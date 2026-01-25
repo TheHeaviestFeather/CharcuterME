@@ -529,23 +529,20 @@ export function getApplicableRules(summary: IngredientSummary): VisualRule[] {
 // PART 8: PROMPT BUILDER
 // =============================================================================
 
-export function buildImagePrompt(classified: ClassifiedIngredient[], template: Template, _rules: VisualRule[]): string {
+export function buildImagePrompt(classified: ClassifiedIngredient[], _template: Template, _rules: VisualRule[]): string {
   // Get all ingredient display names
   const ingredientNames = classified.map((i) => i.displayName).join(', ');
 
-  // Determine the board/plate style based on template
-  const boardStyle = template.layout.boardShape || 'rustic wooden board';
+  // Build a simple, effective prompt - girl dinner style (casual, not fancy)
+  return `Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
 
-  // Build a simple, effective prompt
-  return `Studio Ghibli-style watercolor illustration, overhead flat-lay perspective like an Instagram food photo.
+${ingredientNames} casually arranged on a simple plate, styled for social media.
 
-A beautiful ${boardStyle} with ${ingredientNames} arranged in an aesthetic "${template.name}" layout.
+Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
 
-Style: Soft watercolor textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
+The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
 
-The food looks delicious and carefully arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Perfect for social media sharing.
-
-Overhead bird's-eye view, centered composition, soft natural lighting from the side.`.trim();
+Angled perspective like a food blogger photo, soft natural lighting from the side.`.trim();
 }
 
 // =============================================================================
