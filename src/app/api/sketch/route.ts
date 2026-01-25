@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processGirlDinner } from '@/lib/logic-bridge';
+import { processGirlDinner, processGirlDinnerWithTemplate } from '@/lib/logic-bridge';
+import type { TemplateId } from '@/types';
 import { withRetry } from '@/lib/retry';
 import { withTimeout, TIMEOUTS } from '@/lib/timeout';
 import { dalleCircuit } from '@/lib/circuit-breaker';
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const { ingredients } = await request.json();
+    const { ingredients, template } = await request.json();
 
     if (!ingredients || typeof ingredients !== 'string') {
       return NextResponse.json(
@@ -45,8 +46,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process ingredients through logic bridge
-    const processed = processGirlDinner(ingredients);
+    // Validate template or use default
+    const validTemplates: TemplateId[] = ['minimalist', 'anchor', 'snackLine', 'bento', 'wildGraze'];
+    const selectedTemplate: TemplateId = validTemplates.includes(template) ? template : 'wildGraze';
+
+    // Process ingredients through logic bridge with user-selected template
+    const processed = processGirlDinnerWithTemplate(ingredients, selectedTemplate);
     const ingredientList = ingredients.split(',').map((i: string) => i.trim());
 
     // Check if DALL-E is enabled
