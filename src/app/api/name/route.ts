@@ -14,30 +14,40 @@ function getAnthropicClient() {
 
 const FALLBACK_RESPONSES: Record<string, { name: string; validation: string; tip: string }> = {
   default: {
-    name: 'The Spread',
-    validation: "That's a real dinner. You're doing great.",
-    tip: 'The couch is the correct location for this meal.',
+    name: 'The Audacity',
+    validation: "You looked at your fridge and said 'this is fine.' Iconic behavior.",
+    tip: 'Horizontal eating position is chef-recommended for this vibe.',
   },
   hasCheese: {
-    name: 'The Cheese Situation',
-    validation: 'Cheese is always the answer.',
-    tip: 'Room temperature cheese hits different.',
+    name: 'Cheese Is A Personality',
+    validation: "Your calcium intake is giving main character energy.",
+    tip: 'Room temp cheese is self-care. Microwave cheese is chaos. You decide.',
   },
   hasChips: {
-    name: 'Snack Attack',
-    validation: "Sometimes chips are dinner. That's fine.",
-    tip: 'Double-dipping is allowed when you live alone.',
+    name: 'Crunch Time Realness',
+    validation: "Chips are just deconstructed potatoes. Very farm-to-table of you.",
+    tip: 'Double-dipping? In this economy? Absolutely valid.',
+  },
+  hasPizza: {
+    name: 'Yesterday\'s Choices, Today\'s Dinner',
+    validation: "Cold pizza is a lifestyle. We respect the commitment.",
+    tip: 'Reheat it or don\'t. Either way, you\'re winning.',
+  },
+  hasWine: {
+    name: 'Grapes & Consequences',
+    validation: "Wine is just aged grape juice. Very sophisticated of you.",
+    tip: 'Pair with regret or joy. Dealer\'s choice.',
   },
 };
 
 function getFallback(ingredients: string) {
-  const lowerIngredients = ingredients.toLowerCase();
-  if (lowerIngredients.includes('cheese') || lowerIngredients.includes('brie')) {
+  const lower = ingredients.toLowerCase();
+  if (lower.includes('pizza')) return FALLBACK_RESPONSES.hasPizza;
+  if (lower.includes('wine')) return FALLBACK_RESPONSES.hasWine;
+  if (lower.includes('cheese') || lower.includes('brie') || lower.includes('cheddar')) {
     return FALLBACK_RESPONSES.hasCheese;
   }
-  if (lowerIngredients.includes('chip')) {
-    return FALLBACK_RESPONSES.hasChips;
-  }
+  if (lower.includes('chip')) return FALLBACK_RESPONSES.hasChips;
   return FALLBACK_RESPONSES.default;
 }
 
@@ -66,47 +76,47 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(getFallback(ingredients));
     }
 
-    const prompt = `You name "girl dinners" — casual, unpretentious meals made from whatever someone has.
+    const prompt = `You are a chaotic millennial bestie who names "girl dinners" — unhinged, low-effort meals eaten standing over the sink or horizontal on the couch.
 
-Your job:
-1. Give this food a funny, relatable, validating name (2-5 words)
-2. Write a short validation message (one sentence)
-3. Give one casual tip about their ingredients
+Your job: Name their dinner with SNARKY MILLENNIAL HUMOR that makes them laugh and feel seen.
 
-VIBE:
-- Casual, not fancy
-- Self-aware, slightly self-deprecating humor
-- Validating ("this counts as dinner")
-- Like texting your friend what you're eating
+VIBE CHECK:
+- Extremely online humor (Twitter/TikTok energy)
+- Self-deprecating but validating
+- Chaotic but supportive
+- Like your funniest friend roasting your life choices lovingly
+- References therapy, wine, being tired, adulting, etc.
 
-NAME EXAMPLES:
-- "brie, crackers, grapes" → "The French Affair"
-- "string cheese, pepperoni" → "Lunchable Energy"
-- "chips, salsa, guac" → "Fiesta Mode"
-- "leftover pizza, grapes" → "The 11pm Compromise"
+NAME EXAMPLES (2-5 words, make them LAUGH):
+- "brie, crackers" → "Cheese Is A Personality"
+- "string cheese, pepperoni" → "Lunchable But Make It 30"
+- "chips, salsa" → "Carbs & Consequences"
+- "leftover pizza" → "Yesterday's Choices"
 - "just cheese" → "The Audacity"
+- "wine, crackers" → "Grapes & Regrets"
+- "hummus, pita" → "Mediterranean Coping Mechanism"
+- "pickles" → "Sodium & Sadness"
+- "grapes, cheese" → "Vineyard Cosplay"
+- "random snacks" → "Chaos Goblin Hours"
+- "yogurt, granola" → "Pretending To Be Healthy"
 
-BAD NAMES (too fancy):
-- "Mediterranean Mezze" ❌
-- "Artisan Selection" ❌
-- "Elegant Evening" ❌
+VALIDATION (snarky but supportive, one sentence):
+- "You looked in your fridge and said 'this is fine.' Iconic."
+- "This is what happens when you adult all day. Valid."
+- "Your therapist would be proud. Or concerned. Either way."
+- "Carbs are just a hug for your insides."
+- "This is giving 'main character who's been through it.'"
 
-VALIDATION MESSAGE:
-Always validates their choice:
-- "That's a real dinner. You're doing great."
-- "This is self-care. You earned this."
-- "The fridge provides. You listened."
-
-TIP:
-Must reference THEIR specific ingredients, not generic advice:
-- For brie: "Let the brie sit out 10 minutes — it spreads like butter."
-- For chips: "Salsa counts as a vegetable. You're thriving."
-- For pizza: "Cold pizza is valid. No microwave judgment here."
+TIP (reference THEIR ingredients, be funny):
+- For cheese: "Room temp brie is self-care. Cold brie is a cry for help."
+- For chips: "Double-dipping is fine. You live alone for a reason."
+- For pizza: "Cold pizza hits different at 11pm. Science."
+- For pickles: "Your sodium intake is concerning but also valid."
 
 They have: ${ingredients}
 
-Respond in EXACTLY this JSON format (no markdown, just raw JSON):
-{"name": "[2-5 word playful name]", "validation": "[one sentence validation]", "tip": "[specific tip about their ingredients]"}`;
+Respond in EXACTLY this JSON format (no markdown):
+{"name": "[2-5 word snarky name that makes them laugh]", "validation": "[one snarky but validating sentence]", "tip": "[funny tip about THEIR specific ingredients]"}`;
 
     // Use circuit breaker with retry and timeout
     const response = await claudeCircuit.execute(

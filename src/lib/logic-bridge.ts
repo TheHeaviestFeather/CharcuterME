@@ -297,35 +297,42 @@ export function parseIngredients(input: string): string[] {
 // =============================================================================
 
 const DINNER_DATABASE: Record<string, Omit<DinnerMatch, 'validation'>> = {
-  'brie': { name: 'The French Affair', tip: 'Let the brie sit out 10 minutes.', template: 'minimalist' },
-  'brie,crackers': { name: 'The French Affair', tip: 'Let the brie sit out 10 minutes.', template: 'minimalist' },
-  'brie,crackers,grapes': { name: 'The French Affair', tip: 'Fold the salami into little roses.', template: 'wildGraze' },
-  'hummus': { name: 'The Mediterranean Moment', tip: 'Make a well for olive oil.', template: 'mediterranean' },
-  'hummus,pita': { name: 'The Mediterranean Moment', tip: 'Warm the pita 30 seconds.', template: 'mediterranean' },
-  'hummus,pita,carrots': { name: 'The Healthy-ish Hour', tip: 'Carrots cancel out everything else.', template: 'mediterranean' },
-  'hummus,pita,carrots,cucumber': { name: 'Spa Day Snacks', tip: 'Cucumber hydrates.', template: 'mediterranean' },
-  'chips,salsa': { name: 'Fiesta Mode', tip: 'Salsa counts as a vegetable.', template: 'snackAttack' },
-  'chips,salsa,guacamole': { name: "Guac O'Clock", tip: 'Double-dipping allowed.', template: 'snackAttack' },
-  'chips,guacamole': { name: 'The Green Light', tip: 'Avocado is self-care.', template: 'snackAttack' },
-  'chips,queso': { name: 'Cheese Pls', tip: 'Microwave for 20 seconds. Life-changing.', template: 'snackAttack' },
-  'pizza': { name: 'The 11pm Compromise', tip: 'Cold pizza is valid.', template: 'pizzaNight' },
-  'leftover pizza': { name: 'The Remix', tip: 'Day-old hits different.', template: 'pizzaNight' },
-  'leftover pizza,grapes': { name: 'The Balance', tip: 'Grapes for emotional balance.', template: 'pizzaNight' },
-  'cheese,crackers': { name: 'Adult Lunchable', tip: 'Couch is correct location.', template: 'minimalist' },
-  'cheese': { name: 'The Audacity', tip: 'Just cheese? Respect.', template: 'minimalist' },
-  'grapes': { name: 'The Minimalist', tip: 'Sometimes grapes are dinner.', template: 'minimalist' },
-  'string cheese': { name: 'Inner Child Energy', tip: 'Peel it. You earned this.', template: 'casual' },
-  'pickles': { name: 'The Pickle Person', tip: 'Pickle people understand.', template: 'minimalist' },
-  'olives': { name: 'Mediterranean Vibes', tip: "You're basically in Italy.", template: 'minimalist' },
+  'brie': { name: 'Cheese Is A Personality', tip: 'Room temp brie is self-care. Cold brie is a cry for help.', template: 'minimalist' },
+  'brie,crackers': { name: 'Fancy But Make It Lazy', tip: 'You\'re one wine glass away from a whole vibe.', template: 'minimalist' },
+  'brie,crackers,grapes': { name: 'Vineyard Cosplay', tip: 'This is giving "I have my life together" and we love that for you.', template: 'wildGraze' },
+  'hummus': { name: 'Mediterranean Coping Mechanism', tip: 'Olive oil in the well is mandatory. It\'s the law.', template: 'mediterranean' },
+  'hummus,pita': { name: 'Dip & Denial', tip: 'Warm pita is a love language. Treat yourself.', template: 'mediterranean' },
+  'hummus,pita,carrots': { name: 'Pretending To Be Healthy', tip: 'The carrots cancel out everything. That\'s math.', template: 'mediterranean' },
+  'hummus,pita,carrots,cucumber': { name: 'Spa Day Energy', tip: 'Very hydrated. Very unbothered. Very you.', template: 'mediterranean' },
+  'chips,salsa': { name: 'Carbs & Consequences', tip: 'Salsa is a vegetable. Don\'t let anyone tell you otherwise.', template: 'snackAttack' },
+  'chips,salsa,guacamole': { name: 'Guac Is Extra & So Are You', tip: 'Double-dipping is valid when you live your truth.', template: 'snackAttack' },
+  'chips,guacamole': { name: 'Green Flag Energy', tip: 'Avocado toast could never. This is superior.', template: 'snackAttack' },
+  'chips,queso': { name: 'Liquid Gold Therapy', tip: 'Microwave 20 seconds. Or don\'t. Chaos is also valid.', template: 'snackAttack' },
+  'pizza': { name: 'Yesterday\'s Choices', tip: 'Cold pizza at any hour is a lifestyle, not a problem.', template: 'pizzaNight' },
+  'leftover pizza': { name: 'The Remix Era', tip: 'Day-old pizza hits different and science agrees.', template: 'pizzaNight' },
+  'leftover pizza,grapes': { name: 'Balanced As All Things Should Be', tip: 'Grapes = fruit = health. Logic checks out.', template: 'pizzaNight' },
+  'cheese,crackers': { name: 'Lunchable But Make It 30', tip: 'This is adult behavior and we\'re here for it.', template: 'minimalist' },
+  'cheese': { name: 'The Audacity', tip: 'Just cheese? Honestly iconic. No notes.', template: 'minimalist' },
+  'grapes': { name: 'Minimalist Queen', tip: 'Sometimes dinner is just grapes. That\'s called efficiency.', template: 'minimalist' },
+  'string cheese': { name: 'Inner Child Healing', tip: 'Peel it slowly. You\'ve earned this meditative moment.', template: 'casual' },
+  'pickles': { name: 'Sodium & Serenity', tip: 'Pickle people just get it. No explanation needed.', template: 'minimalist' },
+  'olives': { name: 'Main Character In Rome', tip: 'You\'re basically on vacation. Mentally, at least.', template: 'minimalist' },
+  'wine': { name: 'Grapes & Consequences', tip: 'It\'s fruit. Fermented, but still fruit.', template: 'minimalist' },
+  'wine,cheese': { name: 'Wine Mom Starter Pack', tip: 'This pairing has been getting people through life for centuries.', template: 'minimalist' },
+  'crackers': { name: 'Carb Loading', tip: 'You\'re basically an athlete now.', template: 'minimalist' },
+  'yogurt': { name: 'Pretending To Adult', tip: 'Probiotics are basically a personality trait at this point.', template: 'minimalist' },
+  'cereal': { name: 'Breakfast For Dinner Energy', tip: 'Rules are a social construct. Eat your cereal.', template: 'casual' },
 };
 
 const VALIDATIONS = [
-  "That's a real dinner. You're doing great.",
-  "This is self-care. You earned this.",
-  "The fridge provides. You listened.",
-  "Dinner is whatever you say it is.",
-  "You showed up for yourself today.",
-  "No judgment here. Just vibes.",
+  "You looked in your fridge and said 'this is fine.' Iconic behavior.",
+  "This is what peak performance looks like. Don't let anyone tell you different.",
+  "Your therapist would either be proud or concerned. Either way, valid.",
+  "The fridge provided. You listened. Self-care unlocked.",
+  "Dinner is a social construct. You're deconstructing it. Very avant-garde.",
+  "No notes. Just vibes. Just you thriving.",
+  "This is giving 'I survived another day' and honestly? Celebrate that.",
+  "Carbs are just a hug for your insides. You deserve hugs.",
 ];
 
 export function findDinner(inputString: string): DinnerMatch {
@@ -522,50 +529,23 @@ export function getApplicableRules(summary: IngredientSummary): VisualRule[] {
 // PART 8: PROMPT BUILDER
 // =============================================================================
 
-export function buildImagePrompt(classified: ClassifiedIngredient[], template: Template, rules: VisualRule[]): string {
-  const anchors = classified.filter((i) => i.role === 'anchor');
-  const vehicles = classified.filter((i) => i.role === 'vehicle');
-  const fillers = classified.filter((i) => i.role === 'filler');
-  const pops = classified.filter((i) => i.role === 'pop');
+export function buildImagePrompt(classified: ClassifiedIngredient[], template: Template, _rules: VisualRule[]): string {
+  // Get all ingredient display names
+  const ingredientNames = classified.map((i) => i.displayName).join(', ');
 
-  const placements = [
-    ...anchors.map((i, idx) => `ANCHOR ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-    ...vehicles.map((i, idx) => `VEHICLE ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-    ...fillers.map((i, idx) => `FILLER ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-    ...pops.map((i, idx) => `POP ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-  ];
+  // Determine the board/plate style based on template
+  const boardStyle = template.layout.boardShape || 'rustic wooden board';
 
-  const rulesList = rules.map((r) => `- ${r.instruction}`).join('\n');
+  // Build a simple, effective prompt
+  return `Studio Ghibli-style watercolor illustration, overhead flat-lay perspective like an Instagram food photo.
 
-  return `
-A minimalist, hand-drawn architectural sketch on cream-colored paper.
-Style: Black ink, thin clean lines, high-end culinary blueprint aesthetic.
-NOT a photograph. NOT realistic food. A designer's sketch.
+A beautiful ${boardStyle} with ${ingredientNames} arranged in an aesthetic "${template.name}" layout.
 
-TEMPLATE: ${template.name.toUpperCase()}
-${template.description}
+Style: Soft watercolor textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
 
-Layout: ${template.layout.style}
-Negative Space: ${template.layout.negativeSpace}
-Plate/Board: ${template.layout.boardShape}
+The food looks delicious and carefully arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Perfect for social media sharing.
 
-TEMPLATE RULES:
-${template.rules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
-
-INGREDIENT PLACEMENTS (ONLY DRAW THESE):
-${placements.join('\n')}
-
-VISUAL RULES (MUST FOLLOW):
-${rulesList}
-
-CRITICAL:
-1. Draw ONLY the ingredients listed above
-2. Do NOT add any ingredients not in the list
-3. Follow the "${template.name}" layout exactly
-4. Apply ALL visual rules
-5. Make it look like a quick designer's sketch
-6. Include architectural annotations pointing to key placements
-`.trim();
+Overhead bird's-eye view, centered composition, soft natural lighting from the side.`.trim();
 }
 
 // =============================================================================
