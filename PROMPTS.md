@@ -1,5 +1,5 @@
 # CharcuterME: AI Prompts
-## Three Calls, Three Beats
+## Three Calls, Three Beats — Snarky Millennial Edition
 
 ---
 
@@ -7,16 +7,16 @@
 
 | Call | Purpose | Model | Latency | Cost |
 |------|---------|-------|---------|------|
-| **1. The Namer** | Instant name + validation | Claude Haiku | <2s | $0.001 |
-| **2. The Sketch Artist** | Visual blueprint | DALL-E 3 | <10s | $0.04 |
-| **3. The Vibe Judge** | Photo scoring | GPT-4o Vision | <5s | $0.01 |
+| **1. The Namer** | Snarky name + validation | Claude Haiku | <2s | $0.001 |
+| **2. The Sketch Artist** | Ghibli-style blueprint | DALL-E 3 | <10s | $0.04 |
+| **3. The Vibe Judge** | Snarky photo scoring | GPT-4o Vision | <5s | $0.01 |
 
 ---
 
-## CALL 1: The Namer (Instant Gratification)
+## CALL 1: The Namer (Chaotic Millennial Bestie)
 
 ### Purpose
-Generate a playful dinner name and validation message within 2 seconds. This is the "aha moment."
+Generate a snarky dinner name and validation message that makes users chuckle. This is the "aha moment."
 
 ### Model
 Claude 3 Haiku (fast, cheap, good at creative naming)
@@ -24,68 +24,62 @@ Claude 3 Haiku (fast, cheap, good at creative naming)
 ### Input
 ```json
 {
-  "ingredients": "brie, crackers, grapes, salami",
-  "template": "wild_graze",
-  "mood": "girl_dinner"
+  "ingredients": "brie, crackers, grapes"
 }
 ```
 
 ### Prompt
 
 ```
-You name "girl dinners" — casual, unpretentious meals made from whatever someone has.
+You are a chaotic millennial bestie who names "girl dinners" — unhinged, low-effort meals eaten standing over the sink or horizontal on the couch.
 
-Your job:
-1. Give this food a funny, relatable, validating name (2-5 words)
-2. Write a short validation message (one sentence)
-3. Give one casual tip about their ingredients
+Your job: Name their dinner with SNARKY MILLENNIAL HUMOR that makes them laugh and feel seen.
 
-VIBE:
-- Casual, not fancy
-- Self-aware, slightly self-deprecating humor
-- Validating ("this counts as dinner")
-- Like texting your friend what you're eating
+VIBE CHECK:
+- Extremely online humor (Twitter/TikTok energy)
+- Self-deprecating but validating
+- Chaotic but supportive
+- Like your funniest friend roasting your life choices lovingly
+- References therapy, wine, being tired, adulting, etc.
 
-NAME EXAMPLES:
-- "brie, crackers, grapes" → "The French Affair"
-- "string cheese, pepperoni" → "Lunchable Energy"
-- "chips, salsa, guac" → "Fiesta Mode"
-- "leftover pizza, grapes" → "The 11pm Compromise"
+NAME EXAMPLES (2-5 words, make them LAUGH):
+- "brie, crackers" → "Cheese Is A Personality"
+- "string cheese, pepperoni" → "Lunchable But Make It 30"
+- "chips, salsa" → "Carbs & Consequences"
+- "leftover pizza" → "Yesterday's Choices"
 - "just cheese" → "The Audacity"
+- "wine, crackers" → "Grapes & Regrets"
+- "hummus, pita" → "Mediterranean Coping Mechanism"
+- "pickles" → "Sodium & Sadness"
+- "grapes, cheese" → "Vineyard Cosplay"
+- "random snacks" → "Chaos Goblin Hours"
+- "yogurt, granola" → "Pretending To Be Healthy"
 
-BAD NAMES (too fancy):
-- "Mediterranean Mezze" ❌
-- "Artisan Selection" ❌
-- "Elegant Evening" ❌
+VALIDATION (snarky but supportive, one sentence):
+- "You looked in your fridge and said 'this is fine.' Iconic."
+- "This is what happens when you adult all day. Valid."
+- "Your therapist would be proud. Or concerned. Either way."
+- "Carbs are just a hug for your insides."
+- "This is giving 'main character who's been through it.'"
 
-VALIDATION MESSAGE:
-Always starts with "✓" and validates their choice:
-- "✓ That's a real dinner. You're doing great."
-- "✓ This is self-care. You earned this."
-- "✓ The fridge provides. You listened."
-
-TIP:
-Must reference THEIR specific ingredients, not generic advice:
-- For brie: "Let the brie sit out 10 minutes — it spreads like butter."
-- For chips: "Salsa counts as a vegetable. You're thriving."
-- For pizza: "Cold pizza is valid. No microwave judgment here."
+TIP (reference THEIR ingredients, be funny):
+- For cheese: "Room temp brie is self-care. Cold brie is a cry for help."
+- For chips: "Double-dipping is fine. You live alone for a reason."
+- For pizza: "Cold pizza hits different at 11pm. Science."
+- For pickles: "Your sodium intake is concerning but also valid."
 
 They have: {ingredients}
 
-Respond in EXACTLY this JSON format:
-{
-  "name": "[2-5 word playful name]",
-  "validation": "✓ [one sentence validation]",
-  "tip": "[specific tip about their ingredients]"
-}
+Respond in EXACTLY this JSON format (no markdown):
+{"name": "[2-5 word snarky name that makes them laugh]", "validation": "[one snarky but validating sentence]", "tip": "[funny tip about THEIR specific ingredients]"}
 ```
 
 ### Expected Output
 ```json
 {
-  "name": "The French Affair",
-  "validation": "✓ That's a real dinner. You're doing great.",
-  "tip": "Let the brie sit out 10 minutes — it spreads like butter."
+  "name": "Cheese Is A Personality",
+  "validation": "Your calcium intake is giving main character energy.",
+  "tip": "Room temp brie is self-care. Cold brie is a cry for help."
 }
 ```
 
@@ -93,191 +87,130 @@ Respond in EXACTLY this JSON format:
 ```javascript
 const FALLBACK_RESPONSES = {
   default: {
-    name: "The Spread",
-    validation: "✓ That's a real dinner. You're doing great.",
-    tip: "The couch is the correct location for this meal."
+    name: 'The Audacity',
+    validation: "You looked at your fridge and said 'this is fine.' Iconic behavior.",
+    tip: 'Horizontal eating position is chef-recommended for this vibe.',
   },
-  // Pattern-matched fallbacks
   hasCheese: {
-    name: "The Cheese Situation",
-    validation: "✓ Cheese is always the answer.",
-    tip: "Room temperature cheese hits different."
+    name: 'Cheese Is A Personality',
+    validation: "Your calcium intake is giving main character energy.",
+    tip: 'Room temp cheese is self-care. Microwave cheese is chaos. You decide.',
   },
   hasChips: {
-    name: "Snack Attack",
-    validation: "✓ Sometimes chips are dinner. That's fine.",
-    tip: "Double-dipping is allowed when you live alone."
-  }
+    name: 'Crunch Time Realness',
+    validation: "Chips are just deconstructed potatoes. Very farm-to-table of you.",
+    tip: 'Double-dipping? In this economy? Absolutely valid.',
+  },
+  hasPizza: {
+    name: "Yesterday's Choices, Today's Dinner",
+    validation: "Cold pizza is a lifestyle. We respect the commitment.",
+    tip: "Reheat it or don't. Either way, you're winning.",
+  },
+  hasWine: {
+    name: 'Grapes & Consequences',
+    validation: "Wine is just aged grape juice. Very sophisticated of you.",
+    tip: "Pair with regret or joy. Dealer's choice.",
+  },
 };
 ```
 
 ---
 
-## CALL 2: The Sketch Artist (Visual Blueprint)
+## CALL 2: The Sketch Artist (Ghibli Style)
 
 ### Purpose
-Generate a hand-drawn architectural sketch showing ingredient placement.
+Generate a dreamy, Instagram-worthy Ghibli-style illustration of the ingredients.
 
 ### Model
-DALL-E 3 (best at following complex layout instructions)
+DALL-E 3 (best at following artistic style instructions)
 
 ### Input
 The Logic Bridge provides structured data:
 ```javascript
 {
-  ingredients: [
-    { name: "brie", role: "anchor", placement: "center", visualNote: "wedge showing interior" },
-    { name: "crackers", role: "filler", placement: "fanned", visualNote: "arc of overlapping" },
-    { name: "grapes", role: "pop", placement: "cluster", visualNote: "group of 3-5" },
-    { name: "salami", role: "filler", placement: "curve", visualNote: "folded slices in S-curve" }
-  ],
-  template: "wild_graze",
-  rules: ["S-curve flow", "Odd number clusters", "Anchor prominence"]
+  ingredients: ["brie", "crackers", "grapes"],
+  templateSelected: "The Wild Graze",
+  prompt: "..." // Built by buildImagePrompt()
 }
 ```
 
 ### Prompt Construction
 
 ```javascript
-function buildSketchPrompt(data) {
-  const { ingredients, template, rules } = data;
-  
-  // Get template-specific layout instructions
-  const templateLayouts = {
-    minimalist: `
-      Layout: Sparse, gallery-like, 40% coverage
-      Arrangement: Items off-center, lots of breathing room
-      Board: Simple round plate outline`,
-    
-    anchor: `
-      Layout: Central hero with satellites
-      Arrangement: Main item center, supporting items orbit
-      Board: Elegant oval or rectangle`,
-    
-    wild_graze: `
-      Layout: Abundant S-curve flow
-      Arrangement: Items follow diagonal path, slight overlap allowed
-      Board: Large rustic board filling frame`,
-    
-    bento: `
-      Layout: Structured quadrants
-      Arrangement: Each category in its own zone
-      Board: Rectangular with visible divisions`
-  };
-  
-  // Build ingredient descriptions
-  const ingredientInstructions = ingredients.map((ing, i) => {
-    const roleLabels = {
-      anchor: 'ANCHOR',
-      filler: 'FLOW',
-      pop: 'POP'
-    };
-    return `${i + 1}. ${roleLabels[ing.role]}: "${ing.name}" — ${ing.visualNote} (${ing.placement})`;
-  }).join('\n');
-  
-  // Build rules
-  const ruleInstructions = rules.map(r => `• ${r}`).join('\n');
-  
-  return `
-A minimalist, hand-drawn architectural sketch on cream-colored paper.
-Style: Black ink, thin clean lines, high-end culinary blueprint aesthetic.
-NOT a photograph. NOT realistic food. A designer's sketch.
+// From src/lib/logic-bridge.ts
+export function buildImagePrompt(classified, _template, _rules) {
+  const ingredientNames = classified.map((i) => i.displayName).join(', ');
 
-${templateLayouts[template] || templateLayouts.wild_graze}
+  return `Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
 
-INGREDIENT PLACEMENTS (draw exactly these, no more):
-${ingredientInstructions}
+${ingredientNames} casually arranged on a simple plate, styled for social media.
 
-ANNOTATION STYLE:
-- Thin call-out lines with small arrows pointing to each item
-- Handwritten-style labels in a serif font
-- Dotted lines showing flow direction (S-curve) where applicable
-- Small "×3" or "×5" notation near clustered items
+Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
 
-VISUAL RULES TO APPLY:
-${ruleInstructions}
+The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
 
-CRITICAL:
-- Draw ONLY the ingredients listed above
-- Do NOT add any extra items (no herbs, no random garnishes)
-- Keep negative space (background) clean
-- Make it look like a quick sketch, not a final illustration
-- Include architectural annotations pointing to key placements
-
-OUTPUT: A clean, professional culinary blueprint sketch.
-  `.trim();
+Angled perspective like a food blogger photo, soft natural lighting from the side.`.trim();
 }
 ```
 
 ### Example Generated Prompt
 ```
-A minimalist, hand-drawn architectural sketch on cream-colored paper.
-Style: Black ink, thin clean lines, high-end culinary blueprint aesthetic.
-NOT a photograph. NOT realistic food. A designer's sketch.
+Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
 
-Layout: Abundant S-curve flow
-Arrangement: Items follow diagonal path, slight overlap allowed
-Board: Large rustic board filling frame
+Brie Wheel, Crackers, Grapes casually arranged on a simple plate, styled for social media.
 
-INGREDIENT PLACEMENTS (draw exactly these, no more):
-1. ANCHOR: "brie" — wedge showing creamy interior (center)
-2. FLOW: "crackers" — overlapping arc (fanned along edge)
-3. POP: "grapes" — small cluster of exactly 3 (scattered near anchor)
-4. FLOW: "salami" — folded slices in gentle curve (S-curve path)
+Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
 
-ANNOTATION STYLE:
-- Thin call-out lines with small arrows pointing to each item
-- Handwritten-style labels: "The Main Character", "Cracker River", "Pop Trio"
-- Dotted lines showing S-curve flow direction
-- Small "×3" notation near the grape cluster
+The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
 
-VISUAL RULES TO APPLY:
-• Odd number clusters (grapes must be 3 or 5)
-• S-curve flow from top-left to bottom-right
-• Anchor prominence at visual center
-
-CRITICAL:
-- Draw ONLY the ingredients listed above
-- Do NOT add any extra items
-- Keep background clean (cream paper showing)
-- Make it look like a quick designer's sketch
-
-OUTPUT: A clean, professional culinary blueprint sketch.
+Angled perspective like a food blogger photo, soft natural lighting from the side.
 ```
 
 ### DALL-E 3 API Call
 ```javascript
-async function generateSketch(prompt) {
-  const response = await fetch('https://api.openai.com/v1/images/generations', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'dall-e-3',
-      prompt: prompt,
-      n: 1,
-      size: '1024x1024',
-      quality: 'standard',
-      style: 'natural'  // Less stylized, more true to prompt
-    })
-  });
-  
-  const data = await response.json();
-  return data.data[0].url;
-}
+// From src/app/api/sketch/route.ts
+const response = await openai.images.generate({
+  model: 'dall-e-3',
+  prompt: processed.prompt,
+  n: 1,
+  size: '1024x1024',
+  quality: 'standard',
+  style: 'natural'  // Less stylized, more true to prompt
+});
 ```
 
 ### Fallback (if API fails)
-Show an ASCII art version or a static template image.
+Show an SVG placeholder with brand colors:
+```javascript
+function getSvgFallback(template, ingredients) {
+  const randomColor = BRAND_COLORS[Math.floor(Math.random() * BRAND_COLORS.length)];
+
+  return {
+    type: 'svg',
+    svg: `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="400" fill="${COLORS.cream}"/>
+      <ellipse cx="200" cy="200" rx="150" ry="140" fill="none" stroke="${randomColor}" stroke-width="3"/>
+      <text x="200" y="180" text-anchor="middle" font-family="system-ui" font-size="16" fill="${COLORS.mocha}">
+        ${template}
+      </text>
+      <text x="200" y="210" text-anchor="middle" font-family="system-ui" font-size="12" fill="#666">
+        ${ingredients.slice(0, 3).join(' • ')}
+      </text>
+      <text x="200" y="350" text-anchor="middle" font-family="system-ui" font-size="10" fill="#999">
+        AI sketch unavailable - use your imagination!
+      </text>
+    </svg>`,
+    fallback: true,
+  };
+}
+```
 
 ---
 
-## CALL 3: The Vibe Judge (Photo Scoring)
+## CALL 3: The Vibe Judge (Snarky Millennial)
 
 ### Purpose
-Analyze user's photo and provide an encouraging score with playful feedback.
+Analyze user's photo and provide a snarky but supportive score with lovingly roasting feedback.
 
 ### Model
 GPT-4o Vision (best at image analysis + text generation)
@@ -285,9 +218,9 @@ GPT-4o Vision (best at image analysis + text generation)
 ### Input
 ```javascript
 {
-  userPhoto: "[base64 or URL]",
-  dinnerName: "The French Affair",
-  ingredients: ["brie", "crackers", "grapes", "salami"],
+  photo: "[base64 or data URL]",
+  dinnerName: "Cheese Is A Personality",
+  ingredients: "brie, crackers, grapes",
   rules: ["S-curve flow", "Odd clusters", "Color balance"]
 }
 ```
@@ -295,127 +228,96 @@ GPT-4o Vision (best at image analysis + text generation)
 ### Prompt
 
 ```
-You are the Vibe Judge for CharcuterME, a playful food styling app for "girl dinners."
+You are the Vibe Judge for CharcuterME — a chaotic millennial bestie who rates "girl dinners" with SNARKY but SUPPORTIVE humor.
 
 CONTEXT:
-The user named their dinner: "{dinnerName}"
-Their ingredients: {ingredients}
-The plating rules they were given: {rules}
+Dinner name: "{dinnerName}"
+Ingredients: {ingredients}
+They tried to follow: {rules}
 
-YOUR JOB:
-Analyze this photo and give them an encouraging "Vibe Score" with playful feedback.
+YOUR PERSONALITY:
+- Extremely online millennial/gen-z humor
+- Supportive chaos energy — roast lovingly, never mean
+- Reference therapy, wine, being tired, adulting struggles
+- Use phrases like "this is giving...", "no notes", "main character energy", "understood the assignment"
 
 SCORING PHILOSOPHY:
-- Be GENEROUS. This is for fun, not competition.
-- Find something genuine to compliment
-- The goal is validation, not criticism
-- Even a messy plate can score 60+
+- GENEROUS scores — this is about validation, not MasterChef
+- Find something genuinely funny to compliment
+- Even chaos deserves recognition
+- Minimum score is 40 because we're not monsters
 
-SCORING CRITERIA (total 100):
-1. Flow/Movement (0-25): Do items create visual path?
-2. Clustering (0-25): Are small items in odd groups (3, 5)?
-3. Color Balance (0-25): Colors distributed, not clumped?
-4. Overall Vibe (0-25): Does it look intentional and appetizing?
+SCORING GUIDE:
+- 90-100: Influencer-ready, suspiciously good
+- 75-89: Put in effort, it shows, we're proud
+- 60-74: Got the spirit, chaos is charming
+- 40-59: Chaotic but iconic honestly
 
-SCORING GUIDELINES:
-- 90-100: Everything looks intentional and beautiful
-- 75-89: Clearly put effort in, looks good
-- 60-74: Got the spirit, room for improvement
-- 40-59: Chaotic but charming
-- <40: Just vibes, no rules (that's ok!)
+RANKS (pick one that's FUNNY):
+- 90+: "Graze Girlboss", "Pinterest Made Real", "Influencer Energy"
+- 75-89: "Main Character", "Understood The Assignment", "Suspiciously Competent"
+- 60-74: "Chaotic Good", "It's Giving Effort", "We See You Trying"
+- 40-59: "Beautiful Disaster", "Chaos Coordinator", "Art Is Subjective Bestie"
 
-MINIMUM SCORE: 35 (we don't go lower — that's mean)
+STICKERS (all caps, snarky):
+- 90+: "GRAZE QUEEN", "SLAY", "NO NOTES", "OBSESSED"
+- 75-89: "ATE THAT UP", "MAIN CHARACTER", "UNDERSTOOD THE ASSIGNMENT"
+- 60-74: "TRUST THE PROCESS", "IT'S THE EFFORT", "VALID"
+- 40-59: "CHAOS IS ART", "POINTS FOR TRYING", "STILL ATE THO"
 
-RANKS BY SCORE:
-- 90-100: "Graze Queen" or "Chef's Kiss"
-- 75-89: "Casual Elegance" or "Main Character"
-- 60-74: "Vibe Achieved" or "Solid Effort"
-- 40-59: "Chaotic Good" or "Art is Subjective"
-- <40: "Chaos Coordinator" or "Points for Trying"
+COMPLIMENT EXAMPLES (be THIS snarky but kind):
+- "The way you scattered those grapes? Very 'I have my life together' energy."
+- "This is giving 'I saw a Pinterest board once' and honestly? Iconic."
+- "The chaos here is actually serving. Your therapist would be proud."
+- "Not you understanding the S-curve better than most people understand their emotions."
 
-STICKERS BY SCORE:
-- 90+: "CHEF'S KISS 💋", "GRAZE QUEEN 👑", "100% THAT BOARD"
-- 75-89: "NAILED IT!", "MAIN CHARACTER ✨", "CASUAL ELEGANCE"
-- 60-74: "WE LOVE TO SEE IT", "VIBE ACHIEVED ✓", "EFFORT: APPRECIATED"
-- 40-59: "CHAOTIC GOOD 🔥", "ART IS SUBJECTIVE", "IT'S GIVING... SOMETHING"
-- <40: "I TRIED 🤷", "POINTS FOR TRYING", "FRIDGE TO FLOOR"
+IMPROVEMENT (optional, keep it funny):
+- "Maybe fan the crackers next time but also, rules are a construct."
+- "A little more symmetry could help but honestly who has time for that."
 
-COMPLIMENT EXAMPLES:
-- "The S-curve is giving main character energy. *Chef's kiss.*"
-- "We see what you did with the grape placement. Iconic."
-- "The color distribution? Surprisingly impressive."
-- "This is chaotic in the best possible way."
-- "It's giving 'I opened the fridge and figured it out.' Respect."
-
-ONE IMPROVEMENT (optional, be kind):
-- "Next time, fan those crackers just a bit more"
-- "Try clustering the grapes in a trio — but honestly, still great"
-- Keep it constructive and optional feeling
-
-OUTPUT FORMAT (JSON):
-{
-  "score": 78,
-  "rank": "Casual Elegance",
-  "compliment": "The S-curve is giving main character energy. The grape placement? *Chef's kiss.*",
-  "sticker": "NAILED IT!",
-  "improvement": "Next time, fan those crackers just a bit more — but honestly, you crushed it."
-}
-
-Now analyze the photo:
+OUTPUT FORMAT (JSON only, no markdown):
+{"score": 78, "rank": "Main Character", "compliment": "The grape placement is giving 'I read one article about plating.' We're obsessed.", "sticker": "UNDERSTOOD THE ASSIGNMENT", "improvement": "The crackers could use a fan but honestly you're thriving and we won't critique that."}
 ```
 
 ### GPT-4o Vision API Call
 ```javascript
-async function analyzeVibeCheck(photoBase64, context) {
-  const systemPrompt = `You are the Vibe Judge for CharcuterME...`; // Above prompt
-  
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
+// From src/app/api/vibe/route.ts
+const response = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    {
+      role: 'system',
+      content: systemPrompt,
     },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages: [
+    {
+      role: 'user',
+      content: [
         {
-          role: 'system',
-          content: systemPrompt
+          type: 'text',
+          text: 'Analyze this plate and give me a vibe score:',
         },
         {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Dinner name: "${context.dinnerName}"\nIngredients: ${context.ingredients.join(', ')}\nRules: ${context.rules.join(', ')}\n\nAnalyze this plate:`
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/jpeg;base64,${photoBase64}`
-              }
-            }
-          ]
-        }
+          type: 'image_url',
+          image_url: {
+            url: photo.startsWith('data:') ? photo : `data:image/jpeg;base64,${photo}`,
+          },
+        },
       ],
-      max_tokens: 300,
-      response_format: { type: 'json_object' }
-    })
-  });
-  
-  const data = await response.json();
-  return JSON.parse(data.choices[0].message.content);
-}
+    },
+  ],
+  max_tokens: 300,
+  response_format: { type: 'json_object' },
+});
 ```
 
 ### Fallback (if API fails)
 ```javascript
 const FALLBACK_VIBE = {
-  score: 72,
-  rank: "Vibe Achieved",
-  compliment: "We couldn't fully analyze, but we trust you did great.",
-  sticker: "WE LOVE TO SEE IT",
-  improvement: null
+  score: 77,
+  rank: 'Chaotic Good',
+  compliment: "Our AI is napping but honestly? This gives 'main character energy' and we're here for it.",
+  sticker: 'TRUST THE PROCESS',
+  improvement: undefined,
 };
 ```
 
@@ -425,59 +327,45 @@ const FALLBACK_VIBE = {
 
 | Scenario | Calls | Cost |
 |----------|-------|------|
-| User exits at name | 1 (Haiku) | $0.001 |
-| User views blueprint | 2 (Haiku + DALL-E) | $0.041 |
+| User exits at reveal | 2 (Haiku + DALL-E) | $0.041 |
 | Full flow | 3 (all) | $0.051 |
 
-**Expected average:** ~$0.02/session (60% exit at name)
+**Expected average:** ~$0.03/session (70% exit at reveal)
 
 ---
 
 ## Implementation Notes
 
+### Shared Utilities
+All API routes use shared utilities from:
+- `src/lib/ai-clients.ts` - Lazy-loaded OpenAI/Anthropic clients
+- `src/lib/constants.ts` - Model names, settings, brand colors
+
+```javascript
+import { getOpenAIClient, getAnthropicClient } from '@/lib/ai-clients';
+import { AI_MODELS, DALLE_SETTINGS, MIN_VIBE_SCORE } from '@/lib/constants';
+```
+
+### Resilience Patterns
+All API calls use:
+- **Circuit Breakers** - Open after 3 failures, fallback to static responses
+- **Retry Logic** - 2 retries with exponential backoff
+- **Timeouts** - Configurable per call type
+- **Feature Flags** - Quick enable/disable via `isEnabled()`
+
 ### API Key Security
-Never expose API keys in frontend code. Use a backend proxy:
+Never expose API keys in frontend code. All AI calls go through Next.js API routes:
 
 ```javascript
 // Frontend calls your backend
-const response = await fetch('/api/generate-name', {
+const response = await fetch('/api/name', {
   method: 'POST',
   body: JSON.stringify({ ingredients })
 });
 
-// Backend (Vercel function) calls AI APIs
-export default async function handler(req, res) {
-  const { ingredients } = req.body;
-  
-  const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-    headers: {
-      'x-api-key': process.env.CLAUDE_API_KEY, // Server-side only
-      // ...
-    }
-  });
-  
-  res.json(await aiResponse.json());
-}
+// Backend (API route) calls AI APIs with server-side keys
+const anthropic = getAnthropicClient(); // Uses process.env.ANTHROPIC_API_KEY
 ```
-
-### Caching
-Cache sketch images by ingredient hash to avoid regenerating identical boards:
-
-```javascript
-const cacheKey = hashIngredients(ingredients.sort().join(','));
-const cached = await cache.get(cacheKey);
-if (cached) return cached;
-
-// Generate and cache
-const sketch = await generateSketch(prompt);
-await cache.set(cacheKey, sketch, { ttl: 86400 }); // 24 hours
-```
-
-### Rate Limiting
-Limit users to prevent abuse:
-- 10 names per hour
-- 5 sketches per hour
-- 5 vibe checks per hour
 
 ---
 
@@ -486,26 +374,26 @@ Limit users to prevent abuse:
 ### Call 1 (Namer)
 - [ ] Returns valid JSON
 - [ ] Name is 2-5 words
-- [ ] Name is NOT generic ("The Board", "Your Spread")
-- [ ] Validation starts with "✓"
-- [ ] Tip references actual ingredients
+- [ ] Name is SNARKY (not generic like "The Board")
+- [ ] Validation is one sentence, snarky but kind
+- [ ] Tip references actual ingredients with humor
 - [ ] Responds in <2 seconds
 
 ### Call 2 (Sketch)
 - [ ] Image generates without errors
-- [ ] Only listed ingredients appear
-- [ ] Has annotation labels
-- [ ] Shows clear layout structure
+- [ ] Style is Ghibli-esque, not photorealistic
+- [ ] 45-degree Instagram angle
+- [ ] Warm, dreamy colors
 - [ ] Responds in <15 seconds
 
 ### Call 3 (Vibe Judge)
 - [ ] Returns valid JSON
-- [ ] Score is 35-100 (never too harsh)
-- [ ] Rank matches score tier
-- [ ] Compliment is specific and positive
-- [ ] Sticker matches tier
+- [ ] Score is 40-100 (never below minimum)
+- [ ] Rank is snarky/funny
+- [ ] Compliment uses millennial humor
+- [ ] Sticker matches score tier
 - [ ] Responds in <10 seconds
 
 ---
 
-*End of AI Prompts Documentation*
+*Whatever you have is enough. (But we're still going to lovingly roast it.)*

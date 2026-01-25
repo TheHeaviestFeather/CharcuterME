@@ -6,17 +6,17 @@
 ## The Experience (60 seconds)
 
 ```
-INPUT → NAME → BLUEPRINT → PLATE → VIBE CHECK → SHARE
- (5s)   (5s)    (10s)      (30s)     (10s)      (done!)
+INPUT → REVEAL → PLATE → VIBE CHECK → SHARE
+ (5s)   (10s)    (30s)     (10s)      (done!)
 ```
 
 ### The Three Emotional Beats
 
 | Beat | Time | What Happens | User Feels |
 |------|------|--------------|------------|
-| **1. The Name** | 0-5s | "The French Affair" | "Oh that's cute!" (smile) |
-| **2. The Blueprint** | 5-15s | AI sketch appears | "I can do this" (confidence) |
-| **3. The Vibe Check** | 30-60s | Score: 78 "NAILED IT!" | "I did it!" (pride) |
+| **1. The Name** | 0-5s | "Cheese Is A Personality" | "lol that's me" (chuckle) |
+| **2. The Blueprint** | 5-15s | Ghibli-style sketch appears | "I can do this" (confidence) |
+| **3. The Vibe Check** | 30-60s | Score: 78 "UNDERSTOOD THE ASSIGNMENT" | "I did it!" (pride) |
 
 Every beat provides validation. Every exit is a win.
 
@@ -51,6 +51,8 @@ OPENAI_API_KEY=your_openai_api_key
 | `ARCHITECTURE.md` | Full system design |
 | `PROMPTS.md` | AI prompts for all 3 calls |
 | `src/lib/logic-bridge.ts` | Classification engine |
+| `src/lib/ai-clients.ts` | Shared AI client utilities |
+| `src/lib/constants.ts` | Brand colors, model names, settings |
 
 ---
 
@@ -59,7 +61,7 @@ OPENAI_API_KEY=your_openai_api_key
 ### Architecture
 ```
 User Input → Logic Bridge → AI Calls → User Interface
-              (classify)    (name,     (5 screens)
+              (classify)    (name,     (4 screens)
                             sketch,
                             score)
 ```
@@ -68,9 +70,9 @@ User Input → Logic Bridge → AI Calls → User Interface
 
 | Call | Model | Purpose | Cost |
 |------|-------|---------|------|
-| 1. Namer | Claude Haiku | Instant name + validation | $0.001 |
-| 2. Sketch | DALL-E 3 | Visual blueprint | $0.040 |
-| 3. Judge | GPT-4o Vision | Photo scoring | $0.010 |
+| 1. Namer | Claude Haiku | Snarky name + validation | $0.001 |
+| 2. Sketch | DALL-E 3 | Ghibli-style blueprint | $0.040 |
+| 3. Judge | GPT-4o Vision | Snarky photo scoring | $0.010 |
 
 **Avg cost per session:** ~$0.02 (most users exit after naming)
 
@@ -78,15 +80,15 @@ User Input → Logic Bridge → AI Calls → User Interface
 
 ## Key Design Decisions
 
-### Why "Girl Dinner" vs "Charcuterie Board"?
+### Why "Girl Dinner" Framing?
 
 | Charcuterie Framing | Girl Dinner Framing |
 |---------------------|---------------------|
 | "Culinary art" | "Whatever you have is enough" |
-| Aspirational | Validating |
-| "You should try this" | "You're already doing great" |
+| Aspirational | Validating with snarky humor |
+| "You should try this" | "You looked in your fridge and said 'this is fine.' Iconic." |
 
-We lead with validation, not aspiration.
+We lead with validation AND humor, not aspiration.
 
 ### Why Three Beats?
 
@@ -99,7 +101,7 @@ No dead ends. Every exit is a win.
 
 ---
 
-## Screens
+## Screens (4-Screen Flow)
 
 ### 1. Input
 ```
@@ -115,48 +117,49 @@ No dead ends. Every exit is a win.
 └────────────────────────────┘
 ```
 
-### 2. Name (THE AHA MOMENT)
+### 2. Reveal (Combined Name + Blueprint)
 ```
 ┌────────────────────────────┐
 │  Tonight's Dinner:         │
 │                            │
-│  "The French Affair"       │
+│  "Cheese Is A Personality" │
 │                            │
-│  ✓ That's a real dinner.   │
+│  "Your calcium intake is   │
+│   giving main character    │
+│   energy."                 │
 │                            │
-│  [See the Blueprint]       │
-│  [Just Eat →]              │
-└────────────────────────────┘
-```
-
-### 3. Blueprint
-```
-┌────────────────────────────┐
-│  [AI-generated sketch]     │
+│  [Ghibli-style sketch]     │
 │                            │
-│  💡 Let the brie sit out   │
-│     10 min to soften       │
+│  💡 Room temp brie is      │
+│     self-care.             │
 │                            │
 │  [I Plated It! 📸]         │
+│  [Start Over]              │
 └────────────────────────────┘
 ```
 
-### 4. Camera
+### 3. Camera
 ```
 ┌────────────────────────────┐
 │  [Camera / Upload]         │
 │                            │
-│  [Check My Vibe ✨]        │
+│  [Check My Vibe]           │
 └────────────────────────────┘
 ```
 
-### 5. Results
+### 4. Results
 ```
 ┌────────────────────────────┐
 │  VIBE CHECK: 78            │
-│  "Casual Elegance"         │
+│  "Main Character"          │
 │                            │
-│  [Photo + NAILED IT!]      │
+│  "The grape placement is   │
+│   giving 'I read one       │
+│   article about plating.'  │
+│   We're obsessed."         │
+│                            │
+│  [Photo + UNDERSTOOD THE   │
+│   ASSIGNMENT sticker]      │
 │                            │
 │  [Share] [Save] [Again]    │
 └────────────────────────────┘
@@ -168,13 +171,12 @@ No dead ends. Every exit is a win.
 
 | Score | Rank | Stickers |
 |-------|------|----------|
-| 90-100 | Graze Queen | "CHEF'S KISS", "100% THAT BOARD" |
-| 75-89 | Casual Elegance | "NAILED IT!", "MAIN CHARACTER" |
-| 60-74 | Vibe Achieved | "WE LOVE TO SEE IT", "SOLID EFFORT" |
-| 40-59 | Chaotic Good | "ART IS SUBJECTIVE", "IT'S GIVING..." |
-| <40 | Chaos Coordinator | "I TRIED", "POINTS FOR TRYING" |
+| 90-100 | Graze Girlboss | "SLAY", "NO NOTES", "OBSESSED" |
+| 75-89 | Main Character | "ATE THAT UP", "UNDERSTOOD THE ASSIGNMENT" |
+| 60-74 | Chaotic Good | "TRUST THE PROCESS", "VALID" |
+| 40-59 | Beautiful Disaster | "CHAOS IS ART", "STILL ATE THO" |
 
-**Minimum score:** 35 (we're not mean)
+**Minimum score:** 40 (we're not monsters)
 
 ---
 
@@ -199,12 +201,13 @@ No dead ends. Every exit is a win.
 | AI - Naming | Claude 3 Haiku |
 | AI - Sketches | DALL-E 3 |
 | AI - Vision | GPT-4o |
+| Resilience | Circuit breakers, retry logic, timeouts |
 
 ---
 
 ## Success Metric
 
-> **Did they smile at the name?**
+> **Did they chuckle at the name?**
 
 Everything else is secondary.
 
