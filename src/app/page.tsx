@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { InputScreen } from '@/components/InputScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
-import CameraScreen from '@/components/CameraScreen';
-import type { NamerResponse, SketchResponse, VibeCheckResponse } from '@/types';
+import { VibeCheckScreen } from '@/components/VibeCheckScreen';
+import type { NamerResponse, SketchResponse } from '@/types';
 
 // =============================================================================
 // Types
 // =============================================================================
 
-type Screen = 'input' | 'results' | 'camera' | 'vibecheck';
+type Screen = 'input' | 'results' | 'vibecheck';
 
 // =============================================================================
 // Main App Flow
@@ -29,13 +29,10 @@ export default function CharcuterMeApp() {
   const [tip, setTip] = useState('');
   const [wildcard, setWildcard] = useState<string | undefined>();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [userPhoto, setUserPhoto] = useState<string | null>(null);
-  const [vibeResult, setVibeResult] = useState<VibeCheckResponse | null>(null);
 
   // Loading states
   const [isLoadingName, setIsLoadingName] = useState(false);
   const [isLoadingImage, setIsLoadingImage] = useState(false);
-  const [isLoadingVibe, setIsLoadingVibe] = useState(false);
 
   // =============================================================================
   // API Calls
@@ -111,44 +108,6 @@ export default function CharcuterMeApp() {
     }
   };
 
-  const checkVibe = async () => {
-    if (!userPhoto) return;
-
-    setIsLoadingVibe(true);
-
-    try {
-      const response = await fetch('/api/vibe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          photo: userPhoto,
-          dinnerName,
-          ingredients,
-          rules: [],
-        }),
-      });
-
-      const data: VibeCheckResponse = await response.json();
-      setVibeResult(data);
-      setScreen('vibecheck');
-
-      return data;
-    } catch (error) {
-      console.error('Error checking vibe:', error);
-      // Fallback
-      setVibeResult({
-        score: 77,
-        rank: 'Chaotic Good',
-        compliment: "Our AI is napping but honestly? This gives 'main character energy'.",
-        sticker: 'TRUST THE PROCESS',
-      });
-      setScreen('vibecheck');
-      return null;
-    } finally {
-      setIsLoadingVibe(false);
-    }
-  };
-
   // =============================================================================
   // Handlers
   // =============================================================================
@@ -163,26 +122,13 @@ export default function CharcuterMeApp() {
   };
 
   const handleCheckVibe = () => {
-    setScreen('camera');
-  };
-
-  const handlePhotoCapture = (photo: string) => {
-    setUserPhoto(photo);
-  };
-
-  const handleVibeCheck = () => {
-    checkVibe();
+    setScreen('vibecheck');
   };
 
   const handleJustEat = () => {
     // Reset and go back to input
     setScreen('input');
     resetState();
-  };
-
-  const handleBackToResults = () => {
-    setScreen('results');
-    setUserPhoto(null);
   };
 
   const resetState = () => {
@@ -194,8 +140,6 @@ export default function CharcuterMeApp() {
     setTip('');
     setWildcard(undefined);
     setImageUrl(null);
-    setUserPhoto(null);
-    setVibeResult(null);
   };
 
   // =============================================================================
@@ -227,68 +171,14 @@ export default function CharcuterMeApp() {
         />
       );
 
-    case 'camera':
-      return (
-        <CameraScreen
-          onPhotoCapture={handlePhotoCapture}
-          onCheckVibe={handleVibeCheck}
-          userPhoto={userPhoto}
-          isLoading={isLoadingVibe}
-        />
-      );
-
     case 'vibecheck':
       return (
-        <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center justify-center px-6 py-8">
-          {vibeResult ? (
-            <>
-              {/* Score */}
-              <div className="text-6xl font-bold text-[#E8734A] mb-4">
-                {vibeResult.score}
-              </div>
-
-              {/* Rank */}
-              <h1 className="text-2xl font-bold text-[#A47864] mb-2">
-                {vibeResult.rank}
-              </h1>
-
-              {/* Sticker */}
-              <div className="bg-[#E8734A] text-white px-4 py-2 rounded-full text-sm font-bold mb-6">
-                {vibeResult.sticker}
-              </div>
-
-              {/* Compliment */}
-              <p className="text-center text-[#9A8A7C] max-w-sm mb-8">
-                {vibeResult.compliment}
-              </p>
-
-              {/* Improvement hint if present */}
-              {vibeResult.improvement && (
-                <p className="text-center text-[#C4B5A9] text-sm max-w-sm mb-8 italic">
-                  {vibeResult.improvement}
-                </p>
-              )}
-
-              {/* Actions */}
-              <div className="flex flex-col gap-3 w-full max-w-xs">
-                <button
-                  onClick={handleBackToResults}
-                  className="w-full py-3 px-6 bg-[#A47864] text-white font-semibold rounded-xl hover:bg-[#8A6854] transition-colors"
-                >
-                  Back to Results
-                </button>
-                <button
-                  onClick={handleJustEat}
-                  className="w-full py-3 px-6 bg-transparent text-[#A47864] font-semibold rounded-xl border-2 border-[#A47864] hover:bg-[#A47864]/10 transition-colors"
-                >
-                  Start Over
-                </button>
-              </div>
-            </>
-          ) : (
-            <p className="text-[#A47864]">Loading your vibe...</p>
-          )}
-        </div>
+        <VibeCheckScreen
+          dinnerName={dinnerName || 'Your Creation'}
+          ingredients={ingredients}
+          inspirationImage={imageUrl}
+          onStartOver={handleJustEat}
+        />
       );
 
     default:
