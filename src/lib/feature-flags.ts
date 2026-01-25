@@ -5,7 +5,8 @@
 
 const FLAGS = {
   // AI Features - can disable if services are having issues
-  enableDalle: process.env.ENABLE_DALLE !== 'false',
+  enableDalle: process.env.ENABLE_DALLE === 'true', // Disabled by default, use Imagen instead
+  enableImagen: process.env.ENABLE_IMAGEN !== 'false', // Google Imagen 3 for sketches
   enableVibeCheck: process.env.ENABLE_VIBE_CHECK !== 'false',
   enableClaudeNaming: process.env.ENABLE_CLAUDE_NAMING !== 'false',
 
