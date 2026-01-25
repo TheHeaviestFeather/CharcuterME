@@ -5,14 +5,13 @@ import { AnimatePresence } from 'framer-motion';
 import type { Screen } from '@/types';
 import {
   InputScreen,
-  NameScreen,
-  BlueprintScreen,
+  RevealScreen,
   CameraScreen,
   ResultsScreen,
 } from '@/components';
 
 export default function Home() {
-  // Screen state
+  // Screen state - 4 screens: input -> reveal -> camera -> results
   const [screen, setScreen] = useState<Screen>('input');
 
   // Data state
@@ -21,18 +20,21 @@ export default function Home() {
   const [validation, setValidation] = useState('');
   const [tip, setTip] = useState('');
   const [blueprintUrl, setBlueprintUrl] = useState<string | null>(null);
+  const [blueprintSvg, setBlueprintSvg] = useState<string | null>(null);
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [vibeScore, setVibeScore] = useState(0);
   const [vibeRank, setVibeRank] = useState('');
   const [vibeCompliment, setVibeCompliment] = useState('');
   const [sticker, setSticker] = useState('');
 
-  // Loading state
-  const [isLoading, setIsLoading] = useState(false);
+  // Loading states - separate for name and blueprint
+  const [isLoadingName, setIsLoadingName] = useState(false);
+  const [isLoadingBlueprint, setIsLoadingBlueprint] = useState(false);
+  const [isLoadingVibe, setIsLoadingVibe] = useState(false);
 
-  // API Calls
+  // Generate name via Claude
   const generateName = async () => {
-    setIsLoading(true);
+    setIsLoadingName(true);
     try {
       const response = await fetch('/api/name', {
         method: 'POST',
@@ -44,21 +46,19 @@ export default function Home() {
       setDinnerName(data.name || 'The Spread');
       setValidation(data.validation || "That's a real dinner.");
       setTip(data.tip || '');
-      setScreen('name');
     } catch (error) {
       console.error('Error generating name:', error);
       setDinnerName('The Spread');
       setValidation("That's a real dinner. You're doing great.");
       setTip('');
-      setScreen('name');
     } finally {
-      setIsLoading(false);
+      setIsLoadingName(false);
     }
   };
 
+  // Generate blueprint via DALL-E
   const generateBlueprint = async () => {
-    setScreen('blueprint');
-    setIsLoading(true);
+    setIsLoadingBlueprint(true);
     try {
       const response = await fetch('/api/sketch', {
         method: 'POST',
@@ -67,20 +67,27 @@ export default function Home() {
       });
       const data = await response.json();
 
+      // Handle both image URL and SVG fallback
       if (data.imageUrl) {
         setBlueprintUrl(data.imageUrl);
+        setBlueprintSvg(null);
+      } else if (data.svg) {
+        setBlueprintSvg(data.svg);
+        setBlueprintUrl(null);
       }
     } catch (error) {
       console.error('Error generating blueprint:', error);
+      // Keep null - will show ASCII fallback
     } finally {
-      setIsLoading(false);
+      setIsLoadingBlueprint(false);
     }
   };
 
+  // Check vibe via GPT-4o
   const checkVibe = async () => {
     if (!userPhoto) return;
 
-    setIsLoading(true);
+    setIsLoadingVibe(true);
     try {
       const response = await fetch('/api/vibe', {
         method: 'POST',
@@ -107,14 +114,21 @@ export default function Home() {
       setSticker('WE LOVE TO SEE IT');
       setScreen('results');
     } finally {
-      setIsLoading(false);
+      setIsLoadingVibe(false);
     }
   };
 
+  // Submit ingredients - triggers BOTH name and blueprint generation in parallel
+  const handleSubmitIngredients = async () => {
+    // Navigate to reveal screen immediately
+    setScreen('reveal');
+
+    // Start both API calls in parallel
+    generateName();
+    generateBlueprint();
+  };
+
   // Navigation handlers
-  const handleSubmitIngredients = () => generateName();
-  const handleSeeBlueprint = () => generateBlueprint();
-  const handleJustEat = () => resetApp();
   const handlePlatedIt = () => setScreen('camera');
   const handlePhotoCapture = (photo: string) => setUserPhoto(photo);
   const handleCheckVibe = () => checkVibe();
@@ -154,6 +168,7 @@ export default function Home() {
     setValidation('');
     setTip('');
     setBlueprintUrl(null);
+    setBlueprintSvg(null);
     setUserPhoto(null);
     setVibeScore(0);
     setVibeRank('');
@@ -170,31 +185,22 @@ export default function Home() {
             ingredients={ingredients}
             setIngredients={setIngredients}
             onSubmit={handleSubmitIngredients}
-            isLoading={isLoading}
+            isLoading={false}
           />
         )}
 
-        {screen === 'name' && (
-          <NameScreen
-            key="name"
+        {screen === 'reveal' && (
+          <RevealScreen
+            key="reveal"
             dinnerName={dinnerName}
             validation={validation}
             tip={tip}
-            onSeeBlueprint={handleSeeBlueprint}
-            onJustEat={handleJustEat}
-            isLoading={isLoading}
-          />
-        )}
-
-        {screen === 'blueprint' && (
-          <BlueprintScreen
-            key="blueprint"
-            dinnerName={dinnerName}
             blueprintUrl={blueprintUrl}
-            tip={tip}
+            blueprintSvg={blueprintSvg}
             onPlatedIt={handlePlatedIt}
             onStartOver={resetApp}
-            isLoading={isLoading}
+            isLoadingName={isLoadingName}
+            isLoadingBlueprint={isLoadingBlueprint}
           />
         )}
 
@@ -204,7 +210,7 @@ export default function Home() {
             onPhotoCapture={handlePhotoCapture}
             onCheckVibe={handleCheckVibe}
             userPhoto={userPhoto}
-            isLoading={isLoading}
+            isLoading={isLoadingVibe}
           />
         )}
 

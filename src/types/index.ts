@@ -139,7 +139,11 @@ export interface DinnerMatch {
 }
 
 // App State Types
-export type Screen = 'input' | 'name' | 'blueprint' | 'camera' | 'results';
+// 4-screen flow: input -> reveal (name + blueprint) -> camera -> results
+export type Screen = 'input' | 'reveal' | 'camera' | 'results';
+
+// Keep old screens for backwards compatibility
+export type LegacyScreen = 'input' | 'name' | 'blueprint' | 'camera' | 'results';
 
 export interface AppState {
   screen: Screen;
@@ -148,11 +152,14 @@ export interface AppState {
   validation: string;
   tip: string;
   blueprintUrl: string | null;
+  blueprintSvg: string | null;
   userPhoto: string | null;
   vibeScore: number;
   vibeRank: string;
   vibeCompliment: string;
   sticker: string;
   isLoading: boolean;
+  isLoadingName: boolean;
+  isLoadingBlueprint: boolean;
   error: string | null;
 }
