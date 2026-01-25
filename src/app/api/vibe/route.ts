@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
 import { getOpenAIClient } from '@/lib/ai-clients';
 import { MIN_VIBE_SCORE, DEFAULT_DINNER_NAME, AI_MODELS } from '@/lib/constants';
+import { VibeRequestSchema, validateRequest } from '@/lib/validation';
 
 const FALLBACK_VIBE: VibeCheckResponse = {
   score: 77,
@@ -20,14 +21,26 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const { photo, dinnerName, ingredients, rules } = await request.json();
-
-    if (!photo) {
+    // Parse and validate request body
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json(
-        { error: 'Photo is required' },
+        { error: 'Invalid JSON in request body' },
         { status: 400 }
       );
     }
+
+    const validation = validateRequest(VibeRequestSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const { photo, dinnerName, ingredients, rules } = validation.data!;
 
     // Check if vibe check is enabled
     if (!isEnabled('enableVibeCheck')) {

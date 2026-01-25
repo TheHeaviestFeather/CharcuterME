@@ -42,22 +42,30 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
       {/* Input Section */}
       <div className="w-full max-w-[340px] mb-6">
         {/* Label above input */}
-        <label className="block text-center text-[#A47864] text-base mb-3">
-          What's in the abyss today?
+        <label
+          htmlFor="ingredients-input"
+          className="block text-center text-[#A47864] text-base mb-3"
+        >
+          What&apos;s in the abyss today?
         </label>
 
         {/* Floating input box */}
         <div className="bg-white rounded-xl shadow-md px-5 py-4">
           <input
+            id="ingredients-input"
             type="text"
             value={ingredients}
             onChange={(e) => setIngredients(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="brie, crackers, grapes..."
             disabled={isLoading}
+            aria-describedby="ingredients-hint"
             className="w-full border-none outline-none text-base text-[#A47864] bg-transparent placeholder:text-[#C4B5A9]"
           />
         </div>
+        <p id="ingredients-hint" className="sr-only">
+          Enter your ingredients separated by commas
+        </p>
       </div>
 
       {/* CTA Button */}
