@@ -90,6 +90,16 @@ export interface NamerResponse {
   wildcard?: string;
 }
 
+export interface SketchResponse {
+  type: 'image' | 'svg';
+  imageUrl?: string;
+  svg?: string;
+  template?: string;
+  fallback?: boolean;
+  reason?: string;
+  rules?: string[];
+}
+
 export interface VibeCheckResponse {
   score: number;
   rank: string;

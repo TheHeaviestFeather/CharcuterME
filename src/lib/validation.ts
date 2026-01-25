@@ -52,18 +52,29 @@ export const SketchRequestSchema = z.object({
     .max(1000, 'Input too long'),
 });
 
+// Max photo size: 10MB base64 (~7.5MB actual image)
+const MAX_PHOTO_SIZE = 10 * 1024 * 1024;
+
 export const VibeRequestSchema = z.object({
   photo: z
     .string()
-    .min(1, 'Photo is required'),
+    .min(1, 'Photo is required')
+    .max(MAX_PHOTO_SIZE, 'Photo is too large (max 10MB)')
+    .refine(
+      (val) => val.startsWith('data:image/') || /^[A-Za-z0-9+/=]+$/.test(val.slice(0, 100)),
+      'Invalid photo format'
+    ),
   dinnerName: z
     .string()
+    .max(200, 'Dinner name too long')
     .optional(),
   ingredients: z
     .string()
+    .max(1000, 'Ingredients too long')
     .optional(),
   rules: z
-    .array(z.string())
+    .array(z.string().max(200))
+    .max(20)
     .optional(),
 });
 
