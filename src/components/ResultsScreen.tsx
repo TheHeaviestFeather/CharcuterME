@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { FallbackSvg } from './FallbackSvg';
 
 // =============================================================================
 // Icons (SVG replacements for emojis)
@@ -41,7 +42,8 @@ interface ResultsScreenProps {
   tip: string;
   wildcard?: string;
   imageUrl?: string | null;
-  svgFallback?: string | null;
+  ingredients?: string[]; // For safe SVG fallback rendering
+  template?: string; // For safe SVG fallback rendering
   onCheckVibe: () => void;
   onJustEat?: () => void;
   isLoadingImage?: boolean;
@@ -53,7 +55,8 @@ export function ResultsScreen({
   tip,
   wildcard,
   imageUrl,
-  svgFallback,
+  ingredients = [],
+  template = 'Your Spread',
   onCheckVibe,
   onJustEat,
   isLoadingImage = false,
@@ -103,12 +106,9 @@ export function ResultsScreen({
               className="object-cover"
               sizes="340px"
             />
-          ) : svgFallback ? (
-            /* SVG Fallback */
-            <div
-              className="w-full h-full"
-              dangerouslySetInnerHTML={{ __html: svgFallback }}
-            />
+          ) : ingredients.length > 0 ? (
+            /* Safe SVG Fallback - No dangerouslySetInnerHTML */
+            <FallbackSvg ingredients={ingredients} template={template} />
           ) : (
             /* Placeholder */
             <div className="absolute inset-0 flex items-center justify-center bg-[#FAF9F7]">

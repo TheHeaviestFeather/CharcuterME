@@ -20,16 +20,22 @@ export const DEFAULT_DINNER_NAME = 'The Audacity';
 // Minimum vibe score (we're not monsters)
 export const MIN_VIBE_SCORE = 40;
 
-// API Models
+// API Models - SINGLE SOURCE OF TRUTH
 export const AI_MODELS = {
-  naming: 'claude-3-haiku-20240307',
+  naming: 'claude-3-5-haiku-20241022',
   sketch: 'dall-e-3',
   vibe: 'gpt-4o',
 } as const;
 
-// Image generation settings
+// Image generation settings - SINGLE SOURCE OF TRUTH
 export const DALLE_SETTINGS = {
   size: '1024x1024' as const,
   quality: 'standard' as const,
-  style: 'natural' as const,
+  style: 'vivid' as const, // 'vivid' for anime-style saturated colors
 };
+
+// Claude settings
+export const CLAUDE_SETTINGS = {
+  maxTokens: 300,
+  temperature: 0.9,
+} as const;

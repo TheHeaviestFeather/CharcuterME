@@ -335,8 +335,13 @@ const VALIDATIONS = [
   "Carbs are just a hug for your insides. You deserve hugs.",
 ];
 
+// Performance limits to prevent O(2^n) explosions
+const MAX_INGREDIENTS_FOR_COMBINATIONS = 10;
+const MAX_COMBINATION_LENGTH = 5;
+
 export function findDinner(inputString: string): DinnerMatch {
-  const items = parseIngredients(inputString).sort();
+  // Limit input size for performance
+  const items = parseIngredients(inputString).sort().slice(0, MAX_INGREDIENTS_FOR_COMBINATIONS);
   const key = items.join(',');
   const validation = VALIDATIONS[Math.floor(Math.random() * VALIDATIONS.length)];
 
@@ -345,8 +350,9 @@ export function findDinner(inputString: string): DinnerMatch {
     return { ...DINNER_DATABASE[key], validation };
   }
 
-  // Try subsets (longest first)
-  for (let len = items.length; len > 0; len--) {
+  // Try subsets (longest first, but limited to prevent combinatorial explosion)
+  const maxLen = Math.min(items.length, MAX_COMBINATION_LENGTH);
+  for (let len = maxLen; len > 0; len--) {
     for (const combo of combinations(items, len)) {
       const comboKey = combo.join(',');
       if (DINNER_DATABASE[comboKey]) {
