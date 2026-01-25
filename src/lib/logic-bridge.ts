@@ -522,50 +522,23 @@ export function getApplicableRules(summary: IngredientSummary): VisualRule[] {
 // PART 8: PROMPT BUILDER
 // =============================================================================
 
-export function buildImagePrompt(classified: ClassifiedIngredient[], template: Template, rules: VisualRule[]): string {
-  const anchors = classified.filter((i) => i.role === 'anchor');
-  const vehicles = classified.filter((i) => i.role === 'vehicle');
-  const fillers = classified.filter((i) => i.role === 'filler');
-  const pops = classified.filter((i) => i.role === 'pop');
+export function buildImagePrompt(classified: ClassifiedIngredient[], template: Template, _rules: VisualRule[]): string {
+  // Get all ingredient display names
+  const ingredientNames = classified.map((i) => i.displayName).join(', ');
 
-  const placements = [
-    ...anchors.map((i, idx) => `ANCHOR ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-    ...vehicles.map((i, idx) => `VEHICLE ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-    ...fillers.map((i, idx) => `FILLER ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-    ...pops.map((i, idx) => `POP ${idx + 1}: "${i.displayName}" - ${i.proTip}`),
-  ];
+  // Determine the board/plate style based on template
+  const boardStyle = template.layout.boardShape || 'rustic wooden board';
 
-  const rulesList = rules.map((r) => `- ${r.instruction}`).join('\n');
+  // Build a simple, effective prompt
+  return `Studio Ghibli-style watercolor illustration, overhead flat-lay perspective like an Instagram food photo.
 
-  return `
-A minimalist, hand-drawn architectural sketch on cream-colored paper.
-Style: Black ink, thin clean lines, high-end culinary blueprint aesthetic.
-NOT a photograph. NOT realistic food. A designer's sketch.
+A beautiful ${boardStyle} with ${ingredientNames} arranged in an aesthetic "${template.name}" layout.
 
-TEMPLATE: ${template.name.toUpperCase()}
-${template.description}
+Style: Soft watercolor textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
 
-Layout: ${template.layout.style}
-Negative Space: ${template.layout.negativeSpace}
-Plate/Board: ${template.layout.boardShape}
+The food looks delicious and carefully arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Perfect for social media sharing.
 
-TEMPLATE RULES:
-${template.rules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
-
-INGREDIENT PLACEMENTS (ONLY DRAW THESE):
-${placements.join('\n')}
-
-VISUAL RULES (MUST FOLLOW):
-${rulesList}
-
-CRITICAL:
-1. Draw ONLY the ingredients listed above
-2. Do NOT add any ingredients not in the list
-3. Follow the "${template.name}" layout exactly
-4. Apply ALL visual rules
-5. Make it look like a quick designer's sketch
-6. Include architectural annotations pointing to key placements
-`.trim();
+Overhead bird's-eye view, centered composition, soft natural lighting from the side.`.trim();
 }
 
 // =============================================================================
