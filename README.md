@@ -1,207 +1,280 @@
-# CharcuterME Prompt Rewrites v3.0
-
-## Overview
-
-Three production-ready API routes with improved prompts:
-
-| File | Model | Purpose |
-|------|-------|---------|
-| `api/name/route.ts` | Claude (any) | Girl dinner naming |
-| `api/sketch/route.ts` | DALL-E 3 | Studio Ghibli-style food illustration |
-| `api/vibe/route.ts` | GPT-4o | Photo scoring with context |
+# CharcuterME
+## Turn Fridge Chaos Into Culinary Art
 
 ---
 
-## Key Improvements
+## The Experience (60 seconds)
 
-### 1. Namer (Claude)
-
-**Before:**
-```typescript
-messages: [{ role: 'user', content: hugePromptWithEverything }]
+```
+INPUT → NAME → BLUEPRINT → PLATE → VIBE CHECK → SHARE
+ (5s)   (5s)    (10s)      (30s)     (10s)      (done!)
 ```
 
-**After:**
-```typescript
-system: SYSTEM_PROMPT,  // Personality & rules
-messages: [{ role: 'user', content: `Name this girl dinner: ${ingredients}` }]
-```
+### The Three Emotional Beats
 
-**Changes:**
-- ✅ Proper system message (better role adherence)
-- ✅ XML-structured examples (clearer pattern matching)
-- ✅ Explicit bad examples (prevents "Mediterranean Mezze")
-- ✅ Input sanitization (prevents prompt injection)
-- ✅ Robust response parsing (handles markdown, code blocks)
-- ✅ Model agnostic (`ANTHROPIC_API_KEY` works with any Claude model)
-- ✅ Temperature 0.9 for creativity
-- ✅ Prompt versioning for tracking
+| Beat | Time | What Happens | User Feels |
+|------|------|--------------|------------|
+| **1. The Name** | 0-5s | "The French Affair" | "Oh that's cute!" (smile) |
+| **2. The Blueprint** | 5-15s | Ghibli-style illustration | "I can do this" (confidence) |
+| **3. The Vibe Check** | 30-60s | Score: 78 "NAILED IT!" | "I did it!" (pride) |
+
+Every beat provides validation. Every exit is a win.
 
 ---
 
-### 2. Sketch Artist (DALL-E 3)
+## Quick Start
 
-**Before:**
-```
-A minimalist, hand-drawn architectural sketch on cream paper...
-```
+```bash
+# Install dependencies
+npm install
 
-**After:**
-```
-Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
-${ingredients} casually arranged on a cute white plate, cozy girl dinner vibes.
-Style: Soft dreamy Ghibli textures, warm golden hour lighting, gentle shadows...
+# Run development server
+npm run dev
 ```
 
-**Changes:**
-- ✅ Consistent Ghibli aesthetic (no more style confusion)
-- ✅ Instagram-style angle (45 degrees, relatable)
-- ✅ Warm, cozy mood throughout
-- ✅ Explicit negative constraints (no text, no hands, no extra food)
-- ✅ Template-based layouts (minimalist, wildGraze, bento, etc.)
-- ✅ Max 8 ingredients (DALL-E works better with fewer items)
-- ✅ Beautiful SVG fallback (not embarrassing ASCII)
-- ✅ `style: 'natural'` for prompt accuracy
+Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+### Environment Variables
+
+Create a `.env.local` file:
+
+```bash
+# Required
+ANTHROPIC_API_KEY=sk-ant-...    # Claude API key
+OPENAI_API_KEY=sk-...           # OpenAI API key
+
+# Optional - Cost Optimization
+GPT_VISION_MODEL=gpt-4o         # or gpt-4o-mini for 70% savings on vibe checks
+
+# Optional - Feature Flags
+ENABLE_DALLE=true
+ENABLE_VIBE_CHECK=true
+ENABLE_CLAUDE_NAMING=true
+```
 
 ---
 
-### 3. Vibe Judge (GPT-4o Vision)
+## Files
 
-**Before:**
-```typescript
-// Context passed to API but NOT used in prompt!
-body: { photo, dinnerName, ingredients, rules }
+| File | Purpose |
+|------|---------|
+| `ARCHITECTURE.md` | Full system design |
+| `PROMPTS.md` | AI prompts for all 3 calls |
+| `QA-TEST-SUITE.md` | Testing & validation |
+| `src/lib/logic-bridge.ts` | Classification engine |
 
-// Prompt only said:
-"Analyze this plate and give me a vibe score"
+---
+
+## The System
+
+### Architecture
+```
+User Input → Logic Bridge → AI Calls → User Interface
+              (classify)    (name,     (5 screens)
+                            sketch,
+                            score)
 ```
 
-**After:**
-```typescript
-// Context INCLUDED in user message:
-"Rate this girl dinner plate!
-They named it: "The French Affair"
-Ingredients they used: brie, crackers, grapes
-Plating tips to look for: S-curve flow, Odd clusters"
+### AI Calls
+
+| Call | Model | Purpose | Cost |
+|------|-------|---------|------|
+| 1. Namer | Claude 3.5 Haiku | Instant name + validation | $0.001 |
+| 2. Sketch | DALL-E 3 | Studio Ghibli illustration | $0.040 |
+| 3. Judge | GPT-4o Vision | Photo scoring | $0.010 |
+
+**With gpt-4o-mini:** Vibe check drops to $0.003 (~70% savings)
+
+**Avg cost per session:** ~$0.02 (most users exit after naming)
+
+---
+
+## Key Design Decisions
+
+### Why "Girl Dinner" vs "Charcuterie Board"?
+
+| Charcuterie Framing | Girl Dinner Framing |
+|---------------------|---------------------|
+| "Culinary art" | "Whatever you have is enough" |
+| Aspirational | Validating |
+| "You should try this" | "You're already doing great" |
+
+We lead with validation, not aspiration.
+
+### Why Three Beats?
+
+Each beat catches users at different commitment levels:
+- **40%** exit after name (got validation, happy)
+- **30%** exit after blueprint (got guidance, inspired)
+- **30%** complete full loop (got score + shareable)
+
+No dead ends. Every exit is a win.
+
+### Why Ghibli Style?
+
+The illustration style matters:
+- **Warm, inviting** — not clinical or commercial
+- **Achievable** — looks like something they could make
+- **Shareable** — aesthetic enough for social media
+- **Cozy** — matches "girl dinner" comfort vibe
+
+---
+
+## Visual Style
+
+All generated images follow the Studio Ghibli aesthetic:
+
+| Element | Requirement |
+|---------|-------------|
+| Colors | Warm, muted, soft gradients |
+| Lighting | Golden hour, top-left |
+| Texture | Watercolor, hand-painted |
+| Mood | Cozy, inviting, nostalgic |
+| Angle | 45-degree (Instagram-style) |
+| Background | Creamy linen, shallow DoF |
+
+---
+
+## Screens
+
+### 1. Input
+```
+┌────────────────────────────┐
+│  CharcuterME               │
+│                            │
+│  What do you have?         │
+│  ┌──────────────────────┐  │
+│  │ brie, crackers...    │  │
+│  └──────────────────────┘  │
+│                            │
+│  [Make it a Spread →]      │
+└────────────────────────────┘
 ```
 
-**Changes:**
-- ✅ Context actually used (dinnerName, ingredients, rules)
-- ✅ Tier-based stickers (AI returns tier, we select sticker)
-- ✅ Score floor IN prompt (not post-hoc adjustment)
-- ✅ Edge case handling (blurry, not food, minimal)
-- ✅ `detail: 'low'` for cost savings
-- ✅ Temperature 0.7 for consistency
-- ✅ Proper error responses for non-food images
+### 2. Name (THE AHA MOMENT)
+```
+┌────────────────────────────┐
+│  Tonight's Dinner:         │
+│                            │
+│  "The French Affair"       │
+│                            │
+│  ✓ That's a real dinner.   │
+│    You're doing great.     │
+│                            │
+│  [See the Blueprint]       │
+│  [Just Eat →]              │
+└────────────────────────────┘
+```
+
+### 3. Blueprint (Ghibli Illustration)
+```
+┌────────────────────────────┐
+│  "The French Affair"       │
+│                            │
+│  ┌──────────────────────┐  │
+│  │                      │  │
+│  │  [Ghibli-style       │  │
+│  │   food illustration] │  │
+│  │                      │  │
+│  └──────────────────────┘  │
+│                            │
+│  💡 Room temp brie is      │
+│     self-care              │
+│                            │
+│  [I Plated It! 📸]         │
+└────────────────────────────┘
+```
+
+### 4. Vibe Check Results
+```
+┌────────────────────────────┐
+│  VIBE CHECK                │
+│                            │
+│        78                  │
+│  ████████████░░░░░         │
+│  "Main Character"          │
+│                            │
+│  "The S-curve is giving    │
+│   main character energy."  │
+│                            │
+│  ┌──────────────────────┐  │
+│  │  [Photo with         │  │
+│  │   NAILED IT sticker] │  │
+│  └──────────────────────┘  │
+│                            │
+│  [Share] [Save] [Again]    │
+└────────────────────────────┘
+```
+
+---
+
+## Sticker System
+
+Stickers are selected by tier (not exact match from AI):
+
+| Score | Tier | Example Stickers |
+|-------|------|------------------|
+| 90-100 | `legendary` | GRAZE QUEEN 👑, CHEF'S KISS 💋 |
+| 75-89 | `great` | NAILED IT!, MAIN CHARACTER ✨ |
+| 60-74 | `good` | WE LOVE TO SEE IT, VIBE ACHIEVED ✓ |
+| 45-59 | `chaotic` | CHAOTIC GOOD 🔥, ART IS SUBJECTIVE |
+| 35-44 | `messy` | I TRIED 🤷, POINTS FOR TRYING |
+
+AI returns `stickerTier`, client randomly selects from that tier's options.
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test suites
+npm test -- --grep "namer"
+npm test -- --grep "sketch"
+npm test -- --grep "vibe"
+```
+
+See `QA-TEST-SUITE.md` for full test coverage.
+
+---
+
+## Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Deploy to Vercel
+vercel --prod
+```
+
+Required environment variables in Vercel:
+- `ANTHROPIC_API_KEY`
+- `OPENAI_API_KEY`
+
+Optional:
+- `GPT_VISION_MODEL` (defaults to `gpt-4o`)
 
 ---
 
 ## Cost Optimization
 
-| Change | Savings |
-|--------|---------|
-| GPT-4o → GPT-4o-mini | ~70% on vibe checks |
-| `detail: 'low'` | ~50% on vision tokens |
-| Shorter prompts | ~30% on input tokens |
-| Response caching | Variable |
+| Optimization | Savings |
+|--------------|---------|
+| GPT-4o-mini for vibe checks | 70% on vision calls |
+| `detail: 'low'` for images | 50% on vision tokens |
+| Exit after name (40% users) | Skip DALL-E cost |
 
-To use GPT-4o-mini, set environment variable:
-```bash
-GPT_VISION_MODEL=gpt-4o-mini
-```
+Set `GPT_VISION_MODEL=gpt-4o-mini` to enable cheaper vision.
 
 ---
 
-## Environment Variables
+## License
 
-```bash
-# Required
-ANTHROPIC_API_KEY=sk-ant-...
-OPENAI_API_KEY=sk-...
-
-# Optional
-GPT_VISION_MODEL=gpt-4o          # or gpt-4o-mini for cost savings
-```
+MIT
 
 ---
 
-## File Structure
-
-```
-api/
-├── name/
-│   └── route.ts      # Claude namer
-├── sketch/
-│   └── route.ts      # DALL-E Ghibli sketches  
-└── vibe/
-    └── route.ts      # GPT-4o vision scorer
-```
-
----
-
-## Testing Checklist
-
-### Namer
-- [ ] Returns valid JSON
-- [ ] Name is 2-4 words
-- [ ] Validation starts with ✓
-- [ ] Tip references actual ingredients
-- [ ] Responds < 2 seconds
-- [ ] Handles emoji in input
-- [ ] Rejects prompt injection attempts
-
-### Sketch
-- [ ] Image has Ghibli aesthetic
-- [ ] Only listed ingredients appear
-- [ ] No text/labels in image
-- [ ] Warm lighting, soft shadows
-- [ ] Falls back to SVG gracefully
-- [ ] Responds < 15 seconds
-
-### Vibe Check
-- [ ] Score is 35-100
-- [ ] Compliment is specific to photo
-- [ ] Sticker matches score tier
-- [ ] Handles blurry images
-- [ ] Handles non-food gracefully
-- [ ] Responds < 10 seconds
-
----
-
-## Migration Steps
-
-1. Replace files in `src/app/api/`:
-   - `name/route.ts`
-   - `sketch/route.ts`
-   - `vibe/route.ts`
-
-2. Test locally:
-   ```bash
-   npm run dev
-   ```
-
-3. Verify fallbacks work:
-   - Disable API keys temporarily
-   - Check SVG fallback renders
-   - Check fallback names are good
-
-4. Deploy to staging first
-
-5. Monitor logs for `promptVersion` to track
-
----
-
-## Prompt Versioning
-
-All prompts include version tracking:
-
-```typescript
-const PROMPT_VERSION = 'namer_v3.0';
-
-logger.info('Name generated', {
-  promptVersion: PROMPT_VERSION,
-  // ...
-});
-```
-
-Use this for A/B testing and debugging.
+*Built with 🧀 and chaos*
