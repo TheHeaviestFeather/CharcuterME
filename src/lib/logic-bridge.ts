@@ -18,6 +18,7 @@ import type {
   ValidationResult,
   DinnerMatch,
 } from '@/types';
+import { parseIngredients } from './validation';
 
 // =============================================================================
 // PART 1: NON-FOOD DETECTION & SNARK
@@ -281,15 +282,6 @@ export function validateIngredient(input: string): ValidationResult {
     valid: true,
     classification: { found: false, role: 'unknown', category: 'unknown', warning: "We don't recognize this, but we'll give it a shot!" },
   };
-}
-
-export function parseIngredients(input: string): string[] {
-  return input
-    .toLowerCase()
-    .split(/[,\n]+/)
-    .map(item => item.trim().replace(/^(a |an |some |the |my |fresh |organic |homemade )/i, ''))
-    .filter(item => item.length > 0)
-    .filter((item, index, self) => self.indexOf(item) === index);
 }
 
 // =============================================================================
