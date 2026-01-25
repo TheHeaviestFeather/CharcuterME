@@ -105,6 +105,39 @@ export interface StickerConfig {
   style: string;
 }
 
+// Validation Types
+export type ValidationSeverity = 'high' | 'low' | 'clarification';
+
+export interface ValidationResult {
+  valid: boolean;
+  severity?: ValidationSeverity;
+  category?: string;
+  snark?: string;
+  suggestion?: string;
+  validForms?: string[];
+  classification?: {
+    found: boolean;
+    role: string;
+    category: string;
+    matched?: string;
+    warning?: string;
+  };
+}
+
+export interface ValidationListResult {
+  valid: Array<{ item: string; classification: ValidationResult['classification'] }>;
+  invalid: Array<{ item: string; severity: ValidationSeverity; category: string; snark: string }>;
+  ambiguous: Array<{ item: string; snark: string; validForms: string[] }>;
+  warnings: Array<{ item: string; warning: string }>;
+}
+
+export interface DinnerMatch {
+  name: string;
+  tip: string;
+  template: string;
+  validation: string;
+}
+
 // App State Types
 export type Screen = 'input' | 'name' | 'blueprint' | 'camera' | 'results';
 
