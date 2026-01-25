@@ -116,54 +116,52 @@ const FALLBACK_RESPONSES = {
 
 ---
 
-## CALL 2: The Sketch Artist (Ghibli Style)
+## CALL 2: The Sketch Artist (Anime Style)
 
 ### Purpose
-Generate a dreamy, Instagram-worthy Ghibli-style illustration of the ingredients.
+Generate an anime-style painted food illustration with warm, cozy vibes.
 
 ### Model
-DALL-E 3 (best at following artistic style instructions)
+DALL-E 3 with `style: 'vivid'` for saturated anime-like colors
 
 ### Input
-The Logic Bridge provides structured data:
 ```javascript
 {
   ingredients: ["brie", "crackers", "grapes"],
-  templateSelected: "The Wild Graze",
-  prompt: "..." // Built by buildImagePrompt()
+  template: "wildGraze"  // User-selected from input screen
 }
 ```
+
+### Template Selection UI
+Users can pick their vibe on the input screen:
+- **Minimalist** - Less is more, breathing room
+- **The Anchor** - One hero, supporting cast
+- **Snack Line** - Dip + dippers in a row
+- **Bento** - Organized zones
+- **Wild Graze** - Abundant S-curve flow (default)
 
 ### Prompt Construction
 
 ```javascript
-// From src/lib/logic-bridge.ts
-export function buildImagePrompt(classified, _template, _rules) {
-  const ingredientNames = classified.map((i) => i.displayName).join(', ');
+// From src/app/api/sketch/route.ts
+function buildGhibliPrompt(ingredients: string[], _template: string): string {
+  const ingredientList = ingredients.slice(0, 5).join(', ');
 
-  return `Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
+  return `Anime-style painted food illustration. ${ingredientList} on white plate, cream linen background.
 
-${ingredientNames} casually arranged on a simple plate, styled for social media.
+Soft watercolor textures, warm golden lighting, gentle glow on food. Colors: warm cream, amber, coral. Hand-painted look with visible brushstrokes.
 
-Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
-
-The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
-
-Angled perspective like a food blogger photo, soft natural lighting from the side.`.trim();
+Food arranged artfully with breathing room. Looks delicious and cozy, like a frame from a Japanese animated film.`;
 }
 ```
 
 ### Example Generated Prompt
 ```
-Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
+Anime-style painted food illustration. brie, crackers, grapes on white plate, cream linen background.
 
-Brie Wheel, Crackers, Grapes casually arranged on a simple plate, styled for social media.
+Soft watercolor textures, warm golden lighting, gentle glow on food. Colors: warm cream, amber, coral. Hand-painted look with visible brushstrokes.
 
-Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
-
-The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
-
-Angled perspective like a food blogger photo, soft natural lighting from the side.
+Food arranged artfully with breathing room. Looks delicious and cozy, like a frame from a Japanese animated film.
 ```
 
 ### DALL-E 3 API Call
@@ -171,11 +169,11 @@ Angled perspective like a food blogger photo, soft natural lighting from the sid
 // From src/app/api/sketch/route.ts
 const response = await openai.images.generate({
   model: 'dall-e-3',
-  prompt: processed.prompt,
+  prompt: prompt,
   n: 1,
   size: '1024x1024',
   quality: 'standard',
-  style: 'natural'  // Less stylized, more true to prompt
+  style: 'vivid'  // Vivid for more saturated, anime-like colors
 });
 ```
 
