@@ -181,95 +181,64 @@ Pattern-matched fallbacks when API fails:
 
 ---
 
-## CALL 2: The Sketch Artist (Studio Ghibli Style)
+## CALL 2: The Sketch Artist (Anime Style)
 
 ### Purpose
-Generate a warm, dreamy food illustration that makes their ingredients look beautiful and achievable.
+Generate an anime-style painted food illustration with warm, cozy vibes.
 
 ### Model
-DALL-E 3 (`style: 'natural'` for prompt accuracy)
+DALL-E 3 with `style: 'vivid'` for saturated anime-like colors
 
-### Visual Style: Studio Ghibli
-
-**DO:**
-- Soft watercolor textures
-- Warm golden hour lighting
-- Gentle, inviting shadows
-- Hand-painted feel
-- Cozy, nostalgic mood
-- That magical Ghibli glow
-
-**DON'T:**
-- Photorealistic 3D rendering
-- Harsh dramatic lighting
-- Sharp vector graphics
-- Neon or oversaturated colors
-- Text, labels, or watermarks
-- People, hands, or utensils
-
-### Prompt Template
-
-```
-Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
-
-${ingredientNames} casually arranged on a cute white ceramic plate, cozy girl dinner vibes.
-
-STYLE:
-- Soft, dreamy Ghibli watercolor textures
-- Warm golden hour lighting from the left side
-- Gentle, inviting shadows
-- That magical Ghibli glow that makes everything look delicious
-- Hand-painted feel, slightly whimsical
-- Colors are warm and appetizing, never harsh or oversaturated
-
-COMPOSITION:
-- Creamy linen fabric background with soft natural folds
-- Shallow depth of field, background gently blurred
-- ${layoutGuide}
-- Food looks delicious and effortlessly styled
-- Cute but not trying too hard — casual elegance
-- Centered composition with breathing room around the plate
-
-MOOD:
-- Cozy evening comfort food vibes
-- Self-care energy
-- Like a still frame from Kiki's Delivery Service or Howl's Moving Castle
-- Warm, inviting, makes you want to reach in and grab something
-- The comfort of eating alone, but make it aesthetic
-
-CRITICAL - DO NOT INCLUDE:
-- NO text, labels, writing, or watermarks of any kind
-- NO hands, fingers, or people
-- NO utensils, forks, knives, or chopsticks
-- NO other food items beyond: ${ingredientNames}
-- NO photorealistic 3D rendering
-- NO harsh dramatic lighting or shadows
-- NO busy or cluttered backgrounds
-
-The final image should feel like a warm hug in food form.
+### Input
+```javascript
+{
+  ingredients: ["brie", "crackers", "grapes"],
+  template: "wildGraze"  // User-selected from input screen
+}
 ```
 
-### Layout Guides by Template
+### Template Selection UI
+Users can pick their vibe on the input screen:
+- **Minimalist** - Less is more, breathing room
+- **The Anchor** - One hero, supporting cast
+- **Snack Line** - Dip + dippers in a row
+- **Bento** - Organized zones
+- **Wild Graze** - Abundant S-curve flow (default)
 
-| Template | Layout Guide |
-|----------|-------------|
-| `minimalist` | Intentional negative space, single focal point placed slightly off-center using rule of thirds |
-| `wildGraze` | Organic S-curve flow connecting all items naturally, clustered in pleasing odd numbers (3s and 5s) |
-| `mediterranean` | Central anchor item (like cheese or dip) with other items radiating outward |
-| `bento` | Organized zones for each item type, clean visual separation between groups |
-| `casual` | Relaxed natural placement as if someone just set it down, effortlessly charming |
-| `snack` | Playful scattered arrangement, items slightly overlapping in a casual pile |
+### Prompt Construction
+
+```javascript
+// From src/app/api/sketch/route.ts
+function buildGhibliPrompt(ingredients: string[], _template: string): string {
+  const ingredientList = ingredients.slice(0, 5).join(', ');
+
+  return `Anime-style painted food illustration. ${ingredientList} on white plate, cream linen background.
+
+Soft watercolor textures, warm golden lighting, gentle glow on food. Colors: warm cream, amber, coral. Hand-painted look with visible brushstrokes.
+
+Food arranged artfully with breathing room. Looks delicious and cozy, like a frame from a Japanese animated film.`;
+}
+```
+
+### Example Generated Prompt
+```
+Anime-style painted food illustration. brie, crackers, grapes on white plate, cream linen background.
+
+Soft watercolor textures, warm golden lighting, gentle glow on food. Colors: warm cream, amber, coral. Hand-painted look with visible brushstrokes.
+
+Food arranged artfully with breathing room. Looks delicious and cozy, like a frame from a Japanese animated film.
+```
 
 ### API Configuration
 ```typescript
 {
   model: 'dall-e-3',
-  prompt: builtPrompt,
+  prompt: prompt,
   n: 1,
   size: '1024x1024',
-  quality: 'standard',  // Use 'hd' for 2x cost, better detail
-  style: 'natural'      // More accurate to prompt than 'vivid'
-}
+  quality: 'standard',
+  style: 'vivid'  // Vivid for more saturated, anime-like colors
+});
 ```
 
 ### SVG Fallback

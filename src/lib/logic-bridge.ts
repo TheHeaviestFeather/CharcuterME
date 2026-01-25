@@ -529,6 +529,45 @@ export function getApplicableRules(summary: IngredientSummary): VisualRule[] {
 // PART 8: PROMPT BUILDER
 // =============================================================================
 
+// Template-specific layout instructions for DALL-E
+const TEMPLATE_LAYOUT_PROMPTS: Record<string, string> = {
+  minimalist: `
+LAYOUT: Minimalist — sparse, gallery-like arrangement with lots of breathing room.
+- Items placed off-center using rule of thirds
+- At least 40% of the plate is empty (negative space)
+- Each item has breathing room, nothing crowded
+- Asymmetric placement creates visual tension`,
+
+  anchor: `
+LAYOUT: Anchor — one hero item with supporting cast orbiting around it.
+- Main/largest item commands the center of the plate
+- Smaller items arranged in a loose circle around the anchor
+- Visual rays extending outward from center
+- Supporting items don't compete with the hero`,
+
+  snackLine: `
+LAYOUT: Snack Line — linear, functional arrangement like a grazing line.
+- Items arranged in a diagonal line across the plate
+- Dip/spread anchors one end if present
+- Dippers and small items fan toward the other end
+- Gradient of item sizes from large to small`,
+
+  bento: `
+LAYOUT: Bento — organized zones with distinct islands of food.
+- Plate visually divided into sections/zones
+- Each food type grouped in its own area
+- Small gaps between different food zones
+- Diagonal corners have contrasting colors`,
+
+  wildGraze: `
+LAYOUT: Wild Graze — abundant S-curve flow, classic grazing spread.
+- Items follow a loose S-curve or diagonal flow
+- Anchor items at the curve endpoints
+- Small items scattered in odd-number clusters (3s, 5s)
+- Organic, natural arrangement — nothing perfectly aligned
+- Gaps filled with tiny accent items`,
+};
+
 export function buildImagePrompt(classified: ClassifiedIngredient[], _template: Template, _rules: VisualRule[]): string {
   // Get all ingredient display names
   const ingredientNames = classified.map((i) => i.displayName).join(', ');
@@ -543,6 +582,28 @@ Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosp
 The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
 
 Angled perspective like a food blogger photo, soft natural lighting from the side.`.trim();
+}
+
+// New prompt builder that uses template-specific layout instructions
+export function buildImagePromptWithTemplate(classified: ClassifiedIngredient[], templateId: string): string {
+  // Get all ingredient display names
+  const ingredientNames = classified.map((i) => i.displayName).join(', ');
+
+  // Get template-specific layout or default to wildGraze
+  const layoutPrompt = TEMPLATE_LAYOUT_PROMPTS[templateId] || TEMPLATE_LAYOUT_PROMPTS.wildGraze;
+
+  return `Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
+
+INGREDIENTS (show ONLY these, nothing else): ${ingredientNames}
+${layoutPrompt}
+
+Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
+
+The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
+
+Angled perspective like a food blogger photo, soft natural lighting from the side.
+
+CRITICAL: Show ONLY the ingredients listed above. Do NOT add any extra food items, garnishes, herbs, or decorations that weren't specified.`.trim();
 }
 
 // =============================================================================
@@ -576,6 +637,31 @@ export function processGirlDinner(userInput: string | string[]): ProcessedResult
     },
     templateSelected: template.name,
     templateReason: getTemplateReason(summary, template),
+    rulesApplied: rules.map((r) => r.name),
+    prompt,
+  };
+}
+
+// Process with user-selected template (for when user picks their own vibe)
+export function processGirlDinnerWithTemplate(userInput: string | string[], templateId: string): ProcessedResult {
+  const classified = classifyIngredients(userInput);
+  const summary = summarizeIngredients(classified);
+  const template = TEMPLATES[templateId] || TEMPLATES.wildGraze;
+  const rules = getApplicableRules(summary);
+  const prompt = buildImagePromptWithTemplate(classified, templateId);
+
+  return {
+    input: userInput,
+    classified,
+    summary: {
+      total: summary.total,
+      anchors: summary.anchors.map((a) => a.displayName),
+      fillers: summary.fillers.map((f) => f.displayName),
+      pops: summary.pops.map((p) => p.displayName),
+      vehicles: summary.vehicles.map((v) => v.displayName),
+    },
+    templateSelected: template.name,
+    templateReason: `You chose: ${template.description}`,
     rulesApplied: rules.map((r) => r.name),
     prompt,
   };

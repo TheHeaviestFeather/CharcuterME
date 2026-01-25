@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processGirlDinner } from '@/lib/logic-bridge';
+import { processGirlDinner, processGirlDinnerWithTemplate } from '@/lib/logic-bridge';
+import type { TemplateId } from '@/types';
 import { withRetry } from '@/lib/retry';
 import { withTimeout, TIMEOUTS } from '@/lib/timeout';
 import { dalleCircuit } from '@/lib/circuit-breaker';
@@ -7,6 +8,17 @@ import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
 import { getOpenAIClient } from '@/lib/ai-clients';
 import { BRAND_COLORS, COLORS, AI_MODELS, DALLE_SETTINGS } from '@/lib/constants';
+
+// Build simplified Ghibli-style prompt
+function buildGhibliPrompt(ingredients: string[], _template: string): string {
+  const ingredientList = ingredients.slice(0, 5).join(', ');
+
+  return `Anime-style painted food illustration. ${ingredientList} on white plate, cream linen background.
+
+Soft watercolor textures, warm golden lighting, gentle glow on food. Colors: warm cream, amber, coral. Hand-painted look with visible brushstrokes.
+
+Food arranged artfully with breathing room. Looks delicious and cozy, like a frame from a Japanese animated film.`;
+}
 
 // SVG fallback when DALL-E is unavailable
 function getSvgFallback(template: string, ingredients: string[]) {
@@ -36,7 +48,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const { ingredients } = await request.json();
+    const { ingredients, template } = await request.json();
 
     if (!ingredients || typeof ingredients !== 'string') {
       return NextResponse.json(
@@ -45,8 +57,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process ingredients through logic bridge
-    const processed = processGirlDinner(ingredients);
+    // Validate template or use default
+    const validTemplates: TemplateId[] = ['minimalist', 'anchor', 'snackLine', 'bento', 'wildGraze'];
+    const selectedTemplate: TemplateId = validTemplates.includes(template) ? template : 'wildGraze';
+
+    // Process ingredients through logic bridge with user-selected template
+    const processed = processGirlDinnerWithTemplate(ingredients, selectedTemplate);
     const ingredientList = ingredients.split(',').map((i: string) => i.trim());
 
     // Check if DALL-E is enabled
@@ -64,6 +80,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Build the prompt using the simplified Ghibli function
+    const prompt = buildGhibliPrompt(ingredientList, selectedTemplate);
+
     // Use circuit breaker with retry and timeout
     const imageUrl = await dalleCircuit.execute(
       async () => {
@@ -73,11 +92,11 @@ export async function POST(request: NextRequest) {
               const openai = getOpenAIClient();
               const response = await openai.images.generate({
                 model: AI_MODELS.sketch,
-                prompt: processed.prompt,
+                prompt: prompt,
                 n: 1,
                 size: DALLE_SETTINGS.size,
                 quality: DALLE_SETTINGS.quality,
-                style: DALLE_SETTINGS.style,
+                style: 'vivid', // Use vivid for more anime-like results
               });
 
               const url = response.data && response.data[0]?.url;

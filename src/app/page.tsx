@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import type { Screen } from '@/types';
+import type { Screen, TemplateId } from '@/types';
 import {
   InputScreen,
   RevealScreen,
@@ -16,6 +16,7 @@ export default function Home() {
 
   // Data state
   const [ingredients, setIngredients] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('wildGraze');
   const [dinnerName, setDinnerName] = useState('');
   const [validation, setValidation] = useState('');
   const [tip, setTip] = useState('');
@@ -63,7 +64,7 @@ export default function Home() {
       const response = await fetch('/api/sketch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients }),
+        body: JSON.stringify({ ingredients, template: selectedTemplate }),
       });
       const data = await response.json();
 
@@ -164,6 +165,7 @@ export default function Home() {
   const resetApp = () => {
     setScreen('input');
     setIngredients('');
+    setSelectedTemplate('wildGraze');
     setDinnerName('');
     setValidation('');
     setTip('');
@@ -184,6 +186,8 @@ export default function Home() {
             key="input"
             ingredients={ingredients}
             setIngredients={setIngredients}
+            selectedTemplate={selectedTemplate}
+            setSelectedTemplate={setSelectedTemplate}
             onSubmit={handleSubmitIngredients}
             isLoading={false}
           />

@@ -138,6 +138,16 @@ export interface DinnerMatch {
   validation: string;
 }
 
+// Template Selection Types
+export type TemplateId = 'minimalist' | 'anchor' | 'snackLine' | 'bento' | 'wildGraze';
+
+export interface TemplateOption {
+  id: TemplateId;
+  name: string;
+  description: string;
+  icon: string;
+}
+
 // App State Types
 // 4-screen flow: input -> reveal (name + blueprint) -> camera -> results
 export type Screen = 'input' | 'reveal' | 'camera' | 'results';
