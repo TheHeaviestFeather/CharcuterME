@@ -6,6 +6,8 @@ import { withTimeout, TIMEOUTS } from '@/lib/timeout';
 import { dalleCircuit } from '@/lib/circuit-breaker';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
+import { AI_MODELS, DALLE_SETTINGS } from '@/lib/constants';
+import { SketchRequestSchema, validateRequest, parseIngredients } from '@/lib/validation';
 
 // =============================================================================
 // Configuration
@@ -17,19 +19,6 @@ function getOpenAIClient() {
   return new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
-}
-
-// =============================================================================
-// Input Processing
-// =============================================================================
-
-function parseIngredients(raw: string): string[] {
-  return raw
-    .split(/[,\n]+/)
-    .map((i) => i.trim().toLowerCase())
-    .filter((i) => i.length > 1 && i.length < 40)
-    .filter((i) => !/[{}"'`<>]/.test(i))
-    .slice(0, 6);
 }
 
 // =============================================================================
@@ -153,24 +142,27 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  let ingredients: string[] = []; // Store for error handler access
+  let template = 'The Wild Graze'; // Store for error handler access
 
   try {
     const body = await request.json();
-    const rawIngredients = body.ingredients;
 
-    if (!rawIngredients || typeof rawIngredients !== 'string') {
-      return NextResponse.json({ error: 'Ingredients are required' }, { status: 400 });
+    // Validate request with Zod
+    const validation = validateRequest(SketchRequestSchema, body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const ingredients = parseIngredients(rawIngredients);
+    ingredients = parseIngredients(validation.data!.ingredients);
 
     if (ingredients.length === 0) {
       return NextResponse.json({ error: 'No valid ingredients provided' }, { status: 400 });
     }
 
-    // Get template from logic bridge (still runs even though UI doesn't show it)
-    const processed = processGirlDinner(rawIngredients);
-    const template = processed.templateSelected || 'The Wild Graze';
+    // Get template from logic bridge
+    const processed = processGirlDinner(validation.data!.ingredients);
+    template = processed.templateSelected || 'The Wild Graze';
 
     // Check if DALL-E is enabled
     if (!isEnabled('enableDalle')) {
@@ -214,12 +206,12 @@ export async function POST(request: NextRequest) {
             async () => {
               const openai = getOpenAIClient();
               const response = await openai.images.generate({
-                model: 'dall-e-3',
+                model: AI_MODELS.sketch,
                 prompt,
                 n: 1,
-                size: '1024x1024',
-                quality: 'standard',
-                style: 'vivid',
+                size: DALLE_SETTINGS.size,
+                quality: DALLE_SETTINGS.quality,
+                style: DALLE_SETTINGS.style,
               });
 
               const url = response.data?.[0]?.url;
@@ -275,23 +267,16 @@ export async function POST(request: NextRequest) {
     logger.error('Error generating sketch', {
       promptVersion: PROMPT_VERSION,
       error: error instanceof Error ? error.message : 'Unknown',
+      ingredientCount: ingredients.length,
+      template,
     });
 
-    try {
-      const body = await request.json();
-      const ingredients = parseIngredients(body.ingredients || '');
-      return NextResponse.json({
-        type: 'svg',
-        svg: generateSvgFallback(ingredients, 'The Wild Graze'),
-        template: 'The Wild Graze',
-        fallback: true,
-      });
-    } catch {
-      return NextResponse.json({
-        type: 'svg',
-        svg: generateSvgFallback(['your', 'spread'], 'The Wild Graze'),
-        fallback: true,
-      });
-    }
+    // Return fallback on any error - use stored ingredients (don't re-parse body)
+    return NextResponse.json({
+      type: 'svg',
+      svg: generateSvgFallback(ingredients.length > 0 ? ingredients : ['your', 'spread'], template),
+      template,
+      fallback: true,
+    });
   }
 }

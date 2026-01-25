@@ -21,6 +21,7 @@ interface SketchResponse {
   type: 'image' | 'svg';
   imageUrl?: string;
   svg?: string;
+  template?: string;
 }
 
 // =============================================================================
@@ -33,12 +34,13 @@ export default function CharcuterMeApp() {
 
   // Data state
   const [_ingredients, setIngredients] = useState('');
+  const [ingredientsArray, setIngredientsArray] = useState<string[]>([]);
+  const [template, setTemplate] = useState('Your Spread');
   const [dinnerName, setDinnerName] = useState('');
   const [validation, setValidation] = useState('');
   const [tip, setTip] = useState('');
   const [wildcard, setWildcard] = useState<string | undefined>();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [svgFallback, setSvgFallback] = useState<string | null>(null);
 
   // Loading states
   const [isLoadingName, setIsLoadingName] = useState(false);
@@ -81,6 +83,14 @@ export default function CharcuterMeApp() {
   const generateSketch = async (ingredientInput: string) => {
     setIsLoadingImage(true);
 
+    // Parse ingredients for fallback SVG
+    const parsed = ingredientInput
+      .split(/[,\n]+/)
+      .map((i) => i.trim().toLowerCase())
+      .filter((i) => i.length > 1)
+      .slice(0, 6);
+    setIngredientsArray(parsed);
+
     try {
       const response = await fetch('/api/sketch', {
         method: 'POST',
@@ -90,11 +100,14 @@ export default function CharcuterMeApp() {
 
       const data: SketchResponse = await response.json();
 
+      if (data.template) {
+        setTemplate(data.template);
+      }
+
       if (data.type === 'image' && data.imageUrl) {
         setImageUrl(data.imageUrl);
-        setSvgFallback(null);
-      } else if (data.svg) {
-        setSvgFallback(data.svg);
+      } else {
+        // Fallback - will use FallbackSvg component with ingredientsArray
         setImageUrl(null);
       }
 
@@ -133,12 +146,13 @@ export default function CharcuterMeApp() {
 
   const resetState = () => {
     setIngredients('');
+    setIngredientsArray([]);
+    setTemplate('Your Spread');
     setDinnerName('');
     setValidation('');
     setTip('');
     setWildcard(undefined);
     setImageUrl(null);
-    setSvgFallback(null);
   };
 
   // =============================================================================
@@ -162,7 +176,8 @@ export default function CharcuterMeApp() {
           tip={tip || 'Loading wisdom...'}
           wildcard={wildcard}
           imageUrl={imageUrl}
-          svgFallback={svgFallback}
+          ingredients={ingredientsArray}
+          template={template}
           onCheckVibe={handleCheckVibe}
           onJustEat={handleJustEat}
           isLoadingImage={isLoadingImage}

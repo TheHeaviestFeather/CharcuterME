@@ -3,6 +3,8 @@
 // For resilient AI API calls
 // =============================================================================
 
+import { logger } from './logger';
+
 export interface RetryOptions {
   maxRetries?: number;
   baseDelay?: number;
@@ -53,10 +55,12 @@ export async function withRetry<T>(
         maxDelay
       );
 
-      console.log(
-        `[Retry] Attempt ${attempt + 1}/${maxRetries} failed. Retrying in ${Math.round(delay)}ms...`,
-        { error: lastError.message }
-      );
+      logger.warn('Retry attempt failed, retrying', {
+        attempt: attempt + 1,
+        maxRetries,
+        delayMs: Math.round(delay),
+        error: lastError.message,
+      });
 
       await new Promise((resolve) => setTimeout(resolve, delay));
     }

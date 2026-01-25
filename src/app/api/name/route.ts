@@ -5,6 +5,8 @@ import { withTimeout, TIMEOUTS } from '@/lib/timeout';
 import { claudeCircuit } from '@/lib/circuit-breaker';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
+import { AI_MODELS, CLAUDE_SETTINGS } from '@/lib/constants';
+import { NameRequestSchema, validateRequest, sanitizeIngredients } from '@/lib/validation';
 
 // =============================================================================
 // Configuration
@@ -12,26 +14,10 @@ import { isEnabled } from '@/lib/feature-flags';
 
 const PROMPT_VERSION = 'namer_v3.1_wildcard';
 
-// Model agnostic - change this to switch models without touching prompt logic
-const MODEL = 'claude-3-5-haiku-20241022';
-
 function getAnthropicClient() {
   return new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
   });
-}
-
-// =============================================================================
-// Input Sanitization
-// =============================================================================
-
-function sanitizeIngredients(raw: string): string {
-  return raw
-    .replace(/[{}"'`<>]/g, '') // Remove JSON/XML breaking characters
-    .replace(/\n/g, ', ')       // Newlines to commas
-    .replace(/\s+/g, ' ')       // Collapse whitespace
-    .trim()
-    .slice(0, 500);             // Hard limit
 }
 
 // =============================================================================
@@ -241,7 +227,11 @@ function parseResponse(raw: string): NamerResponse | null {
     if (parsed.name && parsed.validation && parsed.tip) {
       return normalizeResponse(parsed);
     }
-  } catch {}
+  } catch (e) {
+    logger.debug('Direct JSON parse failed, trying alternatives', {
+      error: e instanceof Error ? e.message : 'Unknown',
+    });
+  }
 
   // Try extracting from markdown code block
   const jsonMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -251,7 +241,11 @@ function parseResponse(raw: string): NamerResponse | null {
       if (parsed.name && parsed.validation && parsed.tip) {
         return normalizeResponse(parsed);
       }
-    } catch {}
+    } catch (e) {
+      logger.debug('Markdown code block parse failed', {
+        error: e instanceof Error ? e.message : 'Unknown',
+      });
+    }
   }
 
   // Try extracting raw JSON object
@@ -262,7 +256,11 @@ function parseResponse(raw: string): NamerResponse | null {
       if (parsed.name && parsed.validation && parsed.tip) {
         return normalizeResponse(parsed);
       }
-    } catch {}
+    } catch (e) {
+      logger.debug('Raw JSON object parse failed', {
+        error: e instanceof Error ? e.message : 'Unknown',
+      });
+    }
   }
 
   return null;
@@ -351,16 +349,18 @@ function stripEmojis(text: string): string {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
+  let ingredients = ''; // Store for error handler access
 
   try {
     const body = await request.json();
-    const rawIngredients = body.ingredients;
 
-    if (!rawIngredients || typeof rawIngredients !== 'string') {
-      return NextResponse.json({ error: 'Ingredients are required' }, { status: 400 });
+    // Validate request with Zod
+    const validation = validateRequest(NameRequestSchema, body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const ingredients = sanitizeIngredients(rawIngredients);
+    ingredients = sanitizeIngredients(validation.data!.ingredients);
 
     if (!ingredients || ingredients.length < 2) {
       return NextResponse.json({ error: 'Please enter at least one ingredient' }, { status: 400 });
@@ -386,9 +386,9 @@ export async function POST(request: NextRequest) {
             async () => {
               const client = getAnthropicClient();
               const message = await client.messages.create({
-                model: MODEL,
-                max_tokens: 300,
-                temperature: 0.9,
+                model: AI_MODELS.naming,
+                max_tokens: CLAUDE_SETTINGS.maxTokens,
+                temperature: CLAUDE_SETTINGS.temperature,
                 system: SYSTEM_PROMPT,
                 messages: [
                   {
@@ -451,14 +451,10 @@ export async function POST(request: NextRequest) {
     logger.error('Error generating name', {
       promptVersion: PROMPT_VERSION,
       error: error instanceof Error ? error.message : 'Unknown',
+      ingredients: ingredients || 'unknown',
     });
 
-    // Return fallback on any error
-    try {
-      const body = await request.json();
-      return NextResponse.json(getFallback(body.ingredients || ''));
-    } catch {
-      return NextResponse.json(FALLBACK_RESPONSES.default);
-    }
+    // Return fallback on any error - use stored ingredients (don't re-parse body)
+    return NextResponse.json(getFallback(ingredients || ''));
   }
 }

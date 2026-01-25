@@ -3,6 +3,8 @@
 // Prevents cascading failures when external services are down
 // =============================================================================
 
+import { logger } from './logger';
+
 type CircuitState = 'closed' | 'open' | 'half-open';
 
 export class CircuitBreaker {
@@ -23,10 +25,10 @@ export class CircuitBreaker {
     if (this.state === 'open') {
       // Check if timeout has passed
       if (Date.now() - this.lastFailure > this.timeout) {
-        console.log(`[CircuitBreaker:${this.name}] Transitioning to half-open`);
+        logger.info('Circuit transitioning to half-open', { circuit: this.name });
         this.state = 'half-open';
       } else {
-        console.log(`[CircuitBreaker:${this.name}] Circuit is open, using fallback`);
+        logger.warn('Circuit is open, using fallback', { circuit: this.name });
         if (fallback) return await fallback();
         throw new Error(`Circuit breaker '${this.name}' is open`);
       }
@@ -39,7 +41,10 @@ export class CircuitBreaker {
     } catch (error) {
       this.onFailure();
       if (fallback) {
-        console.log(`[CircuitBreaker:${this.name}] Primary failed, using fallback`);
+        logger.warn('Primary failed, using fallback', {
+          circuit: this.name,
+          error: error instanceof Error ? error.message : 'Unknown',
+        });
         return await fallback();
       }
       throw error;
@@ -48,7 +53,7 @@ export class CircuitBreaker {
 
   private onSuccess() {
     if (this.state === 'half-open') {
-      console.log(`[CircuitBreaker:${this.name}] Success in half-open, closing circuit`);
+      logger.info('Success in half-open, closing circuit', { circuit: this.name });
     }
     this.failures = 0;
     this.state = 'closed';
@@ -58,9 +63,10 @@ export class CircuitBreaker {
     this.failures++;
     this.lastFailure = Date.now();
     if (this.failures >= this.threshold) {
-      console.error(
-        `[CircuitBreaker:${this.name}] Circuit opened after ${this.failures} failures`
-      );
+      logger.error('Circuit opened after failures', {
+        circuit: this.name,
+        failures: this.failures,
+      });
       this.state = 'open';
     }
   }
