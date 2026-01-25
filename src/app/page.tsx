@@ -1,238 +1,183 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import type { Screen, TemplateId } from '@/types';
-import {
-  InputScreen,
-  RevealScreen,
-  CameraScreen,
-  ResultsScreen,
-} from '@/components';
+import { InputScreen } from '@/components/InputScreen';
+import { ResultsScreen } from '@/components/ResultsScreen';
 
-export default function Home() {
-  // Screen state - 4 screens: input -> reveal -> camera -> results
+// =============================================================================
+// Types
+// =============================================================================
+
+type Screen = 'input' | 'results' | 'camera' | 'vibecheck';
+
+interface NamerResponse {
+  name: string;
+  validation: string;
+  tip: string;
+  wildcard?: string;
+}
+
+interface SketchResponse {
+  type: 'image' | 'svg';
+  imageUrl?: string;
+  svg?: string;
+}
+
+// =============================================================================
+// Main App Flow
+// =============================================================================
+
+export default function CharcuterMeApp() {
+  // Screen state
   const [screen, setScreen] = useState<Screen>('input');
 
   // Data state
-  const [ingredients, setIngredients] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('wildGraze');
+  const [_ingredients, setIngredients] = useState('');
   const [dinnerName, setDinnerName] = useState('');
   const [validation, setValidation] = useState('');
   const [tip, setTip] = useState('');
-  const [blueprintUrl, setBlueprintUrl] = useState<string | null>(null);
-  const [blueprintSvg, setBlueprintSvg] = useState<string | null>(null);
-  const [userPhoto, setUserPhoto] = useState<string | null>(null);
-  const [vibeScore, setVibeScore] = useState(0);
-  const [vibeRank, setVibeRank] = useState('');
-  const [vibeCompliment, setVibeCompliment] = useState('');
-  const [sticker, setSticker] = useState('');
+  const [wildcard, setWildcard] = useState<string | undefined>();
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [svgFallback, setSvgFallback] = useState<string | null>(null);
 
-  // Loading states - separate for name and blueprint
+  // Loading states
   const [isLoadingName, setIsLoadingName] = useState(false);
-  const [isLoadingBlueprint, setIsLoadingBlueprint] = useState(false);
-  const [isLoadingVibe, setIsLoadingVibe] = useState(false);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
 
-  // Generate name via Claude
-  const generateName = async () => {
+  // =============================================================================
+  // API Calls
+  // =============================================================================
+
+  const generateName = async (ingredientInput: string) => {
     setIsLoadingName(true);
+
     try {
       const response = await fetch('/api/name', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients }),
+        body: JSON.stringify({ ingredients: ingredientInput }),
       });
-      const data = await response.json();
+
+      const data: NamerResponse = await response.json();
 
       setDinnerName(data.name || 'The Spread');
-      setValidation(data.validation || "That's a real dinner.");
-      setTip(data.tip || '');
+      setValidation(data.validation || "That's a real dinner. You're doing great.");
+      setTip(data.tip || 'Trust your instincts.');
+      setWildcard(data.wildcard);
+
+      return data;
     } catch (error) {
       console.error('Error generating name:', error);
+      // Fallback
       setDinnerName('The Spread');
       setValidation("That's a real dinner. You're doing great.");
-      setTip('');
+      setTip('The couch is the correct location for this meal.');
+      return null;
     } finally {
       setIsLoadingName(false);
     }
   };
 
-  // Generate blueprint via DALL-E
-  const generateBlueprint = async () => {
-    setIsLoadingBlueprint(true);
+  const generateSketch = async (ingredientInput: string) => {
+    setIsLoadingImage(true);
+
     try {
       const response = await fetch('/api/sketch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients, template: selectedTemplate }),
+        body: JSON.stringify({ ingredients: ingredientInput }),
       });
-      const data = await response.json();
 
-      // Handle both image URL and SVG fallback
-      if (data.imageUrl) {
-        setBlueprintUrl(data.imageUrl);
-        setBlueprintSvg(null);
+      const data: SketchResponse = await response.json();
+
+      if (data.type === 'image' && data.imageUrl) {
+        setImageUrl(data.imageUrl);
+        setSvgFallback(null);
       } else if (data.svg) {
-        setBlueprintSvg(data.svg);
-        setBlueprintUrl(null);
+        setSvgFallback(data.svg);
+        setImageUrl(null);
       }
+
+      return data;
     } catch (error) {
-      console.error('Error generating blueprint:', error);
-      // Keep null - will show ASCII fallback
+      console.error('Error generating sketch:', error);
+      return null;
     } finally {
-      setIsLoadingBlueprint(false);
+      setIsLoadingImage(false);
     }
   };
 
-  // Check vibe via GPT-4o
-  const checkVibe = async () => {
-    if (!userPhoto) return;
+  // =============================================================================
+  // Handlers
+  // =============================================================================
 
-    setIsLoadingVibe(true);
-    try {
-      const response = await fetch('/api/vibe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          photo: userPhoto,
-          dinnerName,
-          ingredients,
-          rules: ['S-curve flow', 'Odd clusters', 'Color balance'],
-        }),
-      });
-      const data = await response.json();
+  const handleSubmitIngredients = async (ingredientInput: string) => {
+    setIngredients(ingredientInput);
+    setScreen('results');
 
-      setVibeScore(data.score || 72);
-      setVibeRank(data.rank || 'Vibe Achieved');
-      setVibeCompliment(data.compliment || 'Looking good!');
-      setSticker(data.sticker || 'WE LOVE TO SEE IT');
-      setScreen('results');
-    } catch (error) {
-      console.error('Error checking vibe:', error);
-      setVibeScore(72);
-      setVibeRank('Vibe Achieved');
-      setVibeCompliment('We trust you did great!');
-      setSticker('WE LOVE TO SEE IT');
-      setScreen('results');
-    } finally {
-      setIsLoadingVibe(false);
-    }
+    // Fire both API calls in parallel
+    generateName(ingredientInput);
+    generateSketch(ingredientInput);
   };
 
-  // Submit ingredients - triggers BOTH name and blueprint generation in parallel
-  const handleSubmitIngredients = async () => {
-    // Navigate to reveal screen immediately
-    setScreen('reveal');
-
-    // Start both API calls in parallel
-    generateName();
-    generateBlueprint();
+  const handleCheckVibe = () => {
+    setScreen('camera');
+    // TODO: Open camera or file picker
   };
 
-  // Navigation handlers
-  const handlePlatedIt = () => setScreen('camera');
-  const handlePhotoCapture = (photo: string) => setUserPhoto(photo);
-  const handleCheckVibe = () => checkVibe();
-
-  const handleShare = async () => {
-    if (navigator.share && userPhoto) {
-      try {
-        await navigator.share({
-          title: `CharcuterME: ${dinnerName}`,
-          text: `I scored ${vibeScore} on my "${dinnerName}"! ${sticker}`,
-        });
-      } catch {
-        console.log('Share cancelled');
-      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(
-        `I scored ${vibeScore} on my "${dinnerName}"! ${sticker} #CharcuterME`
-      );
-      alert('Copied to clipboard!');
-    }
-  };
-
-  const handleSave = () => {
-    if (userPhoto) {
-      const link = document.createElement('a');
-      link.download = `charcuterme-${dinnerName.replace(/\s+/g, '-').toLowerCase()}.jpg`;
-      link.href = userPhoto;
-      link.click();
-    }
-  };
-
-  const resetApp = () => {
+  const handleJustEat = () => {
+    // Reset and go back to input
     setScreen('input');
+    resetState();
+  };
+
+  const resetState = () => {
     setIngredients('');
-    setSelectedTemplate('wildGraze');
     setDinnerName('');
     setValidation('');
     setTip('');
-    setBlueprintUrl(null);
-    setBlueprintSvg(null);
-    setUserPhoto(null);
-    setVibeScore(0);
-    setVibeRank('');
-    setVibeCompliment('');
-    setSticker('');
+    setWildcard(undefined);
+    setImageUrl(null);
+    setSvgFallback(null);
   };
 
-  return (
-    <main className="min-h-screen bg-cream">
-      <AnimatePresence mode="wait">
-        {screen === 'input' && (
-          <InputScreen
-            key="input"
-            ingredients={ingredients}
-            setIngredients={setIngredients}
-            selectedTemplate={selectedTemplate}
-            setSelectedTemplate={setSelectedTemplate}
-            onSubmit={handleSubmitIngredients}
-            isLoading={false}
-          />
-        )}
+  // =============================================================================
+  // Render
+  // =============================================================================
 
-        {screen === 'reveal' && (
-          <RevealScreen
-            key="reveal"
-            dinnerName={dinnerName}
-            validation={validation}
-            tip={tip}
-            blueprintUrl={blueprintUrl}
-            blueprintSvg={blueprintSvg}
-            onPlatedIt={handlePlatedIt}
-            onStartOver={resetApp}
-            isLoadingName={isLoadingName}
-            isLoadingBlueprint={isLoadingBlueprint}
-          />
-        )}
+  switch (screen) {
+    case 'input':
+      return (
+        <InputScreen
+          onSubmit={handleSubmitIngredients}
+          isLoading={isLoadingName}
+        />
+      );
 
-        {screen === 'camera' && (
-          <CameraScreen
-            key="camera"
-            onPhotoCapture={handlePhotoCapture}
-            onCheckVibe={handleCheckVibe}
-            userPhoto={userPhoto}
-            isLoading={isLoadingVibe}
-          />
-        )}
+    case 'results':
+      return (
+        <ResultsScreen
+          dinnerName={dinnerName || 'Creating your masterpiece...'}
+          validation={validation || 'Analyzing your choices...'}
+          tip={tip || 'Loading wisdom...'}
+          wildcard={wildcard}
+          imageUrl={imageUrl}
+          svgFallback={svgFallback}
+          onCheckVibe={handleCheckVibe}
+          onJustEat={handleJustEat}
+          isLoadingImage={isLoadingImage}
+        />
+      );
 
-        {screen === 'results' && (
-          <ResultsScreen
-            key="results"
-            dinnerName={dinnerName}
-            userPhoto={userPhoto}
-            vibeScore={vibeScore}
-            vibeRank={vibeRank}
-            vibeCompliment={vibeCompliment}
-            sticker={sticker}
-            onShare={handleShare}
-            onSave={handleSave}
-            onStartOver={resetApp}
-          />
-        )}
-      </AnimatePresence>
-    </main>
-  );
+    case 'camera':
+      // TODO: Implement camera screen
+      return (
+        <div className="min-h-screen bg-[#FAF9F7] flex items-center justify-center">
+          <p className="text-[#A47864]">Camera screen coming soon...</p>
+        </div>
+      );
+
+    default:
+      return <InputScreen onSubmit={handleSubmitIngredients} />;
+  }
 }

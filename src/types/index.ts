@@ -87,6 +87,7 @@ export interface NamerResponse {
   name: string;
   validation: string;
   tip: string;
+  wildcard?: string;
 }
 
 export interface VibeCheckResponse {
