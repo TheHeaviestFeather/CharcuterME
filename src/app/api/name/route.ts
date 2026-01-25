@@ -1,16 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { withRetry } from '@/lib/retry';
 import { withTimeout, TIMEOUTS } from '@/lib/timeout';
 import { claudeCircuit } from '@/lib/circuit-breaker';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
-
-function getAnthropicClient() {
-  return new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
-}
+import { getAnthropicClient } from '@/lib/ai-clients';
+import { AI_MODELS } from '@/lib/constants';
 
 const FALLBACK_RESPONSES: Record<string, { name: string; validation: string; tip: string }> = {
   default: {
@@ -126,7 +121,7 @@ Respond in EXACTLY this JSON format (no markdown):
             async () => {
               const anthropic = getAnthropicClient();
               return await anthropic.messages.create({
-                model: 'claude-3-haiku-20240307',
+                model: AI_MODELS.naming,
                 max_tokens: 200,
                 messages: [
                   {

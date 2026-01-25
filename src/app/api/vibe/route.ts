@@ -1,4 +1,3 @@
-import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 import type { VibeCheckResponse } from '@/types';
 import { withRetry } from '@/lib/retry';
@@ -6,12 +5,8 @@ import { withTimeout, TIMEOUTS } from '@/lib/timeout';
 import { gptCircuit } from '@/lib/circuit-breaker';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
-
-function getOpenAIClient() {
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-}
+import { getOpenAIClient } from '@/lib/ai-clients';
+import { MIN_VIBE_SCORE, DEFAULT_DINNER_NAME, AI_MODELS } from '@/lib/constants';
 
 const FALLBACK_VIBE: VibeCheckResponse = {
   score: 77,
@@ -49,7 +44,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = `You are the Vibe Judge for CharcuterME — a chaotic millennial bestie who rates "girl dinners" with SNARKY but SUPPORTIVE humor.
 
 CONTEXT:
-Dinner name: "${dinnerName || 'The Audacity'}"
+Dinner name: "${dinnerName || DEFAULT_DINNER_NAME}"
 Ingredients: ${ingredients || 'various life choices'}
 They tried to follow: ${rules?.join(', ') || 'vibes only'}
 
@@ -104,7 +99,7 @@ OUTPUT FORMAT (JSON only, no markdown):
             async () => {
               const openai = getOpenAIClient();
               const response = await openai.chat.completions.create({
-                model: 'gpt-4o',
+                model: AI_MODELS.vibe,
                 messages: [
                   {
                     role: 'system',
@@ -150,8 +145,8 @@ OUTPUT FORMAT (JSON only, no markdown):
     );
 
     // Ensure minimum score
-    if (vibeResult.score < 35) {
-      vibeResult.score = 35;
+    if (vibeResult.score < MIN_VIBE_SCORE) {
+      vibeResult.score = MIN_VIBE_SCORE;
     }
 
     logger.info('Vibe check completed', {

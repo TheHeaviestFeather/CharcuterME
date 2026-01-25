@@ -6,15 +6,15 @@
 ## The Experience (60 seconds)
 
 ```
-INPUT → NAME → BLUEPRINT → PLATE → VIBE CHECK → SHARE
- (5s)   (5s)    (10s)      (30s)     (10s)      (done!)
+INPUT → REVEAL → PLATE → VIBE CHECK → SHARE
+ (5s)   (10s)    (30s)     (10s)      (done!)
 ```
 
 ### The Three Emotional Beats
 
 | Beat | Time | What Happens | User Feels |
 |------|------|--------------|------------|
-| **1. The Name** | 0-5s | "The French Affair" | "Oh that's cute!" (smile) |
+| **1. The Name** | 0-5s | "Cheese Is A Personality"| "Oh that's cute!" (smile) |
 | **2. The Blueprint** | 5-15s | Ghibli-style illustration | "I can do this" (confidence) |
 | **3. The Vibe Check** | 30-60s | Score: 78 "NAILED IT!" | "I did it!" (pride) |
 
@@ -62,6 +62,8 @@ ENABLE_CLAUDE_NAMING=true
 | `PROMPTS.md` | AI prompts for all 3 calls |
 | `QA-TEST-SUITE.md` | Testing & validation |
 | `src/lib/logic-bridge.ts` | Classification engine |
+| `src/lib/ai-clients.ts` | Shared AI client utilities |
+| `src/lib/constants.ts` | Brand colors, model names, settings |
 
 ---
 
@@ -70,7 +72,7 @@ ENABLE_CLAUDE_NAMING=true
 ### Architecture
 ```
 User Input → Logic Bridge → AI Calls → User Interface
-              (classify)    (name,     (5 screens)
+              (classify)    (name,     (4 screens)
                             sketch,
                             score)
 ```
@@ -91,15 +93,15 @@ User Input → Logic Bridge → AI Calls → User Interface
 
 ## Key Design Decisions
 
-### Why "Girl Dinner" vs "Charcuterie Board"?
+### Why "Girl Dinner" Framing?
 
 | Charcuterie Framing | Girl Dinner Framing |
 |---------------------|---------------------|
 | "Culinary art" | "Whatever you have is enough" |
-| Aspirational | Validating |
-| "You should try this" | "You're already doing great" |
+| Aspirational | Validating with snarky humor |
+| "You should try this" | "You looked in your fridge and said 'this is fine.' Iconic." |
 
-We lead with validation, not aspiration.
+We lead with validation AND humor, not aspiration.
 
 ### Why Three Beats?
 
@@ -135,7 +137,7 @@ All generated images follow the Studio Ghibli aesthetic:
 
 ---
 
-## Screens
+## Screens (4-Screen Flow)
 
 ### 1. Input
 ```
@@ -151,12 +153,12 @@ All generated images follow the Studio Ghibli aesthetic:
 └────────────────────────────┘
 ```
 
-### 2. Name (THE AHA MOMENT)
+### 2. Reveal (Combined Name + Blueprint)
 ```
 ┌────────────────────────────┐
 │  Tonight's Dinner:         │
 │                            │
-│  "The French Affair"       │
+│  "Cheese Is A Personality" │
 │                            │
 │  ✓ That's a real dinner.   │
 │    You're doing great.     │
@@ -182,6 +184,7 @@ All generated images follow the Studio Ghibli aesthetic:
 │     self-care              │
 │                            │
 │  [I Plated It! 📸]         │
+│  [Start Over]              │
 └────────────────────────────┘
 ```
 
@@ -271,6 +274,7 @@ Set `GPT_VISION_MODEL=gpt-4o-mini` to enable cheaper vision.
 
 ---
 
+> **Did they chuckle at the name?**
 ## License
 
 MIT

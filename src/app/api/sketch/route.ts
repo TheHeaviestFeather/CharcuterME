@@ -1,4 +1,3 @@
-import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { withRetry } from '@/lib/retry';
@@ -6,24 +5,19 @@ import { withTimeout, TIMEOUTS } from '@/lib/timeout';
 import { dalleCircuit } from '@/lib/circuit-breaker';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
-
-function getOpenAIClient() {
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-}
+import { getOpenAIClient } from '@/lib/ai-clients';
+import { BRAND_COLORS, COLORS, AI_MODELS, DALLE_SETTINGS } from '@/lib/constants';
 
 // SVG fallback when DALL-E is unavailable
 function getSvgFallback(template: string, ingredients: string[]) {
-  const colors = ['#FF6F61', '#A78BFA', '#A47864', '#FAF9F7'];
-  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  const randomColor = BRAND_COLORS[Math.floor(Math.random() * BRAND_COLORS.length)];
 
   return {
     type: 'svg' as const,
     svg: `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-      <rect width="400" height="400" fill="#FAF9F7"/>
+      <rect width="400" height="400" fill="${COLORS.cream}"/>
       <ellipse cx="200" cy="200" rx="150" ry="140" fill="none" stroke="${randomColor}" stroke-width="3"/>
-      <text x="200" y="180" text-anchor="middle" font-family="system-ui" font-size="16" fill="#A47864">
+      <text x="200" y="180" text-anchor="middle" font-family="system-ui" font-size="16" fill="${COLORS.mocha}">
         ${template}
       </text>
       <text x="200" y="210" text-anchor="middle" font-family="system-ui" font-size="12" fill="#666">
@@ -78,12 +72,12 @@ export async function POST(request: NextRequest) {
             async () => {
               const openai = getOpenAIClient();
               const response = await openai.images.generate({
-                model: 'dall-e-3',
+                model: AI_MODELS.sketch,
                 prompt: processed.prompt,
                 n: 1,
-                size: '1024x1024',
-                quality: 'standard',
-                style: 'natural',
+                size: DALLE_SETTINGS.size,
+                quality: DALLE_SETTINGS.quality,
+                style: DALLE_SETTINGS.style,
               });
 
               const url = response.data && response.data[0]?.url;
