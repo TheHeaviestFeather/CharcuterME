@@ -1,6 +1,11 @@
 import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 import type { VibeCheckResponse } from '@/types';
+import { withRetry } from '@/lib/retry';
+import { withTimeout, TIMEOUTS } from '@/lib/timeout';
+import { gptCircuit } from '@/lib/circuit-breaker';
+import { logger } from '@/lib/logger';
+import { isEnabled } from '@/lib/feature-flags';
 
 function getOpenAIClient() {
   return new OpenAI({
@@ -17,6 +22,8 @@ const FALLBACK_VIBE: VibeCheckResponse = {
 };
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
     const { photo, dinnerName, ingredients, rules } = await request.json();
 
@@ -27,8 +34,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if vibe check is enabled
+    if (!isEnabled('enableVibeCheck')) {
+      logger.info('Vibe check disabled via feature flag');
+      return NextResponse.json(FALLBACK_VIBE);
+    }
+
     // Check if API key exists
     if (!process.env.OPENAI_API_KEY) {
+      logger.warn('OPENAI_API_KEY not configured, using fallback');
       return NextResponse.json(FALLBACK_VIBE);
     }
 
@@ -80,49 +94,78 @@ STICKERS BY SCORE:
 OUTPUT FORMAT (JSON only, no markdown):
 {"score": 78, "rank": "Casual Elegance", "compliment": "The S-curve is giving main character energy. The grape placement? *Chef's kiss.*", "sticker": "NAILED IT!", "improvement": "Next time, fan those crackers just a bit more — but honestly, you crushed it."}`;
 
-    const openai = getOpenAIClient();
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Analyze this plate and give me a vibe score:',
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: photo.startsWith('data:') ? photo : `data:image/jpeg;base64,${photo}`,
-              },
-            },
-          ],
-        },
-      ],
-      max_tokens: 300,
-      response_format: { type: 'json_object' },
-    });
+    // Use circuit breaker with retry and timeout
+    const vibeResult = await gptCircuit.execute(
+      async () => {
+        return await withTimeout(
+          withRetry(
+            async () => {
+              const openai = getOpenAIClient();
+              const response = await openai.chat.completions.create({
+                model: 'gpt-4o',
+                messages: [
+                  {
+                    role: 'system',
+                    content: systemPrompt,
+                  },
+                  {
+                    role: 'user',
+                    content: [
+                      {
+                        type: 'text',
+                        text: 'Analyze this plate and give me a vibe score:',
+                      },
+                      {
+                        type: 'image_url',
+                        image_url: {
+                          url: photo.startsWith('data:') ? photo : `data:image/jpeg;base64,${photo}`,
+                        },
+                      },
+                    ],
+                  },
+                ],
+                max_tokens: 300,
+                response_format: { type: 'json_object' },
+              });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from GPT-4o');
-    }
+              const content = response.choices[0]?.message?.content;
+              if (!content) {
+                throw new Error('No response from GPT-4o');
+              }
 
-    const vibeResult: VibeCheckResponse = JSON.parse(content);
+              return JSON.parse(content) as VibeCheckResponse;
+            },
+            { maxRetries: 2 }
+          ),
+          TIMEOUTS.GPT_VIBE_CHECK,
+          'GPT-4o vibe check timed out'
+        );
+      },
+      () => {
+        logger.warn('GPT circuit open, using fallback');
+        return FALLBACK_VIBE;
+      }
+    );
 
     // Ensure minimum score
     if (vibeResult.score < 35) {
       vibeResult.score = 35;
     }
 
+    logger.info('Vibe check completed', {
+      action: 'vibe_check',
+      duration: Date.now() - startTime,
+      score: vibeResult.score,
+    });
+
     return NextResponse.json(vibeResult);
   } catch (error) {
-    console.error('Error analyzing vibe:', error);
+    logger.error('Error analyzing vibe', {
+      action: 'vibe_check',
+      duration: Date.now() - startTime,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+
     return NextResponse.json(FALLBACK_VIBE);
   }
 }

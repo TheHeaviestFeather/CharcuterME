@@ -1,9 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
+import { withRetry } from '@/lib/retry';
+import { withTimeout, TIMEOUTS } from '@/lib/timeout';
+import { claudeCircuit } from '@/lib/circuit-breaker';
+import { logger } from '@/lib/logger';
+import { isEnabled } from '@/lib/feature-flags';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+function getAnthropicClient() {
+  return new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  });
+}
 
 const FALLBACK_RESPONSES: Record<string, { name: string; validation: string; tip: string }> = {
   default: {
@@ -23,7 +30,20 @@ const FALLBACK_RESPONSES: Record<string, { name: string; validation: string; tip
   },
 };
 
+function getFallback(ingredients: string) {
+  const lowerIngredients = ingredients.toLowerCase();
+  if (lowerIngredients.includes('cheese') || lowerIngredients.includes('brie')) {
+    return FALLBACK_RESPONSES.hasCheese;
+  }
+  if (lowerIngredients.includes('chip')) {
+    return FALLBACK_RESPONSES.hasChips;
+  }
+  return FALLBACK_RESPONSES.default;
+}
+
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
     const { ingredients } = await request.json();
 
@@ -34,17 +54,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if feature is enabled
+    if (!isEnabled('enableClaudeNaming')) {
+      logger.info('Claude naming disabled via feature flag');
+      return NextResponse.json(getFallback(ingredients));
+    }
+
     // Check if API key exists
     if (!process.env.ANTHROPIC_API_KEY) {
-      // Return fallback response
-      const lowerIngredients = ingredients.toLowerCase();
-      if (lowerIngredients.includes('cheese') || lowerIngredients.includes('brie')) {
-        return NextResponse.json(FALLBACK_RESPONSES.hasCheese);
-      }
-      if (lowerIngredients.includes('chip')) {
-        return NextResponse.json(FALLBACK_RESPONSES.hasChips);
-      }
-      return NextResponse.json(FALLBACK_RESPONSES.default);
+      logger.warn('ANTHROPIC_API_KEY not configured, using fallback');
+      return NextResponse.json(getFallback(ingredients));
     }
 
     const prompt = `You name "girl dinners" — casual, unpretentious meals made from whatever someone has.
@@ -89,31 +108,65 @@ They have: ${ingredients}
 Respond in EXACTLY this JSON format (no markdown, just raw JSON):
 {"name": "[2-5 word playful name]", "validation": "[one sentence validation]", "tip": "[specific tip about their ingredients]"}`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 200,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+    // Use circuit breaker with retry and timeout
+    const response = await claudeCircuit.execute(
+      async () => {
+        return await withTimeout(
+          withRetry(
+            async () => {
+              const anthropic = getAnthropicClient();
+              return await anthropic.messages.create({
+                model: 'claude-3-haiku-20240307',
+                max_tokens: 200,
+                messages: [
+                  {
+                    role: 'user',
+                    content: prompt,
+                  },
+                ],
+              });
+            },
+            { maxRetries: 2 }
+          ),
+          TIMEOUTS.CLAUDE_NAMING,
+          'Claude naming timed out'
+        );
+      },
+      () => {
+        logger.warn('Claude circuit open, using fallback');
+        return null;
+      }
+    );
+
+    // If circuit breaker returned fallback
+    if (!response) {
+      return NextResponse.json(getFallback(ingredients));
+    }
 
     // Extract text content
-    const textContent = message.content.find((block) => block.type === 'text');
+    const textContent = response.content.find((block) => block.type === 'text');
     if (!textContent || textContent.type !== 'text') {
       throw new Error('No text response from Claude');
     }
 
     // Parse JSON response
-    const response = JSON.parse(textContent.text);
+    const result = JSON.parse(textContent.text);
 
-    return NextResponse.json(response);
+    logger.info('Name generated successfully', {
+      action: 'generate_name',
+      duration: Date.now() - startTime,
+    });
+
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('Error generating name:', error);
+    logger.error('Error generating name', {
+      action: 'generate_name',
+      duration: Date.now() - startTime,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
 
     // Return fallback on error
-    return NextResponse.json(FALLBACK_RESPONSES.default);
+    const { ingredients } = await request.json().catch(() => ({ ingredients: '' }));
+    return NextResponse.json(getFallback(ingredients || ''));
   }
 }
