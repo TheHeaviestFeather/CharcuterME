@@ -24,20 +24,23 @@ Every beat provides validation. Every exit is a win.
 
 ## Quick Start
 
-### 1. Open the prototype
 ```bash
-open charcuterme-prototype.html
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
 ```
 
-### 2. Try it
-- Enter: `brie, crackers, grapes, salami`
-- Click "Make it a Spread"
-- See your dinner named instantly
-- (Optional) View the blueprint
-- (Optional) Upload a photo for vibe check
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-### 3. For production
-Replace `YOUR_CLAUDE_API_KEY` and `YOUR_OPENAI_API_KEY` with real keys (use a backend proxy to protect them).
+### Environment Variables
+
+Create a `.env.local` file:
+```bash
+ANTHROPIC_API_KEY=your_claude_api_key
+OPENAI_API_KEY=your_openai_api_key
+```
 
 ---
 
@@ -45,10 +48,9 @@ Replace `YOUR_CLAUDE_API_KEY` and `YOUR_OPENAI_API_KEY` with real keys (use a ba
 
 | File | Purpose |
 |------|---------|
-| `charcuterme-prototype.html` | Working demo (all 5 screens) |
-| `logic-bridge.js` | Classification engine |
 | `ARCHITECTURE.md` | Full system design |
 | `PROMPTS.md` | AI prompts for all 3 calls |
+| `src/lib/logic-bridge.ts` | Classification engine |
 
 ---
 
@@ -84,7 +86,7 @@ User Input → Logic Bridge → AI Calls → User Interface
 | Aspirational | Validating |
 | "You should try this" | "You're already doing great" |
 
-We lead with validation, not aspiration. The sketch is optional upgrade, not required.
+We lead with validation, not aspiration.
 
 ### Why Three Beats?
 
@@ -94,49 +96,6 @@ Each beat catches users at different commitment levels:
 - **30%** complete full loop (got score + shareable)
 
 No dead ends. Every exit is a win.
-
-### Why Separate AI Calls?
-
-1. **Speed** — Name in 2s (instant gratification)
-2. **Cost** — Only pay for features users want
-3. **Flexibility** — Can upgrade/change models per call
-
----
-
-## Logic Bridge
-
-The Logic Bridge classifies ingredients and selects templates:
-
-```javascript
-const { generateImagePrompt } = require('./logic-bridge');
-
-const result = generateImagePrompt("brie, crackers, grapes");
-
-console.log(result.debug.template);  // "Anchor Focus"
-console.log(result.debug.anchors);   // ["brie"]
-console.log(result.debug.fillers);   // ["crackers"]
-console.log(result.debug.pops);      // ["grapes"]
-console.log(result.prompt);          // Full prompt for DALL-E
-```
-
-### Templates
-
-| Template | When | Layout |
-|----------|------|--------|
-| Minimalist | ≤3 items | Clean, sparse |
-| Anchor Focus | 1 hero item | Center + satellites |
-| Wild Graze | 5+ items | S-curve flow |
-| Bento | 4+ categories | Grid zones |
-| Casual Scatter | Default | Natural, imperfect |
-
-### Visual Rules
-
-| Rule | Applies When |
-|------|--------------|
-| Odd Number Cluster | Has grapes, olives, nuts |
-| S-Curve Flow | Has crackers, carrots |
-| Fan Arrangement | Has pita, apple slices |
-| Container Rule | Has dips |
 
 ---
 
@@ -209,11 +168,11 @@ console.log(result.prompt);          // Full prompt for DALL-E
 
 | Score | Rank | Stickers |
 |-------|------|----------|
-| 90-100 | Graze Queen | "CHEF'S KISS 💋", "100% THAT BOARD" |
-| 75-89 | Casual Elegance | "NAILED IT!", "MAIN CHARACTER ✨" |
+| 90-100 | Graze Queen | "CHEF'S KISS", "100% THAT BOARD" |
+| 75-89 | Casual Elegance | "NAILED IT!", "MAIN CHARACTER" |
 | 60-74 | Vibe Achieved | "WE LOVE TO SEE IT", "SOLID EFFORT" |
 | 40-59 | Chaotic Good | "ART IS SUBJECTIVE", "IT'S GIVING..." |
-| <40 | Chaos Coordinator | "I TRIED 🤷", "POINTS FOR TRYING" |
+| <40 | Chaos Coordinator | "I TRIED", "POINTS FOR TRYING" |
 
 **Minimum score:** 35 (we're not mean)
 
@@ -223,50 +182,23 @@ console.log(result.prompt);          // Full prompt for DALL-E
 
 | Use | Color | Hex |
 |-----|-------|-----|
-| Primary | Mocha Mousse | `#A47864` |
-| Secondary | Digital Lavender | `#A78BFA` |
-| Accent | Hyper-Coral | `#FF6F61` |
-| Neutral | Cloud Dancer | `#F0EDE9` |
-| Ink | Architectural Charcoal | `#2B2B2B` |
+| Primary | Mocha | `#A47864` |
+| Secondary | Lavender | `#A78BFA` |
+| Accent | Coral | `#FF6F61` |
+| Neutral | Cream | `#FAF9F7` |
 
 ---
 
-## Tech Stack (Production)
+## Tech Stack
 
 | Layer | Tool |
 |-------|------|
-| Frontend | React Native or Flutter |
-| Backend | Vercel Functions (Node.js) |
-| Auth | Firebase Auth (optional) |
-| Storage | Firebase Storage (for photos) |
+| Frontend | Next.js 14 + React + TypeScript |
+| Styling | Tailwind CSS |
+| Animations | Framer Motion |
 | AI - Naming | Claude 3 Haiku |
 | AI - Sketches | DALL-E 3 |
 | AI - Vision | GPT-4o |
-
----
-
-## Roadmap
-
-### Phase 1: MVP (This)
-- ✅ Text input
-- ✅ Name generation
-- ✅ Blueprint (demo)
-- ✅ Photo upload
-- ✅ Vibe scoring (demo)
-- ✅ Stickers
-
-### Phase 2: Polish
-- [ ] Real DALL-E 3 integration
-- [ ] Real GPT-4o Vision integration
-- [ ] Photo compositing with stickers
-- [ ] Social sharing
-- [ ] Save to camera roll
-
-### Phase 3: Scale
-- [ ] Fridge scan (photo → ingredients)
-- [ ] Community gallery
-- [ ] Brand partnerships
-- [ ] AR plating guide
 
 ---
 
@@ -275,26 +207,6 @@ console.log(result.prompt);          // Full prompt for DALL-E
 > **Did they smile at the name?**
 
 Everything else is secondary.
-
----
-
-## Run Tests
-
-```bash
-# Test the logic bridge
-node logic-bridge.js
-
-# Open the prototype
-open charcuterme-prototype.html
-```
-
----
-
-## Credits
-
-Merged from:
-- **CharcuterME PRD** — Product vision, brand kit, roadmap
-- **Scraps to Spread** — Logic Bridge implementation, prompts, prototypes
 
 ---
 
