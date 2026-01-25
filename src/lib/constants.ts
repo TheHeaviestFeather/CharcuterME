@@ -18,7 +18,7 @@ export const BRAND_COLORS = [COLORS.coral, COLORS.lavender, COLORS.mocha, COLORS
 export const DEFAULT_DINNER_NAME = 'The Audacity';
 
 // Minimum vibe score (we're not monsters)
-export const MIN_VIBE_SCORE = 40;
+export const MIN_VIBE_SCORE = 35;
 
 // API Models
 export const AI_MODELS = {
