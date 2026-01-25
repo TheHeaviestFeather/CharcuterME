@@ -32,7 +32,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://oaidalleapiprodscus.blob.core.windows.net",
+      "img-src 'self' data: blob: https://*.blob.core.windows.net",
       "connect-src 'self' https://api.anthropic.com https://api.openai.com",
     ].join('; ')
   }
@@ -43,9 +43,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'oaidalleapiprodscus.blob.core.windows.net',
-        port: '',
-        pathname: '/**',
+        hostname: '**.blob.core.windows.net',
       },
     ],
     formats: ['image/avif', 'image/webp'],

@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { Check, Camera, RefreshCw, Loader2 } from 'lucide-react';
-import Image from 'next/image';
 
 interface RevealScreenProps {
   dinnerName: string;
@@ -102,12 +101,12 @@ export default function RevealScreen({
               <p className="text-sm text-gray-400 mt-1">This takes about 10 seconds</p>
             </div>
           ) : blueprintUrl ? (
-            <Image
+            // Using regular img tag for external DALL-E URLs (more reliable with dynamic Azure domains)
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={blueprintUrl}
               alt="Your dinner blueprint"
-              fill
-              className="object-cover"
-              priority
+              className="absolute inset-0 w-full h-full object-cover"
             />
           ) : blueprintSvg ? (
             <div
