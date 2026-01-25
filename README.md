@@ -14,9 +14,9 @@ INPUT → REVEAL → PLATE → VIBE CHECK → SHARE
 
 | Beat | Time | What Happens | User Feels |
 |------|------|--------------|------------|
-| **1. The Name** | 0-5s | "Cheese Is A Personality" | "lol that's me" (chuckle) |
-| **2. The Blueprint** | 5-15s | Ghibli-style sketch appears | "I can do this" (confidence) |
-| **3. The Vibe Check** | 30-60s | Score: 78 "UNDERSTOOD THE ASSIGNMENT" | "I did it!" (pride) |
+| **1. The Name** | 0-5s | "Cheese Is A Personality"| "Oh that's cute!" (smile) |
+| **2. The Blueprint** | 5-15s | Ghibli-style illustration | "I can do this" (confidence) |
+| **3. The Vibe Check** | 30-60s | Score: 78 "NAILED IT!" | "I did it!" (pride) |
 
 Every beat provides validation. Every exit is a win.
 
@@ -37,9 +37,19 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 ### Environment Variables
 
 Create a `.env.local` file:
+
 ```bash
-ANTHROPIC_API_KEY=your_claude_api_key
-OPENAI_API_KEY=your_openai_api_key
+# Required
+ANTHROPIC_API_KEY=sk-ant-...    # Claude API key
+OPENAI_API_KEY=sk-...           # OpenAI API key
+
+# Optional - Cost Optimization
+GPT_VISION_MODEL=gpt-4o         # or gpt-4o-mini for 70% savings on vibe checks
+
+# Optional - Feature Flags
+ENABLE_DALLE=true
+ENABLE_VIBE_CHECK=true
+ENABLE_CLAUDE_NAMING=true
 ```
 
 ---
@@ -50,6 +60,7 @@ OPENAI_API_KEY=your_openai_api_key
 |------|---------|
 | `ARCHITECTURE.md` | Full system design |
 | `PROMPTS.md` | AI prompts for all 3 calls |
+| `QA-TEST-SUITE.md` | Testing & validation |
 | `src/lib/logic-bridge.ts` | Classification engine |
 | `src/lib/ai-clients.ts` | Shared AI client utilities |
 | `src/lib/constants.ts` | Brand colors, model names, settings |
@@ -70,9 +81,11 @@ User Input → Logic Bridge → AI Calls → User Interface
 
 | Call | Model | Purpose | Cost |
 |------|-------|---------|------|
-| 1. Namer | Claude Haiku | Snarky name + validation | $0.001 |
-| 2. Sketch | DALL-E 3 | Ghibli-style blueprint | $0.040 |
-| 3. Judge | GPT-4o Vision | Snarky photo scoring | $0.010 |
+| 1. Namer | Claude 3.5 Haiku | Instant name + validation | $0.001 |
+| 2. Sketch | DALL-E 3 | Studio Ghibli illustration | $0.040 |
+| 3. Judge | GPT-4o Vision | Photo scoring | $0.010 |
+
+**With gpt-4o-mini:** Vibe check drops to $0.003 (~70% savings)
 
 **Avg cost per session:** ~$0.02 (most users exit after naming)
 
@@ -99,6 +112,29 @@ Each beat catches users at different commitment levels:
 
 No dead ends. Every exit is a win.
 
+### Why Ghibli Style?
+
+The illustration style matters:
+- **Warm, inviting** — not clinical or commercial
+- **Achievable** — looks like something they could make
+- **Shareable** — aesthetic enough for social media
+- **Cozy** — matches "girl dinner" comfort vibe
+
+---
+
+## Visual Style
+
+All generated images follow the Studio Ghibli aesthetic:
+
+| Element | Requirement |
+|---------|-------------|
+| Colors | Warm, muted, soft gradients |
+| Lighting | Golden hour, top-left |
+| Texture | Watercolor, hand-painted |
+| Mood | Cozy, inviting, nostalgic |
+| Angle | 45-degree (Instagram-style) |
+| Background | Creamy linen, shallow DoF |
+
 ---
 
 ## Screens (4-Screen Flow)
@@ -124,42 +160,50 @@ No dead ends. Every exit is a win.
 │                            │
 │  "Cheese Is A Personality" │
 │                            │
-│  "Your calcium intake is   │
-│   giving main character    │
-│   energy."                 │
+│  ✓ That's a real dinner.   │
+│    You're doing great.     │
 │                            │
-│  [Ghibli-style sketch]     │
+│  [See the Blueprint]       │
+│  [Just Eat →]              │
+└────────────────────────────┘
+```
+
+### 3. Blueprint (Ghibli Illustration)
+```
+┌────────────────────────────┐
+│  "The French Affair"       │
+│                            │
+│  ┌──────────────────────┐  │
+│  │                      │  │
+│  │  [Ghibli-style       │  │
+│  │   food illustration] │  │
+│  │                      │  │
+│  └──────────────────────┘  │
 │                            │
 │  💡 Room temp brie is      │
-│     self-care.             │
+│     self-care              │
 │                            │
 │  [I Plated It! 📸]         │
 │  [Start Over]              │
 └────────────────────────────┘
 ```
 
-### 3. Camera
+### 4. Vibe Check Results
 ```
 ┌────────────────────────────┐
-│  [Camera / Upload]         │
+│  VIBE CHECK                │
 │                            │
-│  [Check My Vibe]           │
-└────────────────────────────┘
-```
-
-### 4. Results
-```
-┌────────────────────────────┐
-│  VIBE CHECK: 78            │
+│        78                  │
+│  ████████████░░░░░         │
 │  "Main Character"          │
 │                            │
-│  "The grape placement is   │
-│   giving 'I read one       │
-│   article about plating.'  │
-│   We're obsessed."         │
+│  "The S-curve is giving    │
+│   main character energy."  │
 │                            │
-│  [Photo + UNDERSTOOD THE   │
-│   ASSIGNMENT sticker]      │
+│  ┌──────────────────────┐  │
+│  │  [Photo with         │  │
+│  │   NAILED IT sticker] │  │
+│  └──────────────────────┘  │
 │                            │
 │  [Share] [Save] [Again]    │
 └────────────────────────────┘
@@ -167,50 +211,74 @@ No dead ends. Every exit is a win.
 
 ---
 
-## Stickers
+## Sticker System
 
-| Score | Rank | Stickers |
-|-------|------|----------|
-| 90-100 | Graze Girlboss | "SLAY", "NO NOTES", "OBSESSED" |
-| 75-89 | Main Character | "ATE THAT UP", "UNDERSTOOD THE ASSIGNMENT" |
-| 60-74 | Chaotic Good | "TRUST THE PROCESS", "VALID" |
-| 40-59 | Beautiful Disaster | "CHAOS IS ART", "STILL ATE THO" |
+Stickers are selected by tier (not exact match from AI):
 
-**Minimum score:** 40 (we're not monsters)
+| Score | Tier | Example Stickers |
+|-------|------|------------------|
+| 90-100 | `legendary` | GRAZE QUEEN 👑, CHEF'S KISS 💋 |
+| 75-89 | `great` | NAILED IT!, MAIN CHARACTER ✨ |
+| 60-74 | `good` | WE LOVE TO SEE IT, VIBE ACHIEVED ✓ |
+| 45-59 | `chaotic` | CHAOTIC GOOD 🔥, ART IS SUBJECTIVE |
+| 35-44 | `messy` | I TRIED 🤷, POINTS FOR TRYING |
 
----
-
-## Brand Colors
-
-| Use | Color | Hex |
-|-----|-------|-----|
-| Primary | Mocha | `#A47864` |
-| Secondary | Lavender | `#A78BFA` |
-| Accent | Coral | `#FF6F61` |
-| Neutral | Cream | `#FAF9F7` |
+AI returns `stickerTier`, client randomly selects from that tier's options.
 
 ---
 
-## Tech Stack
+## Testing
 
-| Layer | Tool |
-|-------|------|
-| Frontend | Next.js 14 + React + TypeScript |
-| Styling | Tailwind CSS |
-| Animations | Framer Motion |
-| AI - Naming | Claude 3 Haiku |
-| AI - Sketches | DALL-E 3 |
-| AI - Vision | GPT-4o |
-| Resilience | Circuit breakers, retry logic, timeouts |
+```bash
+# Run all tests
+npm test
+
+# Run specific test suites
+npm test -- --grep "namer"
+npm test -- --grep "sketch"
+npm test -- --grep "vibe"
+```
+
+See `QA-TEST-SUITE.md` for full test coverage.
 
 ---
 
-## Success Metric
+## Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Deploy to Vercel
+vercel --prod
+```
+
+Required environment variables in Vercel:
+- `ANTHROPIC_API_KEY`
+- `OPENAI_API_KEY`
+
+Optional:
+- `GPT_VISION_MODEL` (defaults to `gpt-4o`)
+
+---
+
+## Cost Optimization
+
+| Optimization | Savings |
+|--------------|---------|
+| GPT-4o-mini for vibe checks | 70% on vision calls |
+| `detail: 'low'` for images | 50% on vision tokens |
+| Exit after name (40% users) | Skip DALL-E cost |
+
+Set `GPT_VISION_MODEL=gpt-4o-mini` to enable cheaper vision.
+
+---
 
 > **Did they chuckle at the name?**
+## License
 
-Everything else is secondary.
+MIT
 
 ---
 
-*Whatever you have is enough.*
+*Built with 🧀 and chaos*
