@@ -1,24 +1,34 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
-import { withRetry } from '@/lib/retry';
-import { withTimeout, TIMEOUTS } from '@/lib/timeout';
-import { dalleCircuit } from '@/lib/circuit-breaker';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
-import { AI_MODELS, DALLE_SETTINGS } from '@/lib/constants';
-import { SketchRequestSchema, validateRequest, parseIngredients } from '@/lib/validation';
 
 // =============================================================================
 // Configuration
 // =============================================================================
 
-const PROMPT_VERSION = 'sketch_v3.2_template_layouts';
+const PROMPT_VERSION = 'sketch_v4.0_imagen3';
 
-function getOpenAIClient() {
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+function getGoogleClient() {
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    throw new Error('GOOGLE_API_KEY not configured');
+  }
+  return new GoogleGenerativeAI(apiKey);
+}
+
+// =============================================================================
+// Input Processing
+// =============================================================================
+
+function parseIngredients(raw: string): string[] {
+  return raw
+    .split(/[,\n]+/)
+    .map((i) => i.trim().toLowerCase())
+    .filter((i) => i.length > 1 && i.length < 40)
+    .filter((i) => !/[{}"'`<>]/.test(i))
+    .slice(0, 6);
 }
 
 // =============================================================================
@@ -43,27 +53,39 @@ const LAYOUT_GUIDES: Record<string, string> = {
 };
 
 // =============================================================================
-// Prompt Building - Option B: Template-Based Detailed Prompt
+// Prompt Building for Imagen 3
 // =============================================================================
 
-function buildGhibliPrompt(ingredients: string[], template: string): string {
-  const ingredientList = ingredients.slice(0, 6).join(', ');
+function buildImagenPrompt(ingredients: string[], template: string): string {
   const layoutGuide = LAYOUT_GUIDES[template] || LAYOUT_GUIDES['The Wild Graze'];
+  const count = ingredients.length;
 
-  return `Anime food illustration in the style of Japanese animation films. Soft painted textures, warm glowing colors.
+  // Imagen 3 responds better to clear, structured prompts
+  return `Anime food illustration in the style of Studio Ghibli films.
 
-${ingredientList} on a simple white plate. ${layoutGuide}
+SCENE: A simple white ceramic plate on cream linen fabric background.
 
-Visual style:
-- Soft cel-shading with visible brushstrokes
-- Warm palette: cream whites, golden ambers, soft corals
-- Food has inner luminosity, looks impossibly delicious
-- Rich saturated colors but gentle, never harsh
-- Slightly stylized and idealized, not photorealistic
+CONTENTS: Exactly ${count} food items on the plate:
+${ingredients.map((ing, i) => `${i + 1}. ${ing}`).join('\n')}
 
-Composition: Overhead view with slight tilt. Soft cream fabric background, shallow depth of field. Food is hero, everything else fades soft.
+COMPOSITION: ${layoutGuide}
 
-The food should look like a frame from a cozy anime - warm, inviting, making the viewer hungry.`;
+STYLE:
+- Soft watercolor textures with visible brushstrokes
+- Warm golden hour lighting from the left
+- Food has a gentle inner glow, looks delicious
+- Warm color palette: cream, amber, coral tones
+- Slightly stylized, not photorealistic
+- Cozy, inviting atmosphere
+
+IMPORTANT CONSTRAINTS:
+- Show ONLY the ${count} ingredients listed above
+- Do not add any extra food items
+- Do not add garnishes or decorations
+- Do not add utensils
+- No text or labels
+- No borders or frames
+- Clean cream fabric background only`;
 }
 
 // =============================================================================
@@ -87,39 +109,19 @@ function generateSvgFallback(ingredients: string[], template: string): string {
     const x = 200 + radius * Math.cos((angle * Math.PI) / 180);
     const y = 195 + radius * Math.sin((angle * Math.PI) / 180);
     const circleColors = [colors.coral, colors.lavender, colors.mocha, '#E8B4A0'];
-    const size = 20 + Math.random() * 10;
+    const size = 20 + (i * 3); // Deterministic size instead of Math.random()
     return `<circle cx="${x}" cy="${y}" r="${size}" fill="${circleColors[i]}" opacity="0.75"/>`;
   }).join('\n    ');
 
   return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <rect width="400" height="400" fill="${colors.cream}"/>
-  <rect width="400" height="400" fill="url(#linen)" opacity="0.3"/>
-
-  <defs>
-    <pattern id="linen" patternUnits="userSpaceOnUse" width="4" height="4">
-      <rect width="4" height="4" fill="${colors.cream}"/>
-      <rect width="1" height="1" fill="${colors.mocha}" opacity="0.1"/>
-    </pattern>
-  </defs>
 
   <ellipse cx="205" cy="210" rx="130" ry="120" fill="${colors.mocha}" opacity="0.1"/>
   <ellipse cx="200" cy="200" rx="130" ry="120" fill="white"/>
   <ellipse cx="200" cy="200" rx="130" ry="120" fill="none" stroke="${colors.mocha}" stroke-width="2" opacity="0.4"/>
-  <ellipse cx="200" cy="200" rx="110" ry="100" fill="none" stroke="${colors.mocha}" stroke-width="1" opacity="0.2"/>
 
   <g>
     ${circles}
-  </g>
-
-  <circle cx="200" cy="195" r="18" fill="${colors.mocha}" opacity="0.6"/>
-  <circle cx="200" cy="195" r="12" fill="${colors.coral}" opacity="0.5"/>
-
-  <g fill="${colors.coral}" opacity="0.5">
-    <circle cx="280" cy="110" r="3"/>
-    <circle cx="115" cy="140" r="2.5"/>
-    <circle cx="295" cy="260" r="2"/>
-    <circle cx="95" cy="230" r="2.5"/>
-    <circle cx="310" cy="175" r="2"/>
   </g>
 
   <text x="200" y="340" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="${colors.mocha}" font-style="italic">
@@ -129,11 +131,51 @@ function generateSvgFallback(ingredients: string[], template: string): string {
   <text x="200" y="362" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="#999">
     ${ingredientText}
   </text>
-
-  <text x="200" y="385" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#bbb" font-style="italic">
-    imagine the magic
-  </text>
 </svg>`;
+}
+
+// =============================================================================
+// Image Generation with Imagen 3 via Gemini 2.0 Flash
+// =============================================================================
+
+async function generateWithImagen(prompt: string): Promise<string | null> {
+  const genAI = getGoogleClient();
+
+  // Use Gemini 2.0 Flash with image generation capability
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash-exp",
+    generationConfig: {
+      temperature: 1,
+      topP: 0.95,
+      topK: 40,
+    },
+  });
+
+  const response = await model.generateContent({
+    contents: [{
+      role: "user",
+      parts: [{ text: `Generate an image: ${prompt}` }]
+    }],
+    generationConfig: {
+      // @ts-expect-error - responseModalities is experimental
+      responseModalities: ["image", "text"],
+    },
+  });
+
+  const candidate = response.response.candidates?.[0];
+  if (!candidate?.content?.parts) {
+    throw new Error('No content in response');
+  }
+
+  // Find the image part in the response
+  for (const part of candidate.content.parts) {
+    if (part.inlineData?.mimeType?.startsWith("image/")) {
+      // Return as base64 data URL
+      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+    }
+  }
+
+  throw new Error('No image in response');
 }
 
 // =============================================================================
@@ -142,31 +184,28 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  let ingredients: string[] = []; // Store for error handler access
-  let template = 'The Wild Graze'; // Store for error handler access
 
   try {
     const body = await request.json();
+    const rawIngredients = body.ingredients;
 
-    // Validate request with Zod
-    const validation = validateRequest(SketchRequestSchema, body);
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error }, { status: 400 });
+    if (!rawIngredients || typeof rawIngredients !== 'string') {
+      return NextResponse.json({ error: 'Ingredients are required' }, { status: 400 });
     }
 
-    ingredients = parseIngredients(validation.data!.ingredients);
+    const ingredients = parseIngredients(rawIngredients);
 
     if (ingredients.length === 0) {
       return NextResponse.json({ error: 'No valid ingredients provided' }, { status: 400 });
     }
 
     // Get template from logic bridge
-    const processed = processGirlDinner(validation.data!.ingredients);
-    template = processed.templateSelected || 'The Wild Graze';
+    const processed = processGirlDinner(rawIngredients);
+    const template = processed.templateSelected || 'The Wild Graze';
 
-    // Check if DALL-E is enabled
-    if (!isEnabled('enableDalle')) {
-      logger.info('DALL-E disabled via feature flag', { promptVersion: PROMPT_VERSION });
+    // Check if Imagen is enabled
+    if (!isEnabled('enableImagen')) {
+      logger.info('Imagen disabled via feature flag', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
@@ -176,8 +215,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      logger.warn('OPENAI_API_KEY not configured', { promptVersion: PROMPT_VERSION });
+    if (!process.env.GOOGLE_API_KEY) {
+      logger.warn('GOOGLE_API_KEY not configured', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
@@ -187,58 +226,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Build the detailed prompt with template-based layout
-    const prompt = buildGhibliPrompt(ingredients, template);
+    // Build prompt
+    const prompt = buildImagenPrompt(ingredients, template);
 
-    logger.info('DALL-E prompt built', {
+    logger.info('Imagen prompt built', {
       promptVersion: PROMPT_VERSION,
       promptLength: prompt.length,
       ingredientCount: ingredients.length,
       template,
-      layoutGuide: LAYOUT_GUIDES[template] ? 'matched' : 'default',
     });
 
-    // Execute with circuit breaker
-    const imageUrl = await dalleCircuit.execute(
-      async () => {
-        return await withTimeout(
-          withRetry(
-            async () => {
-              const openai = getOpenAIClient();
-              const response = await openai.images.generate({
-                model: AI_MODELS.sketch,
-                prompt,
-                n: 1,
-                size: DALLE_SETTINGS.size,
-                quality: DALLE_SETTINGS.quality,
-                style: DALLE_SETTINGS.style,
-              });
+    // Generate image
+    let imageData: string | null = null;
 
-              const url = response.data?.[0]?.url;
-              if (!url) throw new Error('No image URL returned');
-              return url;
-            },
-            {
-              maxRetries: 2,
-              shouldRetry: (error) => {
-                const msg = error.message.toLowerCase();
-                if (msg.includes('content policy') || msg.includes('safety')) return false;
-                return msg.includes('rate limit') || msg.includes('timeout');
-              },
-            }
-          ),
-          TIMEOUTS.DALLE_IMAGE,
-          'DALL-E timed out'
-        );
-      },
-      () => {
-        logger.warn('DALL-E circuit open', { promptVersion: PROMPT_VERSION });
-        return null;
-      }
-    );
+    try {
+      imageData = await generateWithImagen(prompt);
+    } catch (error) {
+      logger.error('Imagen generation failed', {
+        promptVersion: PROMPT_VERSION,
+        error: error instanceof Error ? error.message : 'Unknown',
+      });
+    }
 
-    // Circuit breaker returned fallback
-    if (!imageUrl) {
+    // Return fallback if generation failed
+    if (!imageData) {
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
@@ -248,7 +259,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    logger.info('Sketch generated', {
+    logger.info('Sketch generated with Imagen', {
       promptVersion: PROMPT_VERSION,
       duration: Date.now() - startTime,
       template,
@@ -257,7 +268,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       type: 'image',
-      imageUrl,
+      imageUrl: imageData, // Base64 data URL
       template,
       reason: processed.templateReason,
       rules: processed.rulesApplied,
@@ -267,16 +278,22 @@ export async function POST(request: NextRequest) {
     logger.error('Error generating sketch', {
       promptVersion: PROMPT_VERSION,
       error: error instanceof Error ? error.message : 'Unknown',
-      ingredientCount: ingredients.length,
-      template,
     });
 
-    // Return fallback on any error - use stored ingredients (don't re-parse body)
-    return NextResponse.json({
-      type: 'svg',
-      svg: generateSvgFallback(ingredients.length > 0 ? ingredients : ['your', 'spread'], template),
-      template,
-      fallback: true,
-    });
+    try {
+      const ingredients = parseIngredients('');
+      return NextResponse.json({
+        type: 'svg',
+        svg: generateSvgFallback(ingredients, 'The Wild Graze'),
+        template: 'The Wild Graze',
+        fallback: true,
+      });
+    } catch {
+      return NextResponse.json({
+        type: 'svg',
+        svg: generateSvgFallback(['your', 'spread'], 'The Wild Graze'),
+        fallback: true,
+      });
+    }
   }
 }
