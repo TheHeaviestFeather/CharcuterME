@@ -585,4 +585,6 @@ export function processGirlDinner(userInput: string | string[]): ProcessedResult
 // EXPORTS
 // =============================================================================
 
-export { INGREDIENT_DATABASE, TEMPLATES, VISUAL_RULES, SNARK_BANK, NON_FOOD_PATTERNS, DINNER_DATABASE };
+// Note: INGREDIENT_DATABASE, TEMPLATES, VISUAL_RULES are used internally but
+// exported for potential future features like displaying plating tips to users.
+export { INGREDIENT_DATABASE, TEMPLATES, VISUAL_RULES };
