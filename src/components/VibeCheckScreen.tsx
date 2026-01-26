@@ -2,22 +2,33 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import type { VibeCheckResponse } from '@/types';
 
 // =============================================================================
 // Icons
 // =============================================================================
 
 const CameraIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
 const ShareIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-5 h-5 text-[#E8734A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+  </svg>
+);
+
+const DiceIcon = () => (
+  <svg className="w-5 h-5 text-[#A47864]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
   </svg>
 );
 
@@ -25,178 +36,182 @@ const ShareIcon = () => (
 // Types
 // =============================================================================
 
-interface LocalVibeResult {
+interface VibeCheckResult {
   score: string;
   category: string;
   validation: string;
   observation: string;
 }
 
+interface DinnerData {
+  name: string;
+  validation: string;
+  tip: string;
+  wildcard?: string;
+}
+
 interface VibeCheckScreenProps {
-  dinnerName: string;
-  ingredients: string;
+  dinnerData: DinnerData;
   inspirationImage: string | null;
   onStartOver: () => void;
 }
 
 // =============================================================================
-// Fallback Verdicts
+// Dynamic Vibe Scoring
 // =============================================================================
 
-const VIBE_VERDICTS: LocalVibeResult[] = [
-  {
-    score: "97%",
-    category: "Unhinged Excellence",
-    validation: "Chaotic perfection. The algorithm is impressed.",
-    observation: "The lighting suggests you ate this in bed. Valid.",
-  },
-  {
-    score: "84%",
-    category: "Acceptable Chaos",
-    validation: "You understood the assignment. Mostly.",
-    observation: "Points deducted for using a real plate instead of the container.",
-  },
-  {
-    score: "102%",
-    category: "Overachiever",
-    validation: "You've exceeded the vibe. This is technically illegal.",
-    observation: "Did you... garnish? In this economy?",
-  },
-  {
-    score: "76%",
-    category: "Abstract Interpretation",
-    validation: "The spirit is there. The execution is... artistic.",
-    observation: "Bold choice to ignore the arrangement completely.",
-  },
-  {
-    score: "91%",
-    category: "Chaos Curator",
-    validation: "You've achieved maximum cozy with minimum effort.",
-    observation: "The fork placement says 'I might not use this.'",
-  },
-  {
-    score: "88%",
-    category: "Horizontal Dining",
-    validation: "This plate has 'eaten on the couch' energy. Perfect.",
-    observation: "We can tell you're watching something good.",
-  },
+const VIBE_CATEGORIES = [
+  "Unhinged Excellence",
+  "Acceptable Chaos",
+  "Horizontal Dining",
+  "Chaos Curator",
+  "Snack Architect",
+  "Couch Connoisseur",
+  "Fridge Poet",
+  "Midnight Masterpiece",
+  "Comfort Zone Champion",
+  "Culinary Rebel",
+  "Vibe Virtuoso",
+  "Plate Picasso",
+  "Snack Stack Genius",
+  "Delicious Disaster",
+  "Perfectly Imperfect",
 ];
 
-function getRandomVerdict(): LocalVibeResult {
-  return VIBE_VERDICTS[Math.floor(Math.random() * VIBE_VERDICTS.length)];
+const VALIDATIONS = [
+  "Chaotic perfection. The algorithm is impressed.",
+  "You understood the assignment. Mostly.",
+  "This is exactly what dinner should look like.",
+  "Peak horizontal dining energy detected.",
+  "You've somehow exceeded our expectations.",
+  "The vibes are immaculate.",
+  "This plate tells a story. A delicious one.",
+  "Chef's kiss. Or at least a chef's nod.",
+  "You've achieved maximum cozy with minimum effort.",
+  "The chaos is... beautiful?",
+  "Objectively perfect. Don't @ us.",
+  "This is art. Messy, delicious art.",
+  "Your ancestors would be... confused but proud.",
+  "The fridge gave you lemons. You made... this.",
+  "Comfort food achievement unlocked.",
+];
+
+const OBSERVATIONS = [
+  "The lighting suggests you ate this in bed. Valid.",
+  "Points deducted for using a real plate instead of the container.",
+  "Bold choice to ignore the arrangement completely.",
+  "The fork placement says 'I might not use this.'",
+  "We can tell you're watching something good.",
+  "Suspiciously well-lit. Are you okay?",
+  "The napkin is a nice touch. Fancy.",
+  "We see that wine glass. Self-care queen.",
+  "The background blanket adds +10 cozy points.",
+  "Eaten standing up? Respect.",
+  "The angle says 'I took 47 photos to get this one.'",
+  "We appreciate the effort. And the chaos.",
+  "The crumbs tell a story of commitment.",
+  "This has 'third dinner' energy.",
+  "Presentation: chaotic. Taste: probably amazing.",
+];
+
+function generateRandomScore(): string {
+  // Generate varied scores with some fun outliers
+  const rand = Math.random();
+
+  if (rand < 0.05) {
+    // 5% chance of funny non-numeric scores
+    const funnyScores = ["yes", "\u221E", "100+", "???", "nice", "chef's kiss"];
+    return funnyScores[Math.floor(Math.random() * funnyScores.length)];
+  } else if (rand < 0.15) {
+    // 10% chance of "over 100" scores
+    return `${Math.floor(Math.random() * 15) + 101}%`;
+  } else {
+    // 85% chance of normal-ish scores (74-99)
+    return `${Math.floor(Math.random() * 26) + 74}%`;
+  }
 }
 
-// Max file size: 10MB
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+function getRandomItem<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function generateVibeResult(): VibeCheckResult {
+  return {
+    score: generateRandomScore(),
+    category: getRandomItem(VIBE_CATEGORIES),
+    validation: getRandomItem(VALIDATIONS),
+    observation: getRandomItem(OBSERVATIONS),
+  };
+}
 
 // =============================================================================
 // Component
 // =============================================================================
 
 export function VibeCheckScreen({
-  dinnerName,
-  ingredients,
+  dinnerData,
   inspirationImage,
-  onStartOver,
+  onStartOver
 }: VibeCheckScreenProps) {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
-  const [vibeResult, setVibeResult] = useState<LocalVibeResult | null>(null);
+  const [vibeResult, setVibeResult] = useState<VibeCheckResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
+
+  // Destructure dinner data
+  const { name: dinnerName, tip, wildcard } = dinnerData;
 
   // Handle photo upload
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setError(null);
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
-      return;
-    }
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      setError('Image is too large (max 10MB)');
-      return;
-    }
-
     // Convert to base64 for display
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
       setUserPhoto(base64);
-      await analyzeVibe(base64);
-    };
-    reader.onerror = () => {
-      setError('Failed to read image file');
+
+      // Trigger vibe analysis
+      await analyzeVibe();
     };
     reader.readAsDataURL(file);
   };
 
-  // Analyze the vibe
-  const analyzeVibe = async (photoBase64: string) => {
+  // Analyze the vibe - generates truly random results each time
+  const analyzeVibe = async () => {
     setIsAnalyzing(true);
 
-    try {
-      const response = await fetch('/api/vibe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          photo: photoBase64,
-          dinnerName,
-          ingredients,
-          rules: [],
-        }),
-      });
+    // Simulate analysis delay for UX
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-      if (response.ok) {
-        const data: VibeCheckResponse = await response.json();
-        // Convert API response to local format
-        setVibeResult({
-          score: `${data.score}%`,
-          category: data.rank,
-          validation: data.compliment,
-          observation: data.improvement || "No notes. Just vibes.",
-        });
-      } else {
-        // Use fallback on error
-        setVibeResult(getRandomVerdict());
-      }
-    } catch {
-      // Use fallback on error
-      setVibeResult(getRandomVerdict());
-    } finally {
-      setIsAnalyzing(false);
-    }
+    // Generate fresh random verdict
+    const verdict = generateVibeResult();
+    setVibeResult(verdict);
+
+    setIsAnalyzing(false);
   };
 
   // Share functionality
   const handleShare = async () => {
-    if (navigator.share && vibeResult) {
+    // Try native share if available
+    if (navigator.share && comparisonRef.current) {
       try {
         await navigator.share({
           title: `${dinnerName} - Vibe Check`,
-          text: `I scored ${vibeResult.score} on my girl dinner! Category: ${vibeResult.category}`,
+          text: `I scored ${vibeResult?.score} on my girl dinner! Category: ${vibeResult?.category}`,
         });
       } catch {
-        // User cancelled or share failed - copy to clipboard instead
-        await copyToClipboard();
+        // User cancelled or share failed
+        console.log('Share cancelled');
       }
     } else {
-      await copyToClipboard();
+      // Fallback: Copy to clipboard
+      const shareText = `${dinnerName}\nVibe Check: ${vibeResult?.score} - ${vibeResult?.category}\n"${vibeResult?.validation}"`;
+      await navigator.clipboard.writeText(shareText);
+      alert('Copied to clipboard!');
     }
-  };
-
-  const copyToClipboard = async () => {
-    if (!vibeResult) return;
-    const shareText = `${dinnerName}\nVibe Check: ${vibeResult.score} - ${vibeResult.category}\n"${vibeResult.validation}"`;
-    await navigator.clipboard.writeText(shareText);
-    alert('Copied to clipboard!');
   };
 
   // =============================================================================
@@ -223,7 +238,7 @@ export function VibeCheckScreen({
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-md">
               <Image
                 src={inspirationImage}
-                alt={`AI generated inspiration for ${dinnerName}`}
+                alt="Inspiration"
                 fill
                 className="object-cover"
               />
@@ -231,29 +246,10 @@ export function VibeCheckScreen({
           </div>
         )}
 
-        {/* Error message */}
-        {error && (
-          <div
-            role="alert"
-            className="mb-4 px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm max-w-[340px]"
-          >
-            {error}
-          </div>
-        )}
-
         {/* Upload Area */}
         <div
           onClick={() => fileInputRef.current?.click()}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              fileInputRef.current?.click();
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="Upload photo of your plated dinner"
-          className="w-full max-w-[340px] border-2 border-dashed border-[#E8B4A0] rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#E8734A] hover:bg-[#FDF8F6] transition-all focus:outline-none focus:ring-2 focus:ring-[#E8734A] focus:ring-offset-2"
+          className="w-full max-w-[340px] border-2 border-dashed border-[#E8B4A0] rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#E8734A] hover:bg-[#FDF8F6] transition-all"
         >
           <div className="w-16 h-16 rounded-full bg-[#F5E6E0] flex items-center justify-center mb-4 text-[#A47864]">
             <CameraIcon />
@@ -264,7 +260,6 @@ export function VibeCheckScreen({
           <p className="text-[#9A8A7C] text-sm text-center">
             Tap to take a photo or upload
           </p>
-          <p className="text-[#C4B5A9] text-xs mt-2">Max size: 10MB</p>
         </div>
 
         <input
@@ -274,20 +269,18 @@ export function VibeCheckScreen({
           capture="environment"
           onChange={handlePhotoSelect}
           className="hidden"
-          aria-label="Upload photo file"
         />
 
         {/* Skip Option */}
         <button
           onClick={onStartOver}
-          aria-label="Skip vibe check and start over"
-          className="mt-8 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors focus:outline-none focus:underline"
+          className="mt-8 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors"
         >
           Maybe later
         </button>
 
         {/* Progress Dots */}
-        <div className="flex gap-2 mt-8" role="presentation">
+        <div className="flex gap-2 mt-8">
           <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
           <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
           <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
@@ -340,7 +333,7 @@ export function VibeCheckScreen({
               {inspirationImage ? (
                 <Image
                   src={inspirationImage}
-                  alt="AI generated inspiration"
+                  alt="Inspiration"
                   fill
                   className="object-cover"
                 />
@@ -371,7 +364,7 @@ export function VibeCheckScreen({
 
       {/* Vibe Score */}
       {vibeResult && (
-        <div className="w-full max-w-[340px] bg-white rounded-2xl p-6 shadow-md mb-6">
+        <div className="w-full max-w-[340px] bg-white rounded-2xl p-6 shadow-md mb-4">
           {/* Score */}
           <div className="text-center mb-4">
             <p className="text-5xl font-bold text-[#E8734A] mb-1">
@@ -397,10 +390,46 @@ export function VibeCheckScreen({
         </div>
       )}
 
+      {/* Tip from original results */}
+      {tip && (
+        <div className="w-full max-w-[340px] mb-3">
+          <div className="bg-white rounded-xl px-4 py-3 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex-shrink-0">
+                <LightbulbIcon />
+              </div>
+              <p className="text-[#6B5B4F] text-sm">
+                {tip}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Wildcard from original results */}
+      {wildcard && (
+        <div className="w-full max-w-[340px] mb-6">
+          <div className="bg-[#F5E6E0] rounded-xl px-4 py-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex-shrink-0">
+                <DiceIcon />
+              </div>
+              <div>
+                <p className="text-[#A47864] text-xs font-medium uppercase tracking-wide mb-1">
+                  Next time try
+                </p>
+                <p className="text-[#6B5B4F] text-sm">
+                  {wildcard}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Share Button */}
       <button
         onClick={handleShare}
-        aria-label="Share your vibe check results"
         className="
           w-full max-w-[340px] rounded-xl py-4 px-8
           text-base font-semibold text-white
@@ -409,7 +438,6 @@ export function VibeCheckScreen({
           hover:-translate-y-0.5 active:translate-y-0
           shadow-lg shadow-[#E8734A]/30
           flex items-center justify-center gap-2
-          focus:outline-none focus:ring-2 focus:ring-[#E8734A] focus:ring-offset-2
         "
       >
         <ShareIcon />
@@ -419,14 +447,13 @@ export function VibeCheckScreen({
       {/* Start Over */}
       <button
         onClick={onStartOver}
-        aria-label="Make another dinner"
-        className="mt-4 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors focus:outline-none focus:underline"
+        className="mt-4 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors"
       >
         Make another dinner
       </button>
 
       {/* Progress Dots */}
-      <div className="flex gap-2 mt-6" role="presentation">
+      <div className="flex gap-2 mt-6">
         <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
         <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
         <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
