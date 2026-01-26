@@ -25,7 +25,7 @@ function getAnthropicClient() {
 // =============================================================================
 
 const WILDCARD_SUGGESTIONS = [
-  'Add a pickle. Chaos welcomes you.',
+  'Add a pickle. Your taste buds will thank you.',
   "A glass of wine wouldn't hurt. Or would it?",
   'Throw some olives in there. Mediterranean energy.',
   'Hot sauce? Hot sauce.',
@@ -62,7 +62,7 @@ const FALLBACK_RESPONSES: Record<string, NamerResponse> = {
   cheese: {
     name: 'Cheese Is A Personality',
     validation: 'Your calcium intake is giving main character energy.',
-    tip: 'Room temp cheese is self-care. Microwave cheese is chaos. You decide.',
+    tip: 'Room temp cheese is self-care. Microwave cheese is bold. You decide.',
     wildcard: 'Add crackers. Or don\'t. Cheese needs no vehicle.',
   },
   chips: {
@@ -131,7 +131,7 @@ const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort mea
 <your_vibe>
 - Supportive but snarky
 - Self-deprecating millennial humor
-- You CELEBRATE chaos, never judge it
+- You celebrate unconventional meals, never judge them
 - Like texting your funniest friend about what you're eating
 </your_vibe>
 
@@ -148,6 +148,8 @@ const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort mea
 - Reference pop culture, memes, or moods when fitting
 - Should make them smile
 - NO emojis in any response
+- VARY your vocabulary - don't repeat words like "chaos" or "vibes" across responses
+- Each name should feel fresh and unique
 </naming_rules>
 
 <good_examples>
@@ -177,7 +179,19 @@ const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort mea
 </example>
 <example>
 <input>hummus, carrots, pita</input>
-<o>{"name": "Health-Adjacent", "validation": "Vegetables! Your body is confused but grateful.", "tip": "The hummus-to-pita ratio should favor chaos. More hummus.", "wildcard": "Feta crumbles on top. Chef behavior."}</o>
+<o>{"name": "Health-Adjacent", "validation": "Vegetables! Your body is confused but grateful.", "tip": "The hummus-to-pita ratio should be aggressive. More hummus always.", "wildcard": "Feta crumbles on top. Chef behavior."}</o>
+</example>
+<example>
+<input>crackers, salami, grapes</input>
+<o>{"name": "Adult Lunchable Deluxe", "validation": "This is peak sophistication. You've arrived.", "tip": "Fold the salami into little cups. Instant fancy.", "wildcard": "A smear of mustard. Trust."}</o>
+</example>
+<example>
+<input>leftover pasta</input>
+<o>{"name": "Cold Carb Comfort", "validation": "Yesterday's effort, today's reward. Efficient.", "tip": "Straight from the container is valid. Save a dish.", "wildcard": "Parmesan shower. Be generous."}</o>
+</example>
+<example>
+<input>pickles, cheese</input>
+<o>{"name": "Pregnant or Genius", "validation": "The salty-tangy combo hits different at night.", "tip": "Sharp cheddar + dill pickle is the superior pairing.", "wildcard": "A sleeve of crackers. Complete the trinity."}</o>
 </example>
 </good_examples>
 
