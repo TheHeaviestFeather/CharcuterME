@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 // =============================================================================
 // Input Screen - Simplified (No Emojis)
@@ -13,6 +13,18 @@ interface InputScreenProps {
 
 export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
   const [ingredients, setIngredients] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set height to scrollHeight, with a max of 200px
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  }, [ingredients]);
 
   const handleSubmit = () => {
     if (ingredients.trim() && !isLoading) {
@@ -51,16 +63,17 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
 
         {/* Floating input box */}
         <div className="bg-white rounded-xl shadow-md px-5 py-4">
-          <input
+          <textarea
+            ref={textareaRef}
             id="ingredients-input"
-            type="text"
             value={ingredients}
             onChange={(e) => setIngredients(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="brie, crackers, grapes..."
             disabled={isLoading}
             aria-describedby="ingredients-hint"
-            className="w-full border-none outline-none text-base text-[#A47864] bg-transparent placeholder:text-[#C4B5A9]"
+            rows={1}
+            className="w-full border-none outline-none text-base text-[#A47864] bg-transparent placeholder:text-[#C4B5A9] resize-none overflow-hidden min-h-[24px]"
           />
         </div>
         <p id="ingredients-hint" className="sr-only">
