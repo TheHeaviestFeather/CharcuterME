@@ -15,7 +15,7 @@ import {
   LoaderIcon,
 } from './icons';
 import { ProgressDots } from './ProgressDots';
-import { shareWithImage, copyToClipboard, saveImage, generateCaption } from '@/utils';
+import { shareWithImage, copyToClipboard, saveImage, generateCaption, sanitizeSvg } from '@/utils';
 
 // =============================================================================
 // Results Screen - Name Reveal + Blueprint (Share First)
@@ -222,11 +222,11 @@ export function ResultsScreen({
               />
             )
           ) : svgFallback ? (
-            /* SVG Fallback from API */
+            /* SVG Fallback from API - sanitized for XSS prevention */
             <div className="relative w-full h-full">
               <div
                 className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: svgFallback }}
+                dangerouslySetInnerHTML={{ __html: sanitizeSvg(svgFallback) }}
               />
               {/* Retry Button - shown when image generation failed */}
               {imageError && onRetryImage && (

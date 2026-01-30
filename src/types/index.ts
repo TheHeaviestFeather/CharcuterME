@@ -148,18 +148,6 @@ export const VibeCheckResponseSchema = z.object({
 export type VibeCheckResponse = z.infer<typeof VibeCheckResponseSchema>;
 
 // =============================================================================
-// Sticker Types
-// =============================================================================
-
-export const StickerTierSchema = z.enum(['legendary', 'great', 'good', 'chaotic', 'messy']);
-export type StickerTier = z.infer<typeof StickerTierSchema>;
-
-export interface StickerConfig {
-  options: string[];
-  style: string;
-}
-
-// =============================================================================
 // Validation Types
 // =============================================================================
 
