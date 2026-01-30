@@ -1,27 +1,16 @@
-import { GoogleAuth } from 'google-auth-library';
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
+import { parseIngredients } from '@/lib/validation';
+import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
+import { getVertexAccessToken, isVertexConfigured } from '@/lib/vertex-auth';
 
 // =============================================================================
 // Configuration
 // =============================================================================
 
 const PROMPT_VERSION = 'sketch_v6.0_chaotic_millennial';
-
-// =============================================================================
-// Input Processing
-// =============================================================================
-
-function parseIngredients(raw: string): string[] {
-  return raw
-    .split(/[,\n]+/)
-    .map((i) => i.trim().toLowerCase())
-    .filter((i) => i.length > 1 && i.length < 40)
-    .filter((i) => !/[{}"'`<>]/.test(i))
-    .slice(0, 10);
-}
 
 // =============================================================================
 // Layout Guides (Template-Based)
@@ -141,45 +130,8 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 const PROJECT_ID = process.env.GOOGLE_PROJECT_ID || 'charcuterme';
 const LOCATION = 'us-central1';
 
-async function getAccessToken(): Promise<string> {
-  // Parse service account credentials from environment variable
-  // Supports both raw JSON and base64-encoded JSON
-  const credentials = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-  if (!credentials) {
-    throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY not configured');
-  }
-
-  let serviceAccount;
-  try {
-    // Try parsing as raw JSON first
-    serviceAccount = JSON.parse(credentials);
-  } catch {
-    // If that fails, try base64 decoding first
-    try {
-      const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
-      serviceAccount = JSON.parse(decoded);
-    } catch {
-      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY is not valid JSON or base64-encoded JSON');
-    }
-  }
-
-  const auth = new GoogleAuth({
-    credentials: serviceAccount,
-    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-  });
-
-  const client = await auth.getClient();
-  const token = await client.getAccessToken();
-
-  if (!token.token) {
-    throw new Error('Failed to get access token');
-  }
-
-  return token.token;
-}
-
 async function generateWithVertexImagen(prompt: string): Promise<string | null> {
-  const accessToken = await getAccessToken();
+  const accessToken = await getVertexAccessToken();
 
   const endpoint = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/imagen-3.0-generate-001:predict`;
 
@@ -264,6 +216,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No valid ingredients provided' }, { status: 400 });
     }
 
+    // Check cache first
+    const cacheKey = generateCacheKey('sketch', rawIngredients);
+    const cached = await cacheGet<{ type: string; imageUrl?: string; template: string; reason?: string; rules?: string[] }>(cacheKey);
+    if (cached) {
+      logger.info('Cache hit for sketch', { cacheKey: cacheKey.slice(0, 50) });
+      return NextResponse.json(cached);
+    }
+
     // Get template from logic bridge
     const processed = processGirlDinner(rawIngredients);
     const template = processed.templateSelected || 'The Wild Graze';
@@ -280,8 +240,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
-      logger.warn('GOOGLE_SERVICE_ACCOUNT_KEY not configured', { promptVersion: PROMPT_VERSION });
+    if (!isVertexConfigured()) {
+      logger.warn('Vertex AI not configured', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
@@ -333,13 +293,18 @@ export async function POST(request: NextRequest) {
       ingredientCount: ingredients.length,
     });
 
-    return NextResponse.json({
+    const result = {
       type: 'image',
       imageUrl: imageData, // Base64 data URL
       template,
       reason: processed.templateReason,
       rules: processed.rulesApplied,
-    });
+    };
+
+    // Cache the result (fire and forget)
+    cacheSet(cacheKey, result, CACHE_TTL.sketch).catch(() => {});
+
+    return NextResponse.json(result);
 
   } catch (error) {
     logger.error('Error generating sketch', {

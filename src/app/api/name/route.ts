@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { withRetry } from '@/lib/retry';
 import { withTimeout, TIMEOUTS } from '@/lib/timeout';
@@ -7,18 +6,15 @@ import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
 import { AI_MODELS, CLAUDE_SETTINGS } from '@/lib/constants';
 import { NameRequestSchema, validateRequest, sanitizeIngredients } from '@/lib/validation';
+import { getAnthropicClient } from '@/lib/ai-clients';
+import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
+import { stripEmojis } from '@/lib/ai-response';
 
 // =============================================================================
 // Configuration
 // =============================================================================
 
 const PROMPT_VERSION = 'namer_v4.0_chaotic_millennial';
-
-function getAnthropicClient() {
-  return new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
-}
 
 // =============================================================================
 // Wildcard Suggestions
@@ -304,74 +300,6 @@ function normalizeResponse(parsed: NamerResponse): NamerResponse {
   };
 }
 
-function stripEmojis(text: string): string {
-  return text
-    .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Emoticons
-    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Misc symbols
-    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // Transport
-    .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '') // Flags
-    .replace(/[\u{2600}-\u{26FF}]/gu, '')   // Misc
-    .replace(/[\u{2700}-\u{27BF}]/gu, '')   // Dingbats
-    .replace(/[\u{FE00}-\u{FEFF}]/gu, '')   // Variation selectors
-    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '') // Supplemental
-    .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '') // Chess, etc
-    .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '') // Symbols
-    .replace(/[\u{231A}-\u{231B}]/gu, '')   // Watch, hourglass
-    .replace(/[\u{23E9}-\u{23F3}]/gu, '')   // Media controls
-    .replace(/[\u{23F8}-\u{23FA}]/gu, '')   // More controls
-    .replace(/[\u{25AA}-\u{25AB}]/gu, '')   // Squares
-    .replace(/[\u{25B6}]/gu, '')            // Play
-    .replace(/[\u{25C0}]/gu, '')            // Reverse
-    .replace(/[\u{25FB}-\u{25FE}]/gu, '')   // More squares
-    .replace(/[\u{2614}-\u{2615}]/gu, '')   // Umbrella, coffee
-    .replace(/[\u{2648}-\u{2653}]/gu, '')   // Zodiac
-    .replace(/[\u{267F}]/gu, '')            // Wheelchair
-    .replace(/[\u{2693}]/gu, '')            // Anchor
-    .replace(/[\u{26A1}]/gu, '')            // Lightning
-    .replace(/[\u{26AA}-\u{26AB}]/gu, '')   // Circles
-    .replace(/[\u{26BD}-\u{26BE}]/gu, '')   // Sports
-    .replace(/[\u{26C4}-\u{26C5}]/gu, '')   // Weather
-    .replace(/[\u{26CE}]/gu, '')            // Ophiuchus
-    .replace(/[\u{26D4}]/gu, '')            // No entry
-    .replace(/[\u{26EA}]/gu, '')            // Church
-    .replace(/[\u{26F2}-\u{26F3}]/gu, '')   // Fountain, golf
-    .replace(/[\u{26F5}]/gu, '')            // Sailboat
-    .replace(/[\u{26FA}]/gu, '')            // Tent
-    .replace(/[\u{26FD}]/gu, '')            // Fuel pump
-    .replace(/[\u{2702}]/gu, '')            // Scissors
-    .replace(/[\u{2705}]/gu, '')            // Check mark
-    .replace(/[\u{2708}-\u{270D}]/gu, '')   // Airplane to writing hand
-    .replace(/[\u{270F}]/gu, '')            // Pencil
-    .replace(/[\u{2712}]/gu, '')            // Black nib
-    .replace(/[\u{2714}]/gu, '')            // Check mark
-    .replace(/[\u{2716}]/gu, '')            // X mark
-    .replace(/[\u{271D}]/gu, '')            // Cross
-    .replace(/[\u{2721}]/gu, '')            // Star of David
-    .replace(/[\u{2728}]/gu, '')            // Sparkles
-    .replace(/[\u{2733}-\u{2734}]/gu, '')   // Eight spoked asterisk
-    .replace(/[\u{2744}]/gu, '')            // Snowflake
-    .replace(/[\u{2747}]/gu, '')            // Sparkle
-    .replace(/[\u{274C}]/gu, '')            // Cross mark
-    .replace(/[\u{274E}]/gu, '')            // Cross mark
-    .replace(/[\u{2753}-\u{2755}]/gu, '')   // Question marks
-    .replace(/[\u{2757}]/gu, '')            // Exclamation
-    .replace(/[\u{2763}-\u{2764}]/gu, '')   // Heart
-    .replace(/[\u{2795}-\u{2797}]/gu, '')   // Plus, minus, divide
-    .replace(/[\u{27A1}]/gu, '')            // Arrow
-    .replace(/[\u{27B0}]/gu, '')            // Curly loop
-    .replace(/[\u{27BF}]/gu, '')            // Double curly loop
-    .replace(/[\u{2934}-\u{2935}]/gu, '')   // Arrows
-    .replace(/[\u{2B05}-\u{2B07}]/gu, '')   // Arrows
-    .replace(/[\u{2B1B}-\u{2B1C}]/gu, '')   // Squares
-    .replace(/[\u{2B50}]/gu, '')            // Star
-    .replace(/[\u{2B55}]/gu, '')            // Circle
-    .replace(/[\u{3030}]/gu, '')            // Wavy dash
-    .replace(/[\u{303D}]/gu, '')            // Part alternation mark
-    .replace(/[\u{3297}]/gu, '')            // Circled ideograph
-    .replace(/[\u{3299}]/gu, '')            // Circled ideograph
-    .trim();
-}
-
 // =============================================================================
 // API Route
 // =============================================================================
@@ -393,6 +321,14 @@ export async function POST(request: NextRequest) {
 
     if (!ingredients || ingredients.length < 2) {
       return NextResponse.json({ error: 'Please enter at least one ingredient' }, { status: 400 });
+    }
+
+    // Check cache first
+    const cacheKey = generateCacheKey('dinnerName', ingredients);
+    const cached = await cacheGet<NamerResponse>(cacheKey);
+    if (cached) {
+      logger.info('Cache hit for dinner name', { cacheKey: cacheKey.slice(0, 50) });
+      return NextResponse.json(cached);
     }
 
     // Check if Claude is enabled
@@ -473,6 +409,9 @@ export async function POST(request: NextRequest) {
       duration: Date.now() - startTime,
       name: parsed.name,
     });
+
+    // Cache the result (fire and forget)
+    cacheSet(cacheKey, parsed, CACHE_TTL.dinnerName).catch(() => {});
 
     return NextResponse.json(parsed);
 
