@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
@@ -9,14 +8,6 @@ import { isEnabled } from '@/lib/feature-flags';
 // =============================================================================
 
 const PROMPT_VERSION = 'sketch_v5.0_lifestyle';
-
-function getGoogleClient() {
-  const apiKey = process.env.GOOGLE_API_KEY;
-  if (!apiKey) {
-    throw new Error('GOOGLE_API_KEY not configured');
-  }
-  return new GoogleGenerativeAI(apiKey);
-}
 
 // =============================================================================
 // Input Processing
@@ -112,18 +103,6 @@ CRITICAL CONSTRAINTS:
 }
 
 // =============================================================================
-// Negative Prompt for Imagen 3
-// =============================================================================
-
-const NEGATIVE_PROMPT = `overhead view, top-down view, bird's eye view, 90-degree angle,
-flat lighting, clinical lighting, flash photography,
-sterile, medical, food database, stock photo, product photography,
-extra food items, additional ingredients, garnishes, decorations,
-centered composition, perfectly symmetrical, white background,
-text, labels, watermarks, borders, frames, color palettes,
-hands, people, faces, utensils in hand`;
-
-// =============================================================================
 // SVG Fallback
 // =============================================================================
 
@@ -170,90 +149,54 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 }
 
 // =============================================================================
-// Image Generation with Imagen 3
+// Image Generation with Imagen 3 via REST API
 // =============================================================================
 
-async function generateWithImagen(prompt: string, negativePrompt: string): Promise<string | null> {
-  const genAI = getGoogleClient();
-
-  // Gemini doesn't support negative prompts directly, so we append "avoid" instructions
-  const fullPrompt = `${prompt}
-
-AVOID: ${negativePrompt}`;
-
-  // Use Gemini 2.0 Flash with image generation capability
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-exp",
-    generationConfig: {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-    },
-  });
-
-  const response = await model.generateContent({
-    contents: [{
-      role: "user",
-      parts: [{ text: `Generate an image: ${fullPrompt}` }]
-    }],
-    generationConfig: {
-      // @ts-expect-error - responseModalities is experimental and not in types yet
-      responseModalities: ["image", "text"],
-    },
-  });
-
-  const candidate = response.response.candidates?.[0];
-  if (!candidate?.content?.parts) {
-    throw new Error('No content in response');
+async function generateWithImagen(prompt: string): Promise<string | null> {
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    throw new Error('GOOGLE_API_KEY not configured');
   }
 
-  // Find the image part in the response
-  for (const part of candidate.content.parts) {
-    if (part.inlineData?.mimeType?.startsWith("image/")) {
-      // Return as base64 data URL
-      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+  // Use Imagen 3 model for image generation
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        instances: [{ prompt }],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: '1:1',
+          safetyFilterLevel: 'block_few',
+          personGeneration: 'dont_allow',
+        },
+      }),
     }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error('Imagen API error', {
+      status: response.status,
+      error: errorText
+    });
+    throw new Error(`Imagen API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  // Extract the base64 image from the response
+  const predictions = data.predictions;
+  if (predictions && predictions.length > 0 && predictions[0].bytesBase64Encoded) {
+    return `data:image/png;base64,${predictions[0].bytesBase64Encoded}`;
   }
 
   throw new Error('No image in response');
 }
-
-// =============================================================================
-// Alternative: Vertex AI Imagen 3 (Recommended for Production)
-// Supports native negative prompts for better control
-// =============================================================================
-
-/*
-import { VertexAI } from "@google-cloud/vertexai";
-
-async function generateWithVertexImagen(
-  prompt: string,
-  negativePrompt: string
-): Promise<string | null> {
-  const vertex = new VertexAI({
-    project: process.env.GOOGLE_PROJECT_ID!,
-    location: "us-central1"
-  });
-
-  const model = vertex.preview.getGenerativeModel({
-    model: "imagen-3.0-generate-001"
-  });
-
-  const response = await model.generateImages({
-    prompt: prompt,
-    numberOfImages: 1,
-    aspectRatio: "1:1",
-    // Native negative prompt support!
-    negativePrompt: negativePrompt,
-  });
-
-  if (response.images && response.images.length > 0) {
-    return `data:image/png;base64,${response.images[0].bytesBase64Encoded}`;
-  }
-
-  return null;
-}
-*/
 
 // =============================================================================
 // API Route
@@ -315,11 +258,11 @@ export async function POST(request: NextRequest) {
       mood: templateStyle.mood,
     });
 
-    // Generate image with negative prompt
+    // Generate image
     let imageData: string | null = null;
 
     try {
-      imageData = await generateWithImagen(prompt, NEGATIVE_PROMPT);
+      imageData = await generateWithImagen(prompt);
     } catch (error) {
       logger.error('Imagen generation failed', {
         promptVersion: PROMPT_VERSION,
