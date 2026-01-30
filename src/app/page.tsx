@@ -117,12 +117,15 @@ export default function CharcuterMeApp() {
     resetState();
     setScreen('loading');
 
+    // Minimum loading time for theatrical effect (1.5 seconds)
+    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1500));
+
     // Fire both API calls in parallel
     const namePromise = generateName(ingredientInput);
     generateSketch(ingredientInput);
 
-    // Transition to results when name is ready
-    await namePromise;
+    // Wait for BOTH name to be ready AND minimum loading time
+    await Promise.all([namePromise, minLoadingTime]);
     setScreen('results');
   };
 

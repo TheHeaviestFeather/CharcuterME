@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleAuth } from 'google-auth-library';
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
@@ -10,14 +10,6 @@ import { isEnabled } from '@/lib/feature-flags';
 
 const PROMPT_VERSION = 'sketch_v5.0_lifestyle';
 
-function getGoogleClient() {
-  const apiKey = process.env.GOOGLE_API_KEY;
-  if (!apiKey) {
-    throw new Error('GOOGLE_API_KEY not configured');
-  }
-  return new GoogleGenerativeAI(apiKey);
-}
-
 // =============================================================================
 // Input Processing
 // =============================================================================
@@ -28,7 +20,7 @@ function parseIngredients(raw: string): string[] {
     .map((i) => i.trim().toLowerCase())
     .filter((i) => i.length > 1 && i.length < 40)
     .filter((i) => !/[{}"'`<>]/.test(i))
-    .slice(0, 6);
+    .slice(0, 10);
 }
 
 // =============================================================================
@@ -77,51 +69,23 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
 // Prompt Building for Imagen 3 - Lifestyle Photography Style
 // =============================================================================
 
-function buildImagenPrompt(ingredients: string[], template: string): string {
+function buildImagenPrompt(ingredients: string[], _template: string): string {
   const ingredientList = ingredients.join(', ');
   const count = ingredients.length;
 
-  const style = TEMPLATE_STYLES[template] || TEMPLATE_STYLES['The Wild Graze'];
+  return `Cozy Instagram food photography, 45-degree angle, warm golden hour lighting.
 
-  return `Cozy Instagram food photography. 45-degree angle, shot from the perspective of someone about to enjoy their meal.
+A ceramic plate with EXACTLY ${count} food items: ${ingredientList}. Nothing else on the plate.
 
-FOOD: A ceramic plate with exactly ${count} items: ${ingredientList}.
-${style.layout}
+Setting: Cozy couch corner with soft throw blanket in background. Wine glass blurred in back.
+Style: Shallow depth of field, warm colors, lifestyle aesthetic.
 
-SCENE:
-- ${style.scene}
-- Soft linen napkin tucked under plate edge
-- Warm ambient lighting from the side
-
-LIGHTING: Golden hour warmth. Soft directional light from the left creating gentle shadows.
-
-STYLE:
-- Shallow depth of field, background softly blurred
-- Warm color grading, cozy tones
-- Lifestyle aesthetic, not food database or stock photo
-- Artfully casual plating, not restaurant-perfect
-- The food looks delicious and approachable
-
-MOOD: ${style.mood}
-
-CRITICAL CONSTRAINTS:
-- Show ONLY these ${count} food items on the plate: ${ingredientList}
-- Do not add any extra food items, garnishes, or ingredients
-- Scene props (napkin, glass, blanket) are allowed but NO extra food
-- No text, labels, watermarks, or borders`;
+STRICT RULES:
+- The plate must contain ONLY these ${count} items: ${ingredientList}
+- Do NOT add any other food, garnishes, herbs, or extras
+- NO humans, hands, people, or body parts in the image
+- No text or watermarks`;
 }
-
-// =============================================================================
-// Negative Prompt for Imagen 3
-// =============================================================================
-
-const NEGATIVE_PROMPT = `overhead view, top-down view, bird's eye view, 90-degree angle,
-flat lighting, clinical lighting, flash photography,
-sterile, medical, food database, stock photo, product photography,
-extra food items, additional ingredients, garnishes, decorations,
-centered composition, perfectly symmetrical, white background,
-text, labels, watermarks, borders, frames, color palettes,
-hands, people, faces, utensils in hand`;
 
 // =============================================================================
 // SVG Fallback
@@ -170,90 +134,113 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 }
 
 // =============================================================================
-// Image Generation with Imagen 3
+// Image Generation with Vertex AI Imagen 3
 // =============================================================================
 
-async function generateWithImagen(prompt: string, negativePrompt: string): Promise<string | null> {
-  const genAI = getGoogleClient();
+const PROJECT_ID = process.env.GOOGLE_PROJECT_ID || 'charcuterme';
+const LOCATION = 'us-central1';
 
-  // Gemini doesn't support negative prompts directly, so we append "avoid" instructions
-  const fullPrompt = `${prompt}
-
-AVOID: ${negativePrompt}`;
-
-  // Use Gemini 2.0 Flash with image generation capability
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-exp",
-    generationConfig: {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-    },
-  });
-
-  const response = await model.generateContent({
-    contents: [{
-      role: "user",
-      parts: [{ text: `Generate an image: ${fullPrompt}` }]
-    }],
-    generationConfig: {
-      // @ts-expect-error - responseModalities is experimental and not in types yet
-      responseModalities: ["image", "text"],
-    },
-  });
-
-  const candidate = response.response.candidates?.[0];
-  if (!candidate?.content?.parts) {
-    throw new Error('No content in response');
+async function getAccessToken(): Promise<string> {
+  // Parse service account credentials from environment variable
+  // Supports both raw JSON and base64-encoded JSON
+  const credentials = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  if (!credentials) {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY not configured');
   }
 
-  // Find the image part in the response
-  for (const part of candidate.content.parts) {
-    if (part.inlineData?.mimeType?.startsWith("image/")) {
-      // Return as base64 data URL
-      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+  let serviceAccount;
+  try {
+    // Try parsing as raw JSON first
+    serviceAccount = JSON.parse(credentials);
+  } catch {
+    // If that fails, try base64 decoding first
+    try {
+      const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
+      serviceAccount = JSON.parse(decoded);
+    } catch {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY is not valid JSON or base64-encoded JSON');
     }
   }
 
-  throw new Error('No image in response');
-}
-
-// =============================================================================
-// Alternative: Vertex AI Imagen 3 (Recommended for Production)
-// Supports native negative prompts for better control
-// =============================================================================
-
-/*
-import { VertexAI } from "@google-cloud/vertexai";
-
-async function generateWithVertexImagen(
-  prompt: string,
-  negativePrompt: string
-): Promise<string | null> {
-  const vertex = new VertexAI({
-    project: process.env.GOOGLE_PROJECT_ID!,
-    location: "us-central1"
+  const auth = new GoogleAuth({
+    credentials: serviceAccount,
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
 
-  const model = vertex.preview.getGenerativeModel({
-    model: "imagen-3.0-generate-001"
-  });
+  const client = await auth.getClient();
+  const token = await client.getAccessToken();
 
-  const response = await model.generateImages({
-    prompt: prompt,
-    numberOfImages: 1,
-    aspectRatio: "1:1",
-    // Native negative prompt support!
-    negativePrompt: negativePrompt,
-  });
-
-  if (response.images && response.images.length > 0) {
-    return `data:image/png;base64,${response.images[0].bytesBase64Encoded}`;
+  if (!token.token) {
+    throw new Error('Failed to get access token');
   }
 
-  return null;
+  return token.token;
 }
-*/
+
+async function generateWithVertexImagen(prompt: string): Promise<string | null> {
+  const accessToken = await getAccessToken();
+
+  const endpoint = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/imagen-3.0-generate-001:predict`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      instances: [{ prompt }],
+      parameters: {
+        sampleCount: 1,
+        aspectRatio: '1:1',
+        safetyFilterLevel: 'block_few',
+        personGeneration: 'dont_allow',
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error('Vertex AI Imagen error', {
+      status: response.status,
+      error: errorText
+    });
+    throw new Error(`Vertex AI error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Log the response structure for debugging
+  logger.info('Vertex AI response received', {
+    hasData: !!data,
+    hasPredictions: !!data?.predictions,
+    predictionsLength: data?.predictions?.length,
+    firstPredictionKeys: data?.predictions?.[0] ? Object.keys(data.predictions[0]) : [],
+  });
+
+  // Extract base64 image from response
+  const predictions = data.predictions;
+  if (predictions && predictions.length > 0) {
+    const prediction = predictions[0];
+
+    // Try different possible field names
+    const imageData = prediction.bytesBase64Encoded ||
+                      prediction.image?.bytesBase64Encoded ||
+                      prediction.generatedImage?.bytesBase64Encoded ||
+                      prediction.imageBytes;
+
+    if (imageData) {
+      return `data:image/png;base64,${imageData}`;
+    }
+  }
+
+  // Log what we got for debugging
+  logger.error('Unexpected response structure', {
+    data: JSON.stringify(data).slice(0, 500)
+  });
+
+  throw new Error('No image in response');
+}
 
 // =============================================================================
 // API Route
@@ -280,9 +267,9 @@ export async function POST(request: NextRequest) {
     const processed = processGirlDinner(rawIngredients);
     const template = processed.templateSelected || 'The Wild Graze';
 
-    // Check if Imagen is enabled
+    // Check if image generation is enabled
     if (!isEnabled('enableImagen')) {
-      logger.info('Imagen disabled via feature flag', { promptVersion: PROMPT_VERSION });
+      logger.info('Image generation disabled via feature flag', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
@@ -292,14 +279,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!process.env.GOOGLE_API_KEY) {
-      logger.warn('GOOGLE_API_KEY not configured', { promptVersion: PROMPT_VERSION });
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+      logger.warn('GOOGLE_SERVICE_ACCOUNT_KEY not configured', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
         template,
         fallback: true,
-        reason: 'API key not configured',
+        reason: 'Service account not configured',
       });
     }
 
@@ -307,7 +294,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildImagenPrompt(ingredients, template);
     const templateStyle = TEMPLATE_STYLES[template] || TEMPLATE_STYLES['The Wild Graze'];
 
-    logger.info('Imagen prompt built', {
+    logger.info('Image prompt built', {
       promptVersion: PROMPT_VERSION,
       promptLength: prompt.length,
       ingredientCount: ingredients.length,
@@ -315,13 +302,13 @@ export async function POST(request: NextRequest) {
       mood: templateStyle.mood,
     });
 
-    // Generate image with negative prompt
+    // Generate image
     let imageData: string | null = null;
 
     try {
-      imageData = await generateWithImagen(prompt, NEGATIVE_PROMPT);
+      imageData = await generateWithVertexImagen(prompt);
     } catch (error) {
-      logger.error('Imagen generation failed', {
+      logger.error('Vertex AI Imagen generation failed', {
         promptVersion: PROMPT_VERSION,
         error: error instanceof Error ? error.message : 'Unknown',
       });
@@ -338,7 +325,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    logger.info('Sketch generated with Imagen', {
+    logger.info('Sketch generated with Vertex AI Imagen', {
       promptVersion: PROMPT_VERSION,
       duration: Date.now() - startTime,
       template,

@@ -21,6 +21,7 @@ const config: Config = {
         'fade-in': 'fadeIn 0.3s ease-out forwards',
         'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
         'pulse-subtle': 'pulseSubtle 1.5s ease-in-out infinite',
+        'progress-indeterminate': 'progressIndeterminate 1.5s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -40,6 +41,10 @@ const config: Config = {
         pulseSubtle: {
           '0%, 100%': { opacity: '0.4' },
           '50%': { opacity: '1' },
+        },
+        progressIndeterminate: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
         },
       },
     },

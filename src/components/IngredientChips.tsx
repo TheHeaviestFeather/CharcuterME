@@ -8,17 +8,12 @@ import { useMemo, useCallback } from 'react';
 
 const CHIP_OPTIONS = [
   { label: 'brie', emoji: '🧀' },
+  { label: 'cheddar', emoji: '🧀' },
   { label: 'crackers', emoji: '🥨' },
-  { label: 'grapes', emoji: '🍇' },
-  { label: 'salami', emoji: '🥓' },
   { label: 'olives', emoji: '🫒' },
-  { label: 'honey', emoji: '🍯' },
-  { label: 'nuts', emoji: '🥜' },
-  { label: 'fig jam', emoji: '🫐' },
-  { label: 'prosciutto', emoji: '🍖' },
-  { label: 'hummus', emoji: '🫘' },
-  { label: 'bread', emoji: '🥖' },
-  { label: 'pickles', emoji: '🥒' },
+  { label: 'grapes', emoji: '🍇' },
+  { label: 'pickle', emoji: '🥒' },
+  { label: 'wine', emoji: '🍷' },
 ];
 
 // =============================================================================
