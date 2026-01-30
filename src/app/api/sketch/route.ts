@@ -158,12 +158,25 @@ const LOCATION = 'us-central1';
 
 async function getAccessToken(): Promise<string> {
   // Parse service account credentials from environment variable
+  // Supports both raw JSON and base64-encoded JSON
   const credentials = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!credentials) {
     throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY not configured');
   }
 
-  const serviceAccount = JSON.parse(credentials);
+  let serviceAccount;
+  try {
+    // Try parsing as raw JSON first
+    serviceAccount = JSON.parse(credentials);
+  } catch {
+    // If that fails, try base64 decoding first
+    try {
+      const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
+      serviceAccount = JSON.parse(decoded);
+    } catch {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY is not valid JSON or base64-encoded JSON');
+    }
+  }
 
   const auth = new GoogleAuth({
     credentials: serviceAccount,
