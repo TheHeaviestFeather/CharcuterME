@@ -11,3 +11,8 @@ export {
   ResultsSkeleton,
   ProgressiveReveal,
 } from './Skeleton';
+export {
+  AppErrorBoundary,
+  ComponentErrorBoundary,
+  useErrorBoundary,
+} from './ErrorBoundary';
