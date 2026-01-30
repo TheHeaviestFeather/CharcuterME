@@ -20,7 +20,7 @@ function parseIngredients(raw: string): string[] {
     .map((i) => i.trim().toLowerCase())
     .filter((i) => i.length > 1 && i.length < 40)
     .filter((i) => !/[{}"'`<>]/.test(i))
-    .slice(0, 6);
+    .slice(0, 10);
 }
 
 // =============================================================================
@@ -69,38 +69,17 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
 // Prompt Building for Imagen 3 - Lifestyle Photography Style
 // =============================================================================
 
-function buildImagenPrompt(ingredients: string[], template: string): string {
+function buildImagenPrompt(ingredients: string[], _template: string): string {
   const ingredientList = ingredients.join(', ');
-  const count = ingredients.length;
 
-  const style = TEMPLATE_STYLES[template] || TEMPLATE_STYLES['The Wild Graze'];
+  // Simpler, more focused prompt for better ingredient accuracy
+  return `Beautiful overhead food photography of a charcuterie board featuring these exact items: ${ingredientList}.
 
-  return `Cozy Instagram food photography. 45-degree angle, shot from the perspective of someone about to enjoy their meal.
+Style: Warm, cozy Instagram aesthetic. Soft natural lighting. Shallow depth of field.
+Setting: Rustic wooden board on a kitchen counter.
 
-FOOD: A ceramic plate with exactly ${count} items: ${ingredientList}.
-${style.layout}
-
-SCENE:
-- ${style.scene}
-- Soft linen napkin tucked under plate edge
-- Warm ambient lighting from the side
-
-LIGHTING: Golden hour warmth. Soft directional light from the left creating gentle shadows.
-
-STYLE:
-- Shallow depth of field, background softly blurred
-- Warm color grading, cozy tones
-- Lifestyle aesthetic, not food database or stock photo
-- Artfully casual plating, not restaurant-perfect
-- The food looks delicious and approachable
-
-MOOD: ${style.mood}
-
-CRITICAL CONSTRAINTS:
-- Show ONLY these ${count} food items on the plate: ${ingredientList}
-- Do not add any extra food items, garnishes, or ingredients
-- Scene props (napkin, glass, blanket) are allowed but NO extra food
-- No text, labels, watermarks, or borders`;
+IMPORTANT: Include ALL of these foods clearly visible: ${ingredientList}.
+No text or watermarks.`;
 }
 
 // =============================================================================
