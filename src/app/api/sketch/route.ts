@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
@@ -150,46 +150,32 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 }
 
 // =============================================================================
-// Image Generation with Gemini 2.0 Flash
+// Image Generation with DALL-E 3
 // =============================================================================
 
-async function generateWithGemini(prompt: string): Promise<string | null> {
-  const apiKey = process.env.GOOGLE_API_KEY;
+async function generateWithDallE(prompt: string): Promise<string | null> {
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('GOOGLE_API_KEY not configured');
+    throw new Error('OPENAI_API_KEY not configured');
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
+  const openai = new OpenAI({ apiKey });
 
-  // Use Gemini 2.0 Flash with image generation
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-exp-image-generation",
+  const response = await openai.images.generate({
+    model: "dall-e-3",
+    prompt: prompt,
+    n: 1,
+    size: "1024x1024",
+    quality: "standard",
+    response_format: "b64_json",
   });
 
-  const response = await model.generateContent({
-    contents: [{
-      role: "user",
-      parts: [{ text: prompt }]
-    }],
-    generationConfig: {
-      // @ts-expect-error - responseModalities is valid but not in types yet
-      responseModalities: ["image", "text"],
-    },
-  });
-
-  const candidate = response.response.candidates?.[0];
-  if (!candidate?.content?.parts) {
-    throw new Error('No content in response');
+  const imageData = response.data?.[0]?.b64_json;
+  if (!imageData) {
+    throw new Error('No image in response');
   }
 
-  // Find the image part in the response
-  for (const part of candidate.content.parts) {
-    if (part.inlineData?.mimeType?.startsWith("image/")) {
-      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-    }
-  }
-
-  throw new Error('No image in response');
+  return `data:image/png;base64,${imageData}`;
 }
 
 // =============================================================================
@@ -217,9 +203,9 @@ export async function POST(request: NextRequest) {
     const processed = processGirlDinner(rawIngredients);
     const template = processed.templateSelected || 'The Wild Graze';
 
-    // Check if Imagen is enabled
+    // Check if image generation is enabled
     if (!isEnabled('enableImagen')) {
-      logger.info('Imagen disabled via feature flag', { promptVersion: PROMPT_VERSION });
+      logger.info('Image generation disabled via feature flag', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
@@ -229,8 +215,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!process.env.GOOGLE_API_KEY) {
-      logger.warn('GOOGLE_API_KEY not configured', { promptVersion: PROMPT_VERSION });
+    if (!process.env.OPENAI_API_KEY) {
+      logger.warn('OPENAI_API_KEY not configured', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
@@ -244,7 +230,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildImagenPrompt(ingredients, template);
     const templateStyle = TEMPLATE_STYLES[template] || TEMPLATE_STYLES['The Wild Graze'];
 
-    logger.info('Imagen prompt built', {
+    logger.info('Image prompt built', {
       promptVersion: PROMPT_VERSION,
       promptLength: prompt.length,
       ingredientCount: ingredients.length,
@@ -256,9 +242,9 @@ export async function POST(request: NextRequest) {
     let imageData: string | null = null;
 
     try {
-      imageData = await generateWithGemini(prompt);
+      imageData = await generateWithDallE(prompt);
     } catch (error) {
-      logger.error('Gemini image generation failed', {
+      logger.error('DALL-E image generation failed', {
         promptVersion: PROMPT_VERSION,
         error: error instanceof Error ? error.message : 'Unknown',
       });
@@ -275,7 +261,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    logger.info('Sketch generated with Gemini', {
+    logger.info('Sketch generated with DALL-E', {
       promptVersion: PROMPT_VERSION,
       duration: Date.now() - startTime,
       template,
