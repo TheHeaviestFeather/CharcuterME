@@ -95,14 +95,23 @@ export function ResultsScreen({
               <p className="text-[#9A8A7C] text-sm">Crafting your vision...</p>
             </div>
           ) : imageUrl ? (
-            /* Generated Image */
-            <Image
-              src={imageUrl}
-              alt={dinnerName}
-              fill
-              className="object-cover"
-              sizes="340px"
-            />
+            /* Generated Image - use img for data URLs, Next Image for remote URLs */
+            imageUrl.startsWith('data:') ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt={dinnerName}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={imageUrl}
+                alt={dinnerName}
+                fill
+                className="object-cover"
+                sizes="340px"
+              />
+            )
           ) : svgFallback ? (
             /* SVG Fallback from API */
             <div
