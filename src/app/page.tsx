@@ -113,6 +113,8 @@ export default function CharcuterMeApp() {
   // =============================================================================
 
   const handleSubmitIngredients = async (ingredientInput: string) => {
+    // Reset previous results before starting new request
+    resetState();
     setScreen('loading');
 
     // Fire both API calls in parallel

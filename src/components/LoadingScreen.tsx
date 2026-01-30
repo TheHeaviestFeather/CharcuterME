@@ -13,20 +13,22 @@ interface LoadingScreenProps {
 interface FloatingEmojiProps {
   emoji: string;
   delay: number;
+  left: number;
+  duration: number;
 }
 
 // =============================================================================
 // Floating Emoji Component
 // =============================================================================
 
-function FloatingEmoji({ emoji, delay }: FloatingEmojiProps) {
+function FloatingEmoji({ emoji, delay, left, duration }: FloatingEmojiProps) {
   return (
     <div
       className="absolute text-2xl animate-float opacity-0"
       style={{
-        left: `${Math.random() * 80 + 10}%`,
+        left: `${left}%`,
         animationDelay: `${delay}s`,
-        animationDuration: `${6 + Math.random() * 4}s`,
+        animationDuration: `${duration}s`,
       }}
     >
       {emoji}
@@ -47,12 +49,12 @@ export function LoadingScreen({ isLoading }: LoadingScreenProps) {
     <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center justify-center px-6 py-8 relative overflow-hidden">
       {/* Floating Emojis Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <FloatingEmoji emoji="🧀" delay={0} />
-        <FloatingEmoji emoji="🍇" delay={1.5} />
-        <FloatingEmoji emoji="🥖" delay={3} />
-        <FloatingEmoji emoji="🫒" delay={4.5} />
-        <FloatingEmoji emoji="🍷" delay={6} />
-        <FloatingEmoji emoji="🥨" delay={7.5} />
+        <FloatingEmoji emoji="🧀" delay={0} left={15} duration={7} />
+        <FloatingEmoji emoji="🍇" delay={1.5} left={75} duration={8} />
+        <FloatingEmoji emoji="🥖" delay={3} left={35} duration={6} />
+        <FloatingEmoji emoji="🫒" delay={4.5} left={55} duration={9} />
+        <FloatingEmoji emoji="🍷" delay={6} left={25} duration={7} />
+        <FloatingEmoji emoji="🥨" delay={7.5} left={85} duration={8} />
       </div>
 
       {/* Content */}
