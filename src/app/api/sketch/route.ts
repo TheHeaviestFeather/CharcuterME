@@ -4,6 +4,7 @@ import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
 import { parseIngredients } from '@/lib/validation';
+import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
 
 // =============================================================================
 // Configuration
@@ -251,6 +252,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No valid ingredients provided' }, { status: 400 });
     }
 
+    // Check cache first
+    const cacheKey = generateCacheKey('sketch', rawIngredients);
+    const cached = await cacheGet<{ type: string; imageUrl?: string; template: string; reason?: string; rules?: string[] }>(cacheKey);
+    if (cached) {
+      logger.info('Cache hit for sketch', { cacheKey: cacheKey.slice(0, 50) });
+      return NextResponse.json(cached);
+    }
+
     // Get template from logic bridge
     const processed = processGirlDinner(rawIngredients);
     const template = processed.templateSelected || 'The Wild Graze';
@@ -320,13 +329,18 @@ export async function POST(request: NextRequest) {
       ingredientCount: ingredients.length,
     });
 
-    return NextResponse.json({
+    const result = {
       type: 'image',
       imageUrl: imageData, // Base64 data URL
       template,
       reason: processed.templateReason,
       rules: processed.rulesApplied,
-    });
+    };
+
+    // Cache the result (fire and forget)
+    cacheSet(cacheKey, result, CACHE_TTL.sketch).catch(() => {});
+
+    return NextResponse.json(result);
 
   } catch (error) {
     logger.error('Error generating sketch', {

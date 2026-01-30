@@ -7,6 +7,7 @@ import { isEnabled } from '@/lib/feature-flags';
 import { AI_MODELS, CLAUDE_SETTINGS } from '@/lib/constants';
 import { NameRequestSchema, validateRequest, sanitizeIngredients } from '@/lib/validation';
 import { getAnthropicClient } from '@/lib/ai-clients';
+import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
 
 // =============================================================================
 // Configuration
@@ -374,6 +375,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Please enter at least one ingredient' }, { status: 400 });
     }
 
+    // Check cache first
+    const cacheKey = generateCacheKey('dinnerName', ingredients);
+    const cached = await cacheGet<NamerResponse>(cacheKey);
+    if (cached) {
+      logger.info('Cache hit for dinner name', { cacheKey: cacheKey.slice(0, 50) });
+      return NextResponse.json(cached);
+    }
+
     // Check if Claude is enabled
     if (!isEnabled('enableClaudeNaming')) {
       logger.info('Claude naming disabled, using fallback', { promptVersion: PROMPT_VERSION });
@@ -452,6 +461,9 @@ export async function POST(request: NextRequest) {
       duration: Date.now() - startTime,
       name: parsed.name,
     });
+
+    // Cache the result (fire and forget)
+    cacheSet(cacheKey, parsed, CACHE_TTL.dinnerName).catch(() => {});
 
     return NextResponse.json(parsed);
 
