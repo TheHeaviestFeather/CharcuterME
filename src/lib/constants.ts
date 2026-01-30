@@ -23,16 +23,9 @@ export const MIN_VIBE_SCORE = 35;
 // API Models - SINGLE SOURCE OF TRUTH
 export const AI_MODELS = {
   naming: 'claude-3-5-haiku-20241022',
-  sketch: 'dall-e-3',
+  sketch: 'imagen-3.0-generate-001', // Vertex AI Imagen
   vibe: 'gpt-4o',
 } as const;
-
-// Image generation settings - SINGLE SOURCE OF TRUTH
-export const DALLE_SETTINGS = {
-  size: '1024x1024' as const,
-  quality: 'standard' as const,
-  style: 'vivid' as const, // 'vivid' for anime-style saturated colors
-};
 
 // Claude settings
 export const CLAUDE_SETTINGS = {

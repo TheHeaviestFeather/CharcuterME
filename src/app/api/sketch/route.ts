@@ -3,25 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
+import { parseIngredients } from '@/lib/validation';
 
 // =============================================================================
 // Configuration
 // =============================================================================
 
 const PROMPT_VERSION = 'sketch_v5.0_lifestyle';
-
-// =============================================================================
-// Input Processing
-// =============================================================================
-
-function parseIngredients(raw: string): string[] {
-  return raw
-    .split(/[,\n]+/)
-    .map((i) => i.trim().toLowerCase())
-    .filter((i) => i.length > 1 && i.length < 40)
-    .filter((i) => !/[{}"'`<>]/.test(i))
-    .slice(0, 10);
-}
 
 // =============================================================================
 // Layout Guides (Template-Based)

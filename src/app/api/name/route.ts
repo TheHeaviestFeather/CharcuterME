@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 import { withRetry } from '@/lib/retry';
 import { withTimeout, TIMEOUTS } from '@/lib/timeout';
@@ -7,18 +6,13 @@ import { logger } from '@/lib/logger';
 import { isEnabled } from '@/lib/feature-flags';
 import { AI_MODELS, CLAUDE_SETTINGS } from '@/lib/constants';
 import { NameRequestSchema, validateRequest, sanitizeIngredients } from '@/lib/validation';
+import { getAnthropicClient } from '@/lib/ai-clients';
 
 // =============================================================================
 // Configuration
 // =============================================================================
 
 const PROMPT_VERSION = 'namer_v3.1_wildcard';
-
-function getAnthropicClient() {
-  return new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
-}
 
 // =============================================================================
 // Wildcard Suggestions
