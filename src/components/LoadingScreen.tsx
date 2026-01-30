@@ -79,9 +79,9 @@ export function LoadingScreen({ isLoading }: LoadingScreenProps) {
           </div>
         </div>
 
-        {/* Subtle hint */}
+        {/* Priming line */}
         <p className="mt-8 text-sm text-[#9A8A7C] animate-fade-in">
-          Crafting your culinary masterpiece...
+          creating a story-ready share card + caption...
         </p>
       </div>
 

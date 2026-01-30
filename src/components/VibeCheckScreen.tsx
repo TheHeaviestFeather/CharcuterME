@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 
 // =============================================================================
@@ -29,6 +29,12 @@ const LightbulbIcon = () => (
 const DiceIcon = () => (
   <svg className="w-5 h-5 text-[#A47864]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+  </svg>
+);
+
+const InstagramIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
   </svg>
 );
 
@@ -193,26 +199,89 @@ export function VibeCheckScreen({
     setIsAnalyzing(false);
   };
 
-  // Share functionality
-  const handleShare = async () => {
+  // Generate caption for sharing
+  const generateCaption = useCallback((includeVibeScore: boolean = false) => {
+    if (includeVibeScore && vibeResult) {
+      return `Tonight's dinner: "${dinnerName}"\n\nVibe Score: ${vibeResult.score} - ${vibeResult.category}\n"${vibeResult.validation}"\n\n#CharcuterME #GirlDinner #FoodVibes`;
+    }
+    return `Tonight's dinner: "${dinnerName}"\n\n#CharcuterME #GirlDinner #FoodVibes`;
+  }, [dinnerName, vibeResult]);
+
+  // Share functionality (with vibe score)
+  const handleShare = useCallback(async () => {
+    const caption = generateCaption(true);
+
     // Try native share if available
-    if (navigator.share && comparisonRef.current) {
+    if (navigator.share) {
       try {
-        await navigator.share({
+        const shareData: ShareData = {
           title: `${dinnerName} - Vibe Check`,
-          text: `I scored ${vibeResult?.score} on my girl dinner! Category: ${vibeResult?.category}`,
-        });
+          text: caption,
+        };
+
+        // Try to include the user photo if available
+        if (userPhoto) {
+          try {
+            const response = await fetch(userPhoto);
+            const blob = await response.blob();
+            const file = new File([blob], 'charcuterme-vibe.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              shareData.files = [file];
+            }
+          } catch {
+            // Continue without image
+          }
+        }
+
+        await navigator.share(shareData);
       } catch {
-        // User cancelled or share failed
-        console.log('Share cancelled');
+        // User cancelled or share failed - fallback to clipboard
+        await navigator.clipboard.writeText(caption);
+        alert('Caption copied to clipboard!');
       }
     } else {
       // Fallback: Copy to clipboard
-      const shareText = `${dinnerName}\nVibe Check: ${vibeResult?.score} - ${vibeResult?.category}\n"${vibeResult?.validation}"`;
-      await navigator.clipboard.writeText(shareText);
-      alert('Copied to clipboard!');
+      await navigator.clipboard.writeText(caption);
+      alert('Caption copied to clipboard!');
     }
-  };
+  }, [dinnerName, generateCaption, userPhoto]);
+
+  // Skip upload but still share (no vibe score)
+  const handleSkipUploadStillShare = useCallback(async () => {
+    const caption = generateCaption(false);
+
+    if (navigator.share) {
+      try {
+        const shareData: ShareData = {
+          title: `${dinnerName} - CharcuterME`,
+          text: caption,
+        };
+
+        // Try to include the inspiration image
+        if (inspirationImage) {
+          try {
+            const response = await fetch(inspirationImage);
+            const blob = await response.blob();
+            const file = new File([blob], 'charcuterme-dinner.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              shareData.files = [file];
+            }
+          } catch {
+            // Continue without image
+          }
+        }
+
+        await navigator.share(shareData);
+      } catch {
+        // User cancelled - fallback to clipboard
+        await navigator.clipboard.writeText(caption);
+        alert('Caption copied! Open Instagram to share.');
+      }
+    } else {
+      await navigator.clipboard.writeText(caption);
+      alert('Caption copied! Open Instagram to share.');
+    }
+  }, [dinnerName, generateCaption, inspirationImage]);
 
   // =============================================================================
   // Render: Photo Capture State
@@ -223,15 +292,19 @@ export function VibeCheckScreen({
       <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center px-6 py-8">
         {/* Header */}
         <p className="text-[#9A8A7C] text-sm mb-2 mt-4">
-          Time to check the vibe
+          Optional: Level up your share
         </p>
-        <h1 className="font-serif text-2xl italic text-[#A47864] text-center mb-8">
+        <h1 className="font-serif text-2xl italic text-[#A47864] text-center mb-2">
           &ldquo;{dinnerName}&rdquo;
         </h1>
+        {/* Value clarification */}
+        <p className="text-[#6B5B4F] text-sm text-center mb-6 max-w-[300px]">
+          Upload a photo to get a vibe score + side-by-side comparison
+        </p>
 
         {/* Inspiration Preview */}
         {inspirationImage && (
-          <div className="w-full max-w-[280px] mb-8">
+          <div className="w-full max-w-[280px] mb-6">
             <p className="text-[#9A8A7C] text-xs text-center mb-2 uppercase tracking-wide">
               The Inspiration
             </p>
@@ -271,16 +344,32 @@ export function VibeCheckScreen({
           className="hidden"
         />
 
-        {/* Skip Option */}
+        {/* Skip upload, still share */}
+        <button
+          onClick={handleSkipUploadStillShare}
+          className="
+            mt-6 w-full max-w-[340px] rounded-xl py-3 px-6
+            text-sm font-medium text-white
+            bg-gradient-to-r from-[#E8734A] to-[#C13584]
+            hover:from-[#D4623B] hover:to-[#A02B70]
+            transition-all duration-200
+            flex items-center justify-center gap-2
+          "
+        >
+          <InstagramIcon />
+          <span>Skip upload, still share</span>
+        </button>
+
+        {/* Back option */}
         <button
           onClick={onStartOver}
-          className="mt-8 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors"
+          className="mt-4 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors"
         >
-          Maybe later
+          Back to results
         </button>
 
         {/* Progress Dots */}
-        <div className="flex gap-2 mt-8">
+        <div className="flex gap-2 mt-6">
           <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
           <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
           <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
@@ -427,21 +516,22 @@ export function VibeCheckScreen({
         </div>
       )}
 
-      {/* Share Button */}
+      {/* Share Button - Instagram gradient */}
       <button
         onClick={handleShare}
         className="
           w-full max-w-[340px] rounded-xl py-4 px-8
           text-base font-semibold text-white
-          bg-[#E8734A] hover:bg-[#D4623B]
+          bg-gradient-to-r from-[#E8734A] to-[#C13584]
+          hover:from-[#D4623B] hover:to-[#A02B70]
           transition-all duration-200 ease-out
           hover:-translate-y-0.5 active:translate-y-0
           shadow-lg shadow-[#E8734A]/30
           flex items-center justify-center gap-2
         "
       >
-        <ShareIcon />
-        <span>Share the Vibe</span>
+        <InstagramIcon />
+        <span>Share to Stories</span>
       </button>
 
       {/* Start Over */}
