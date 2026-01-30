@@ -203,29 +203,5 @@ export interface TemplateOption {
 // =============================================================================
 // App State Types
 // =============================================================================
-
-// 4-screen flow: input -> reveal (name + blueprint) -> camera -> results
-export const ScreenSchema = z.enum(['input', 'reveal', 'camera', 'results']);
-export type Screen = z.infer<typeof ScreenSchema>;
-
-// Keep old screens for backwards compatibility
-export type LegacyScreen = 'input' | 'name' | 'blueprint' | 'camera' | 'results';
-
-export interface AppState {
-  screen: Screen;
-  ingredients: string;
-  dinnerName: string;
-  validation: string;
-  tip: string;
-  blueprintUrl: string | null;
-  blueprintSvg: string | null;
-  userPhoto: string | null;
-  vibeScore: number;
-  vibeRank: string;
-  vibeCompliment: string;
-  sticker: string;
-  isLoading: boolean;
-  isLoadingName: boolean;
-  isLoadingBlueprint: boolean;
-  error: string | null;
-}
+// Note: App state is now managed by useDinnerFlow hook in src/hooks/useDinnerFlow.ts
+// Screen type and DinnerState are exported from there.
