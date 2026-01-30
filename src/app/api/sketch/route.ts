@@ -205,11 +205,34 @@ async function generateWithVertexImagen(prompt: string): Promise<string | null> 
 
   const data = await response.json();
 
+  // Log the response structure for debugging
+  logger.info('Vertex AI response received', {
+    hasData: !!data,
+    hasPredictions: !!data?.predictions,
+    predictionsLength: data?.predictions?.length,
+    firstPredictionKeys: data?.predictions?.[0] ? Object.keys(data.predictions[0]) : [],
+  });
+
   // Extract base64 image from response
   const predictions = data.predictions;
-  if (predictions && predictions.length > 0 && predictions[0].bytesBase64Encoded) {
-    return `data:image/png;base64,${predictions[0].bytesBase64Encoded}`;
+  if (predictions && predictions.length > 0) {
+    const prediction = predictions[0];
+
+    // Try different possible field names
+    const imageData = prediction.bytesBase64Encoded ||
+                      prediction.image?.bytesBase64Encoded ||
+                      prediction.generatedImage?.bytesBase64Encoded ||
+                      prediction.imageBytes;
+
+    if (imageData) {
+      return `data:image/png;base64,${imageData}`;
+    }
   }
+
+  // Log what we got for debugging
+  logger.error('Unexpected response structure', {
+    data: JSON.stringify(data).slice(0, 500)
+  });
 
   throw new Error('No image in response');
 }
