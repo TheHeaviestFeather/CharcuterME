@@ -80,9 +80,11 @@ A ceramic plate with EXACTLY ${count} food items: ${ingredientList}. Nothing els
 Setting: Cozy couch corner with soft throw blanket in background. Wine glass blurred in back.
 Style: Shallow depth of field, warm colors, lifestyle aesthetic.
 
-STRICT RULE: The plate must contain ONLY these ${count} items: ${ingredientList}.
-Do NOT add any other food, garnishes, herbs, or extras.
-No text or watermarks.`;
+STRICT RULES:
+- The plate must contain ONLY these ${count} items: ${ingredientList}
+- Do NOT add any other food, garnishes, herbs, or extras
+- NO humans, hands, people, or body parts in the image
+- No text or watermarks`;
 }
 
 // =============================================================================
