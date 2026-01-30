@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { InputScreen } from '@/components/InputScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { VibeCheckScreen } from '@/components/VibeCheckScreen';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 // =============================================================================
 // Types
 // =============================================================================
 
-type Screen = 'input' | 'results' | 'vibecheck';
+type Screen = 'input' | 'loading' | 'results' | 'vibecheck';
 
 interface NamerResponse {
   name: string;
@@ -112,11 +113,17 @@ export default function CharcuterMeApp() {
   // =============================================================================
 
   const handleSubmitIngredients = async (ingredientInput: string) => {
-    setScreen('results');
+    // Reset previous results before starting new request
+    resetState();
+    setScreen('loading');
 
     // Fire both API calls in parallel
-    generateName(ingredientInput);
+    const namePromise = generateName(ingredientInput);
     generateSketch(ingredientInput);
+
+    // Transition to results when name is ready
+    await namePromise;
+    setScreen('results');
   };
 
   const handleCheckVibe = () => {
@@ -150,6 +157,9 @@ export default function CharcuterMeApp() {
           isLoading={isLoadingName}
         />
       );
+
+    case 'loading':
+      return <LoadingScreen isLoading={true} />;
 
     case 'results':
       return (

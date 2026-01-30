@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { IngredientChips } from './IngredientChips';
 
 // =============================================================================
 // Input Screen - Simplified (No Emojis)
@@ -79,6 +80,13 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
         <p id="ingredients-hint" className="sr-only">
           Enter your ingredients separated by commas
         </p>
+
+        {/* Ingredient Chips */}
+        <IngredientChips
+          value={ingredients}
+          onChange={setIngredients}
+          disabled={isLoading}
+        />
       </div>
 
       {/* CTA Button */}
