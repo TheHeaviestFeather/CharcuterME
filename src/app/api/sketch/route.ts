@@ -8,7 +8,7 @@ import { isEnabled } from '@/lib/feature-flags';
 // Configuration
 // =============================================================================
 
-const PROMPT_VERSION = 'sketch_v5.0_lifestyle';
+const PROMPT_VERSION = 'sketch_v6.0_chaotic_millennial';
 
 // =============================================================================
 // Input Processing
@@ -35,56 +35,57 @@ interface TemplateStyle {
 
 const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
   'The Minimalist': {
-    layout: 'Minimal arrangement with generous negative space. Items placed off-center using rule of thirds.',
-    scene: 'Clean marble or light stone surface. Single small candle in soft focus. Minimal, intentional.',
-    mood: 'Quiet evening alone. Thoughtful, curated simplicity.',
+    layout: 'Items slightly askew on the plate. One thing rolling toward the edge. Imperfect but intentional.',
+    scene: 'Worn kitchen counter with water ring stains. Sriracha bottle photobombing in background.',
+    mood: 'Too tired to care about presentation. Authentic chaos.',
   },
 
   'The Anchor': {
-    layout: 'One hero item takes focus. Smaller items arranged around it as supporting players.',
-    scene: 'Rustic wooden cutting board on kitchen counter. Casual, just-prepared feeling.',
-    mood: 'Proud home cook energy. "I made this and it looks good."',
+    layout: 'One big item dominates. Others scattered around like afterthoughts. Uneven spacing.',
+    scene: 'Paper towel as a placemat. Fork at weird angle. Ambient laptop glow.',
+    mood: '"This is fine" energy. Peak millennial survival.',
   },
 
   'The Snack Line': {
-    layout: 'Linear arrangement with dip as anchor point. Dippers fanned in an arc beside it.',
-    scene: 'Coffee table surface. TV remote slightly visible. Cozy blanket edge in frame.',
-    mood: 'Movie night vibes. Comfortable, no pretense.',
+    layout: 'Items in a vaguely straight line. Some overlapping. One fell over.',
+    scene: 'Coffee table with ring stains. TV remote half-visible. Blanket burrito staging.',
+    mood: 'Netflix asked if I\'m still watching. Yes. Obviously.',
   },
 
   'The Bento': {
-    layout: 'Organized zones for each item. Clean visual separation. Satisfying orderly grid.',
-    scene: 'Clean desk surface. Laptop edge or book spine in soft background.',
-    mood: 'Work-from-home lunch break. Organized but relaxed.',
+    layout: 'Attempted organization that gave up halfway. Some zones respected, some chaos.',
+    scene: 'Desk with sticky notes visible. Coffee mug with attitude. Work-from-home realness.',
+    mood: 'Multitasking between emails and emotional eating.',
   },
 
   'The Wild Graze': {
-    layout: 'Abundant S-curve flow connecting items. Clustered in pleasing odd numbers. Organic arrangement.',
-    scene: 'Cozy couch corner. Soft throw blanket visible. Wine glass in background.',
-    mood: 'Sunday evening indulgence. Treat yourself energy.',
+    layout: 'Gloriously haphazard pile. Items touching that shouldn\'t. Zero fucks given.',
+    scene: 'Couch cushion visible. Wine glass already half empty. Phone charging cable in shot.',
+    mood: 'Sunday scaries but make it aesthetic. Chaotic self-care.',
   },
 };
 
 // =============================================================================
-// Prompt Building for Imagen 3 - Lifestyle Photography Style
+// Prompt Building for Imagen 3 - Millennial Chaotic Style
 // =============================================================================
 
 function buildImagenPrompt(ingredients: string[], _template: string): string {
   const ingredientList = ingredients.join(', ');
   const count = ingredients.length;
 
-  return `Cozy Instagram food photography, 45-degree angle, warm golden hour lighting.
+  return `Casual phone photo of late night snack, slightly messy, authentic millennial apartment vibes.
 
-A ceramic plate with EXACTLY ${count} food items: ${ingredientList}. Nothing else on the plate.
+A mismatched plate or paper plate with EXACTLY ${count} food items: ${ingredientList}. Arranged haphazardly like someone just threw them on.
 
-Setting: Cozy couch corner with soft throw blanket in background. Wine glass blurred in back.
-Style: Shallow depth of field, warm colors, lifestyle aesthetic.
+Setting: Cluttered coffee table or kitchen counter. Visible in background: half-empty wine glass, phone charger, maybe a laptop edge. Warm lamp lighting mixed with blue TV glow. Couch blanket visible.
+Style: Imperfect composition, slight motion blur okay, looks like it was taken at 11pm before eating. NOT Instagram perfect - more "sent this to my group chat" energy.
 
 STRICT RULES:
 - The plate must contain ONLY these ${count} items: ${ingredientList}
 - Do NOT add any other food, garnishes, herbs, or extras
 - NO humans, hands, people, or body parts in the image
-- No text or watermarks`;
+- No text or watermarks
+- NOT overly styled or curated - embrace the chaos`;
 }
 
 // =============================================================================
