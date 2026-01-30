@@ -13,6 +13,7 @@ import {
   InstagramIcon,
   LoaderIcon,
 } from './icons';
+import { ProgressDots } from './ProgressDots';
 import { shareWithImage, copyToClipboard, saveImage, generateCaption } from '@/utils';
 
 // =============================================================================
@@ -339,11 +340,7 @@ export function ResultsScreen({
       )}
 
       {/* Progress Dots */}
-      <div className="flex gap-2 mt-8">
-        <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
-        <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
-        <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
-      </div>
+      <ProgressDots currentStep={2} className="mt-8" />
     </div>
   );
 }

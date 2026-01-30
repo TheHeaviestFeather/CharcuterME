@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IngredientChips } from './IngredientChips';
+import { ProgressDots } from './ProgressDots';
 
 // =============================================================================
 // Time-based Greetings
@@ -228,18 +229,12 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
 
       {/* Progress Dots */}
       <motion.div
-        className="flex gap-2 mt-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
+        className="mt-10"
       >
-        <motion.div
-          className="w-2 h-2 rounded-full bg-[#E8734A]"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-        />
-        <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
-        <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
+        <ProgressDots currentStep={1} animate />
       </motion.div>
     </motion.div>
   );

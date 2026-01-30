@@ -27,3 +27,6 @@ export {
   InstagramIcon,
   LoaderIcon,
 } from './icons';
+export { ProgressDots } from './ProgressDots';
+export { Button } from './Button';
+export type { ButtonVariant, ButtonSize } from './Button';

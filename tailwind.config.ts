@@ -11,10 +11,31 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // CharcuterME Brand Palette
+        cream: {
+          DEFAULT: "#FAF9F7",
+          light: "#FDF8F6",
+        },
+        coral: {
+          DEFAULT: "#E8734A",
+          dark: "#D4623B",
+          light: "#E8B4A0",
+          muted: "#F5E6E0",
+        },
+        brown: {
+          DEFAULT: "#A47864",
+          dark: "#6B5B4F",
+          muted: "#9A8A7C",
+          placeholder: "#C4B5A9",
+        },
+        instagram: {
+          orange: "#E8734A",
+          purple: "#C13584",
+          "purple-dark": "#A02B70",
+        },
+        // Legacy aliases
         mocha: "#A47864",
-        coral: "#FF6F61",
         lavender: "#A78BFA",
-        cream: "#FAF9F7",
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
