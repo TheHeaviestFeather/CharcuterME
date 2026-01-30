@@ -16,3 +16,14 @@ export {
   ComponentErrorBoundary,
   useErrorBoundary,
 } from './ErrorBoundary';
+export {
+  CheckIcon,
+  LightbulbIcon,
+  DiceIcon,
+  CameraIcon,
+  SparklesIcon,
+  CopyIcon,
+  DownloadIcon,
+  InstagramIcon,
+  LoaderIcon,
+} from './icons';

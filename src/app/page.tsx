@@ -5,25 +5,13 @@ import { InputScreen } from '@/components/InputScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { VibeCheckScreen } from '@/components/VibeCheckScreen';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import type { NamerResponse, SketchResponse } from '@/types';
 
 // =============================================================================
 // Types
 // =============================================================================
 
 type Screen = 'input' | 'loading' | 'results' | 'vibecheck';
-
-interface NamerResponse {
-  name: string;
-  validation: string;
-  tip: string;
-  wildcard?: string;
-}
-
-interface SketchResponse {
-  type: 'image' | 'svg';
-  imageUrl?: string;
-  svg?: string;
-}
 
 // =============================================================================
 // Main App Flow
