@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import {
   CheckIcon,
   LightbulbIcon,
@@ -34,16 +35,18 @@ interface ResultsScreenProps {
   imageError?: boolean;
 }
 
-// Image loading messages
+// Image loading messages - millennial chaos energy
 const IMAGE_LOADING_MESSAGES = [
   "Arranging your spread...",
-  "Adjusting the lighting...",
+  "Adjusting the lighting (it's giving golden hour)...",
   "Finding the perfect angle...",
-  "Adding cozy vibes...",
+  "Adding main character energy...",
+  "Making it look chef's kiss...",
+  "Manifesting that aesthetic...",
+  "Convincing the AI you're worth it...",
   "Almost Instagram-ready...",
-  "Perfecting the aesthetic...",
-  "Making it look delicious...",
-  "Final touches...",
+  "Your followers aren't ready...",
+  "This is gonna be so good...",
 ];
 
 export function ResultsScreen({
@@ -96,7 +99,7 @@ export function ResultsScreen({
   // Save image to device
   const handleSaveImage = useCallback(async () => {
     if (!imageUrl) {
-      showFeedback('No image to save');
+      showFeedback('No image yet. Patience is a virtue we don\'t have.');
       return;
     }
     const fileName = `charcuterme-${dinnerName.toLowerCase().replace(/\s+/g, '-')}.png`;
@@ -126,27 +129,58 @@ export function ResultsScreen({
     <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center px-6 py-8">
 
       {/* Tonight's Dinner Label */}
-      <p className="text-[#9A8A7C] text-sm mb-2 mt-4">
+      <motion.p
+        className="text-[#9A8A7C] text-sm mb-2 mt-4"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         Tonight&apos;s Dinner:
-      </p>
+      </motion.p>
 
-      {/* Hero Moment - The Name */}
-      <h1 className="font-serif text-3xl md:text-4xl italic text-[#A47864] text-center mb-4 px-4">
+      {/* Hero Moment - The Name (with celebration animation) */}
+      <motion.h1
+        className="font-serif text-3xl md:text-4xl italic text-[#A47864] text-center mb-4 px-4"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.5,
+          delay: 0.2,
+          type: 'spring',
+          stiffness: 200,
+          damping: 15,
+        }}
+      >
         &ldquo;{dinnerName}&rdquo;
-      </h1>
+      </motion.h1>
 
       {/* Validation */}
-      <div className="flex items-start gap-2 mb-6 px-4 max-w-[340px]">
-        <div className="mt-0.5 flex-shrink-0">
+      <motion.div
+        className="flex items-start gap-2 mb-6 px-4 max-w-[340px]"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
+      >
+        <motion.div
+          className="mt-0.5 flex-shrink-0"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.5, type: 'spring', stiffness: 300 }}
+        >
           <CheckIcon />
-        </div>
+        </motion.div>
         <p className="text-[#6B5B4F] text-base">
           {cleanValidation}
         </p>
-      </div>
+      </motion.div>
 
       {/* Image / Blueprint */}
-      <div className="w-full max-w-[340px] mb-4">
+      <motion.div
+        className="w-full max-w-[340px] mb-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
         <div className="relative aspect-square rounded-2xl overflow-hidden shadow-lg bg-white">
           {isLoadingImage ? (
             /* Loading State - Enhanced */
@@ -218,11 +252,11 @@ export function ResultsScreen({
           ) : (
             /* Placeholder */
             <div className="absolute inset-0 flex items-center justify-center bg-[#FAF9F7]">
-              <p className="text-[#9A8A7C] text-sm">Your spread awaits...</p>
+              <p className="text-[#9A8A7C] text-sm italic">Manifesting your spread...</p>
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Quick Actions - Copy Caption & Save Image */}
       {!isLoadingImage && (

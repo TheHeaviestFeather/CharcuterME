@@ -44,11 +44,30 @@ function canShareFiles(file: File): boolean {
 /**
  * Trigger haptic feedback on supported devices
  */
-function triggerHaptic(): void {
+function triggerHaptic(pattern: number | number[] = 50): void {
   if ('vibrate' in navigator) {
-    navigator.vibrate(50);
+    navigator.vibrate(pattern);
   }
 }
+
+/**
+ * Error messages with personality - millennial chaos energy
+ */
+const ERROR_MESSAGES = {
+  shareCancelled: 'Share cancelled. The vibes weren\'t right.',
+  shareFailed: 'Sharing machine broke. Screenshot it like it\'s 2015?',
+  copyFailed: 'Copy failed. Mercury must be in retrograde.',
+  saveFailed: 'Save failed. Your phone said no. Try again?',
+  noImage: 'No image yet. Patience is a virtue we don\'t have.',
+} as const;
+
+const SUCCESS_MESSAGES = {
+  shared: 'Shared! Your followers are blessed.',
+  copied: 'Copied! Ctrl+V when ready.',
+  copiedWithHint: 'Caption copied! Open Instagram and paste away.',
+  saved: 'Saved! Check your camera roll.',
+  openedTab: 'Opened in new tab. Very old school.',
+} as const;
 
 /**
  * Share content using Web Share API with image support
@@ -76,12 +95,12 @@ export async function shareWithImage(options: ShareOptions): Promise<ShareResult
       }
 
       await navigator.share(shareData);
-      triggerHaptic();
+      triggerHaptic([50, 30, 50]); // Double tap pattern for success
 
       return {
         success: true,
         method: 'native',
-        message: 'Shared successfully!',
+        message: SUCCESS_MESSAGES.shared,
       };
     } catch (error) {
       // User cancelled the share dialog
@@ -89,7 +108,7 @@ export async function shareWithImage(options: ShareOptions): Promise<ShareResult
         return {
           success: false,
           method: 'native',
-          message: 'Share cancelled',
+          message: ERROR_MESSAGES.shareCancelled,
         };
       }
       // Fall through to clipboard fallback
@@ -104,13 +123,14 @@ export async function shareWithImage(options: ShareOptions): Promise<ShareResult
     return {
       success: true,
       method: 'clipboard',
-      message: 'Caption copied! Open Instagram to share.',
+      message: SUCCESS_MESSAGES.copiedWithHint,
     };
   } catch {
+    triggerHaptic([100, 50, 100]); // Error pattern
     return {
       success: false,
       method: 'failed',
-      message: 'Unable to share. Please try again.',
+      message: ERROR_MESSAGES.shareFailed,
     };
   }
 }
@@ -126,13 +146,14 @@ export async function copyToClipboard(text: string): Promise<ShareResult> {
     return {
       success: true,
       method: 'clipboard',
-      message: 'Copied!',
+      message: SUCCESS_MESSAGES.copied,
     };
   } catch {
+    triggerHaptic([100, 50, 100]); // Error pattern
     return {
       success: false,
       method: 'failed',
-      message: 'Failed to copy',
+      message: ERROR_MESSAGES.copyFailed,
     };
   }
 }
@@ -159,11 +180,11 @@ export async function saveImage(
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      triggerHaptic();
+      triggerHaptic([50, 30, 50]); // Success pattern
       return {
         success: true,
         method: 'native',
-        message: 'Saved!',
+        message: SUCCESS_MESSAGES.saved,
       };
     } else {
       // For remote URLs, open in new tab (can't force download cross-origin)
@@ -171,14 +192,15 @@ export async function saveImage(
       return {
         success: true,
         method: 'native',
-        message: 'Opened in new tab',
+        message: SUCCESS_MESSAGES.openedTab,
       };
     }
   } catch {
+    triggerHaptic([100, 50, 100]); // Error pattern
     return {
       success: false,
       method: 'failed',
-      message: 'Failed to save',
+      message: ERROR_MESSAGES.saveFailed,
     };
   }
 }

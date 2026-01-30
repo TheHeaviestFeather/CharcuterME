@@ -3,18 +3,20 @@
 import { useState, useEffect } from 'react';
 
 // =============================================================================
-// Theatrical Loading Messages
+// Theatrical Loading Messages - Millennial Chaos Energy
 // =============================================================================
 
 const LOADING_MESSAGES = [
   "Consulting the cheese gods...",
-  "Arranging tiny pickles...",
+  "Manifesting snack excellence...",
   "Achieving optimal spread angles...",
-  "Summoning artisanal energy...",
-  "Channeling grandma's wisdom...",
-  "Calculating cracker ratios...",
-  "Infusing with cozy vibes...",
-  "Aligning the charcuterie stars...",
+  "Channeling chaotic neutral energy...",
+  "Calculating cracker-to-cheese ratios...",
+  "Asking the universe for validation...",
+  "Making this look intentional...",
+  "Adding a little unhinged flair...",
+  "Your spread is having a main character moment...",
+  "Almost there, bestie...",
 ];
 
 // =============================================================================
