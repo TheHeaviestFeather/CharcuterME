@@ -72,14 +72,16 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
 function buildImagenPrompt(ingredients: string[], _template: string): string {
   const ingredientList = ingredients.join(', ');
 
-  // Simpler, more focused prompt for better ingredient accuracy
-  return `Beautiful overhead food photography of a charcuterie board featuring these exact items: ${ingredientList}.
+  return `Cozy Instagram food photography, 45-degree angle, warm golden hour lighting.
 
-Style: Warm, cozy Instagram aesthetic. Soft natural lighting. Shallow depth of field.
-Setting: Rustic wooden board on a kitchen counter.
+A beautiful spread on a ceramic plate featuring: ${ingredientList}.
 
-IMPORTANT: Include ALL of these foods clearly visible: ${ingredientList}.
-No text or watermarks.`;
+Setting: Cozy couch corner with soft throw blanket visible in background. Wine glass softly blurred in the back.
+Style: Shallow depth of field, warm color grading, lifestyle aesthetic. Artfully casual plating.
+Mood: Sunday evening indulgence, treat yourself energy.
+
+Show ALL of these items clearly: ${ingredientList}.
+No text, labels, or watermarks.`;
 }
 
 // =============================================================================
