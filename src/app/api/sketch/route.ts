@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import { GoogleAuth } from 'google-auth-library';
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
@@ -150,32 +150,76 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 }
 
 // =============================================================================
-// Image Generation with DALL-E 3
+// Image Generation with Vertex AI Imagen 3
 // =============================================================================
 
-async function generateWithDallE(prompt: string): Promise<string | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY not configured');
+const PROJECT_ID = process.env.GOOGLE_PROJECT_ID || 'charcuterme';
+const LOCATION = 'us-central1';
+
+async function getAccessToken(): Promise<string> {
+  // Parse service account credentials from environment variable
+  const credentials = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  if (!credentials) {
+    throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY not configured');
   }
 
-  const openai = new OpenAI({ apiKey });
+  const serviceAccount = JSON.parse(credentials);
 
-  const response = await openai.images.generate({
-    model: "dall-e-3",
-    prompt: prompt,
-    n: 1,
-    size: "1024x1024",
-    quality: "standard",
-    response_format: "b64_json",
+  const auth = new GoogleAuth({
+    credentials: serviceAccount,
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
   });
 
-  const imageData = response.data?.[0]?.b64_json;
-  if (!imageData) {
-    throw new Error('No image in response');
+  const client = await auth.getClient();
+  const token = await client.getAccessToken();
+
+  if (!token.token) {
+    throw new Error('Failed to get access token');
   }
 
-  return `data:image/png;base64,${imageData}`;
+  return token.token;
+}
+
+async function generateWithVertexImagen(prompt: string): Promise<string | null> {
+  const accessToken = await getAccessToken();
+
+  const endpoint = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/imagen-3.0-generate-001:predict`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      instances: [{ prompt }],
+      parameters: {
+        sampleCount: 1,
+        aspectRatio: '1:1',
+        safetyFilterLevel: 'block_few',
+        personGeneration: 'dont_allow',
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error('Vertex AI Imagen error', {
+      status: response.status,
+      error: errorText
+    });
+    throw new Error(`Vertex AI error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Extract base64 image from response
+  const predictions = data.predictions;
+  if (predictions && predictions.length > 0 && predictions[0].bytesBase64Encoded) {
+    return `data:image/png;base64,${predictions[0].bytesBase64Encoded}`;
+  }
+
+  throw new Error('No image in response');
 }
 
 // =============================================================================
@@ -215,14 +259,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      logger.warn('OPENAI_API_KEY not configured', { promptVersion: PROMPT_VERSION });
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+      logger.warn('GOOGLE_SERVICE_ACCOUNT_KEY not configured', { promptVersion: PROMPT_VERSION });
       return NextResponse.json({
         type: 'svg',
         svg: generateSvgFallback(ingredients, template),
         template,
         fallback: true,
-        reason: 'API key not configured',
+        reason: 'Service account not configured',
       });
     }
 
@@ -242,9 +286,9 @@ export async function POST(request: NextRequest) {
     let imageData: string | null = null;
 
     try {
-      imageData = await generateWithDallE(prompt);
+      imageData = await generateWithVertexImagen(prompt);
     } catch (error) {
-      logger.error('DALL-E image generation failed', {
+      logger.error('Vertex AI Imagen generation failed', {
         promptVersion: PROMPT_VERSION,
         error: error instanceof Error ? error.message : 'Unknown',
       });
@@ -261,7 +305,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    logger.info('Sketch generated with DALL-E', {
+    logger.info('Sketch generated with Vertex AI Imagen', {
       promptVersion: PROMPT_VERSION,
       duration: Date.now() - startTime,
       template,
