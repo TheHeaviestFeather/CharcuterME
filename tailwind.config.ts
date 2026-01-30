@@ -24,7 +24,7 @@ const config: Config = {
       },
       keyframes: {
         float: {
-          '0%, 100%': { transform: 'translateY(100vh) rotate(0deg)', opacity: '0' },
+          '0%': { transform: 'translateY(100vh) rotate(0deg)', opacity: '0' },
           '10%': { opacity: '0.2' },
           '90%': { opacity: '0.2' },
           '100%': { transform: 'translateY(-20px) rotate(360deg)', opacity: '0' },
