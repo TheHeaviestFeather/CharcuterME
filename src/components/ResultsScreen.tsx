@@ -32,6 +32,12 @@ const CameraIcon = () => (
   </svg>
 );
 
+const SparklesIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  </svg>
+);
+
 // =============================================================================
 // Results Screen - Name Reveal + Blueprint (No Emojis)
 // =============================================================================
@@ -45,7 +51,9 @@ interface ResultsScreenProps {
   svgFallback?: string | null;
   onCheckVibe: () => void;
   onJustEat?: () => void;
+  onRetryImage?: () => void;
   isLoadingImage?: boolean;
+  imageError?: boolean;
 }
 
 // Image loading messages
@@ -69,7 +77,9 @@ export function ResultsScreen({
   svgFallback,
   onCheckVibe,
   onJustEat,
+  onRetryImage,
   isLoadingImage = false,
+  imageError = false,
 }: ResultsScreenProps) {
   // Rotating loading message for image
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
@@ -157,10 +167,32 @@ export function ResultsScreen({
             )
           ) : svgFallback ? (
             /* SVG Fallback from API */
-            <div
-              className="w-full h-full"
-              dangerouslySetInnerHTML={{ __html: svgFallback }}
-            />
+            <div className="relative w-full h-full">
+              <div
+                className="w-full h-full"
+                dangerouslySetInnerHTML={{ __html: svgFallback }}
+              />
+              {/* Retry Button - shown when image generation failed */}
+              {imageError && onRetryImage && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+                  <button
+                    onClick={onRetryImage}
+                    className="
+                      flex items-center gap-2 px-4 py-2
+                      bg-white/90 backdrop-blur-sm rounded-full
+                      text-[#A47864] text-sm font-medium
+                      shadow-lg hover:bg-white
+                      transition-all duration-200
+                      hover:-translate-y-0.5 active:translate-y-0
+                      focus:outline-none focus:ring-2 focus:ring-[#E8734A] focus:ring-offset-2
+                    "
+                  >
+                    <SparklesIcon />
+                    <span>Generate Image</span>
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             /* Placeholder */
             <div className="absolute inset-0 flex items-center justify-center bg-[#FAF9F7]">

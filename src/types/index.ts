@@ -1,31 +1,59 @@
+/**
+ * CharcuterME Type Definitions
+ *
+ * Types are organized in two categories:
+ * 1. Domain types (derived from Zod schemas for validation)
+ * 2. Internal types (for app logic, no validation needed)
+ *
+ * API request/response types are derived from Zod schemas in @/lib/validation
+ */
+
+import { z } from 'zod';
+
 // =============================================================================
-// CharcuterME Type Definitions
+// Zod Schemas - Single Source of Truth
 // =============================================================================
 
-// Ingredient Types
-export type IngredientRole = 'anchor' | 'filler' | 'pop' | 'vehicle';
-export type IngredientSize = 'tiny' | 'small' | 'medium' | 'large';
-export type PlatingStyle = 'stack' | 'scatter' | 'cluster' | 'spread' | 'fan' | 'pile';
+// Ingredient Role Schema
+export const IngredientRoleSchema = z.enum(['anchor', 'filler', 'pop', 'vehicle']);
+export type IngredientRole = z.infer<typeof IngredientRoleSchema>;
 
-export interface IngredientData {
-  role: IngredientRole;
-  size: IngredientSize;
-  shape: string;
-  color: string;
-  platingStyle: PlatingStyle;
-  displayName: string;
-  proTip: string;
-  isSmallRound?: boolean;
-  isLongItem?: boolean;
-  isBulky?: boolean;
-  needsContainer?: boolean;
-  useOddNumbers?: boolean;
-}
+// Ingredient Size Schema
+export const IngredientSizeSchema = z.enum(['tiny', 'small', 'medium', 'large']);
+export type IngredientSize = z.infer<typeof IngredientSizeSchema>;
 
-export interface ClassifiedIngredient extends IngredientData {
-  original: string;
-}
+// Plating Style Schema
+export const PlatingStyleSchema = z.enum(['stack', 'scatter', 'cluster', 'spread', 'fan', 'pile']);
+export type PlatingStyle = z.infer<typeof PlatingStyleSchema>;
 
+// Ingredient Data Schema
+export const IngredientDataSchema = z.object({
+  role: IngredientRoleSchema,
+  size: IngredientSizeSchema,
+  shape: z.string(),
+  color: z.string(),
+  platingStyle: PlatingStyleSchema,
+  displayName: z.string(),
+  proTip: z.string(),
+  isSmallRound: z.boolean().optional(),
+  isLongItem: z.boolean().optional(),
+  isBulky: z.boolean().optional(),
+  needsContainer: z.boolean().optional(),
+  useOddNumbers: z.boolean().optional(),
+});
+export type IngredientData = z.infer<typeof IngredientDataSchema>;
+
+// Classified Ingredient Schema
+export const ClassifiedIngredientSchema = IngredientDataSchema.extend({
+  original: z.string(),
+});
+export type ClassifiedIngredient = z.infer<typeof ClassifiedIngredientSchema>;
+
+// =============================================================================
+// Internal Types (No Zod validation needed)
+// =============================================================================
+
+// Ingredient Summary - computed from ClassifiedIngredient[]
 export interface IngredientSummary {
   total: number;
   anchors: ClassifiedIngredient[];
@@ -41,13 +69,14 @@ export interface IngredientSummary {
   hasOddNumberItems: boolean;
 }
 
-// Template Types
+// Template Layout
 export interface TemplateLayout {
   style: string;
   negativeSpace: string;
   boardShape: string;
 }
 
+// Template Definition
 export interface Template {
   name: string;
   conditions: (summary: IngredientSummary) => boolean;
@@ -57,7 +86,7 @@ export interface Template {
   visualGuide: string;
 }
 
-// Visual Rules Types
+// Visual Rules
 export interface VisualRule {
   name: string;
   check: (summary: IngredientSummary) => boolean;
@@ -65,59 +94,77 @@ export interface VisualRule {
   appliesTo?: string[];
 }
 
-// Processing Result Types
-export interface ProcessedResult {
-  input: string | string[];
-  classified: ClassifiedIngredient[];
-  summary: {
-    total: number;
-    anchors: string[];
-    fillers: string[];
-    pops: string[];
-    vehicles: string[];
-  };
-  templateSelected: string;
-  templateReason: string;
-  rulesApplied: string[];
-  prompt: string;
-}
+// =============================================================================
+// API Schemas - Derived from Zod
+// =============================================================================
 
-// API Response Types
-export interface NamerResponse {
-  name: string;
-  validation: string;
-  tip: string;
-  wildcard?: string;
-}
+// Processed Result Schema
+export const ProcessedResultSchema = z.object({
+  input: z.union([z.string(), z.array(z.string())]),
+  classified: z.array(ClassifiedIngredientSchema),
+  summary: z.object({
+    total: z.number(),
+    anchors: z.array(z.string()),
+    fillers: z.array(z.string()),
+    pops: z.array(z.string()),
+    vehicles: z.array(z.string()),
+  }),
+  templateSelected: z.string(),
+  templateReason: z.string(),
+  rulesApplied: z.array(z.string()),
+  prompt: z.string(),
+});
+export type ProcessedResult = z.infer<typeof ProcessedResultSchema>;
 
-export interface SketchResponse {
-  type: 'image' | 'svg';
-  imageUrl?: string;
-  svg?: string;
-  template?: string;
-  fallback?: boolean;
-  reason?: string;
-  rules?: string[];
-}
+// Namer Response Schema
+export const NamerResponseSchema = z.object({
+  name: z.string(),
+  validation: z.string(),
+  tip: z.string(),
+  wildcard: z.string().optional(),
+});
+export type NamerResponse = z.infer<typeof NamerResponseSchema>;
 
-export interface VibeCheckResponse {
-  score: number;
-  rank: string;
-  compliment: string;
-  sticker: string;
-  improvement?: string;
-}
+// Sketch Response Schema
+export const SketchResponseSchema = z.object({
+  type: z.enum(['image', 'svg']),
+  imageUrl: z.string().optional(),
+  svg: z.string().optional(),
+  template: z.string().optional(),
+  fallback: z.boolean().optional(),
+  reason: z.string().optional(),
+  rules: z.array(z.string()).optional(),
+});
+export type SketchResponse = z.infer<typeof SketchResponseSchema>;
 
+// Vibe Check Response Schema
+export const VibeCheckResponseSchema = z.object({
+  score: z.number().min(0).max(100),
+  rank: z.string(),
+  compliment: z.string(),
+  sticker: z.string(),
+  improvement: z.string().optional(),
+});
+export type VibeCheckResponse = z.infer<typeof VibeCheckResponseSchema>;
+
+// =============================================================================
 // Sticker Types
-export type StickerTier = 'legendary' | 'great' | 'good' | 'chaotic' | 'messy';
+// =============================================================================
+
+export const StickerTierSchema = z.enum(['legendary', 'great', 'good', 'chaotic', 'messy']);
+export type StickerTier = z.infer<typeof StickerTierSchema>;
 
 export interface StickerConfig {
   options: string[];
   style: string;
 }
 
+// =============================================================================
 // Validation Types
-export type ValidationSeverity = 'high' | 'low' | 'clarification';
+// =============================================================================
+
+export const ValidationSeveritySchema = z.enum(['high', 'low', 'clarification']);
+export type ValidationSeverity = z.infer<typeof ValidationSeveritySchema>;
 
 export interface ValidationResult {
   valid: boolean;
@@ -142,15 +189,21 @@ export interface ValidationListResult {
   warnings: Array<{ item: string; warning: string }>;
 }
 
-export interface DinnerMatch {
-  name: string;
-  tip: string;
-  template: string;
-  validation: string;
-}
+// Dinner Match Schema
+export const DinnerMatchSchema = z.object({
+  name: z.string(),
+  tip: z.string(),
+  template: z.string(),
+  validation: z.string(),
+});
+export type DinnerMatch = z.infer<typeof DinnerMatchSchema>;
 
+// =============================================================================
 // Template Selection Types
-export type TemplateId = 'minimalist' | 'anchor' | 'snackLine' | 'bento' | 'wildGraze';
+// =============================================================================
+
+export const TemplateIdSchema = z.enum(['minimalist', 'anchor', 'snackLine', 'bento', 'wildGraze']);
+export type TemplateId = z.infer<typeof TemplateIdSchema>;
 
 export interface TemplateOption {
   id: TemplateId;
@@ -159,9 +212,13 @@ export interface TemplateOption {
   icon: string;
 }
 
+// =============================================================================
 // App State Types
+// =============================================================================
+
 // 4-screen flow: input -> reveal (name + blueprint) -> camera -> results
-export type Screen = 'input' | 'reveal' | 'camera' | 'results';
+export const ScreenSchema = z.enum(['input', 'reveal', 'camera', 'results']);
+export type Screen = z.infer<typeof ScreenSchema>;
 
 // Keep old screens for backwards compatibility
 export type LegacyScreen = 'input' | 'name' | 'blueprint' | 'camera' | 'results';

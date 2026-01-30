@@ -83,6 +83,5 @@ export class CircuitBreaker {
 }
 
 // Create breakers for each external service
-export const dalleCircuit = new CircuitBreaker('dalle', 3, 30000);
 export const claudeCircuit = new CircuitBreaker('claude', 5, 60000);
 export const gptCircuit = new CircuitBreaker('gpt', 5, 60000);

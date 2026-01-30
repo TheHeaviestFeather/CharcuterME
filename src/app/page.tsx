@@ -44,6 +44,8 @@ export default function CharcuterMeApp() {
   // Loading states
   const [isLoadingName, setIsLoadingName] = useState(false);
   const [isLoadingImage, setIsLoadingImage] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [currentIngredients, setCurrentIngredients] = useState('');
 
   // =============================================================================
   // API Calls
@@ -81,6 +83,7 @@ export default function CharcuterMeApp() {
 
   const generateSketch = async (ingredientInput: string) => {
     setIsLoadingImage(true);
+    setImageError(false);
 
     try {
       const response = await fetch('/api/sketch', {
@@ -94,14 +97,18 @@ export default function CharcuterMeApp() {
       if (data.type === 'image' && data.imageUrl) {
         setImageUrl(data.imageUrl);
         setSvgFallback(null);
+        setImageError(false);
       } else if (data.svg) {
+        // SVG fallback means image generation failed
         setSvgFallback(data.svg);
         setImageUrl(null);
+        setImageError(true);
       }
 
       return data;
     } catch (error) {
       console.error('Error generating sketch:', error);
+      setImageError(true);
       return null;
     } finally {
       setIsLoadingImage(false);
@@ -115,6 +122,7 @@ export default function CharcuterMeApp() {
   const handleSubmitIngredients = async (ingredientInput: string) => {
     // Reset previous results before starting new request
     resetState();
+    setCurrentIngredients(ingredientInput);
     setScreen('loading');
 
     // Minimum loading time for theatrical effect (1.5 seconds)
@@ -127,6 +135,12 @@ export default function CharcuterMeApp() {
     // Wait for BOTH name to be ready AND minimum loading time
     await Promise.all([namePromise, minLoadingTime]);
     setScreen('results');
+  };
+
+  const handleRetryImage = () => {
+    if (currentIngredients) {
+      generateSketch(currentIngredients);
+    }
   };
 
   const handleCheckVibe = () => {
@@ -146,6 +160,8 @@ export default function CharcuterMeApp() {
     setWildcard(undefined);
     setImageUrl(null);
     setSvgFallback(null);
+    setImageError(false);
+    setCurrentIngredients('');
   };
 
   // =============================================================================
@@ -175,7 +191,9 @@ export default function CharcuterMeApp() {
           svgFallback={svgFallback}
           onCheckVibe={handleCheckVibe}
           onJustEat={handleJustEat}
+          onRetryImage={handleRetryImage}
           isLoadingImage={isLoadingImage}
+          imageError={imageError}
         />
       );
 

@@ -1,9 +1,19 @@
 /**
- * Zod Validation Schemas
- * Single source of truth for API request/response validation
+ * Zod Validation Utilities
+ * Re-exports schemas from types and provides validation helpers
  */
 
 import { z } from 'zod';
+
+// Re-export schemas from types for convenience
+export {
+  NamerResponseSchema,
+  SketchResponseSchema,
+  VibeCheckResponseSchema,
+  type NamerResponse,
+  type SketchResponse,
+  type VibeCheckResponse,
+} from '@/types';
 
 // =============================================================================
 // Shared Utilities
@@ -79,43 +89,12 @@ export const VibeRequestSchema = z.object({
 });
 
 // =============================================================================
-// Response Schemas
-// =============================================================================
-
-export const NamerResponseSchema = z.object({
-  name: z.string(),
-  validation: z.string(),
-  tip: z.string(),
-  wildcard: z.string().optional(),
-});
-
-export const SketchResponseSchema = z.object({
-  type: z.enum(['image', 'svg']),
-  imageUrl: z.string().optional(),
-  svg: z.string().optional(),
-  template: z.string().optional(),
-  fallback: z.boolean().optional(),
-  reason: z.string().optional(),
-  rules: z.array(z.string()).optional(),
-});
-
-export const VibeResponseSchema = z.object({
-  score: z.number().min(0).max(100),
-  rank: z.string(),
-  compliment: z.string(),
-  sticker: z.string(),
-});
-
-// =============================================================================
 // Type Exports
 // =============================================================================
 
 export type NameRequest = z.infer<typeof NameRequestSchema>;
 export type SketchRequest = z.infer<typeof SketchRequestSchema>;
 export type VibeRequest = z.infer<typeof VibeRequestSchema>;
-export type NamerResponse = z.infer<typeof NamerResponseSchema>;
-export type SketchResponse = z.infer<typeof SketchResponseSchema>;
-export type VibeResponse = z.infer<typeof VibeResponseSchema>;
 
 // =============================================================================
 // Validation Helper
