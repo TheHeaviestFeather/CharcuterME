@@ -31,6 +31,7 @@ interface ResultsScreenProps {
   onCheckVibe: () => void;
   onJustEat?: () => void;
   onRetryImage?: () => void;
+  isLoadingName?: boolean;
   isLoadingImage?: boolean;
   imageError?: boolean;
 }
@@ -42,11 +43,19 @@ const IMAGE_LOADING_MESSAGES = [
   "Finding the perfect angle...",
   "Adding main character energy...",
   "Making it look chef's kiss...",
-  "Manifesting that aesthetic...",
+  "Summoning that aesthetic...",
   "Convincing the AI you're worth it...",
   "Almost Instagram-ready...",
   "Your followers aren't ready...",
   "This is gonna be so good...",
+];
+
+// Name loading messages
+const NAME_LOADING_MESSAGES = [
+  "Consulting the snack oracle...",
+  "Channeling chaotic energy...",
+  "Asking the universe for a name...",
+  "Summoning dinner vibes...",
 ];
 
 export function ResultsScreen({
@@ -59,26 +68,43 @@ export function ResultsScreen({
   onCheckVibe,
   onJustEat,
   onRetryImage,
+  isLoadingName = false,
   isLoadingImage = false,
   imageError = false,
 }: ResultsScreenProps) {
   // State
-  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [imageLoadingMsgIndex, setImageLoadingMsgIndex] = useState(0);
+  const [nameLoadingMsgIndex, setNameLoadingMsgIndex] = useState(0);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
 
+  // Rotate image loading messages
   useEffect(() => {
     if (!isLoadingImage) {
-      setLoadingMessageIndex(0);
+      setImageLoadingMsgIndex(0);
       return;
     }
 
     const interval = setInterval(() => {
-      setLoadingMessageIndex((prev) => (prev + 1) % IMAGE_LOADING_MESSAGES.length);
+      setImageLoadingMsgIndex((prev) => (prev + 1) % IMAGE_LOADING_MESSAGES.length);
     }, 3000);
 
     return () => clearInterval(interval);
   }, [isLoadingImage]);
+
+  // Rotate name loading messages
+  useEffect(() => {
+    if (!isLoadingName) {
+      setNameLoadingMsgIndex(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setNameLoadingMsgIndex((prev) => (prev + 1) % NAME_LOADING_MESSAGES.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isLoadingName]);
 
   // Strip checkmark from validation if present (we'll add our own icon)
   const cleanValidation = validation.replace(/^[✓✔]\s*/, '');
@@ -138,41 +164,60 @@ export function ResultsScreen({
         Tonight&apos;s Dinner:
       </motion.p>
 
-      {/* Hero Moment - The Name (with celebration animation) */}
-      <motion.h1
-        className="font-serif text-3xl md:text-4xl italic text-[#A47864] text-center mb-4 px-4"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.5,
-          delay: 0.2,
-          type: 'spring',
-          stiffness: 200,
-          damping: 15,
-        }}
-      >
-        &ldquo;{dinnerName}&rdquo;
-      </motion.h1>
+      {/* Hero Moment - The Name (with skeleton loading state) */}
+      {isLoadingName ? (
+        <div className="text-center mb-4 px-4">
+          {/* Skeleton pulse for name */}
+          <div className="h-10 w-64 mx-auto bg-[#E8B4A0]/30 rounded-lg animate-pulse mb-3" />
+          <p className="text-[#A47864] text-sm italic animate-pulse">
+            {NAME_LOADING_MESSAGES[nameLoadingMsgIndex]}
+          </p>
+        </div>
+      ) : (
+        <motion.h1
+          className="font-serif text-3xl md:text-4xl italic text-[#A47864] text-center mb-4 px-4"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.5,
+            type: 'spring',
+            stiffness: 200,
+            damping: 15,
+          }}
+        >
+          &ldquo;{dinnerName}&rdquo;
+        </motion.h1>
+      )}
 
       {/* Validation */}
-      <motion.div
-        className="flex items-start gap-2 mb-6 px-4 max-w-[340px]"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.4 }}
-      >
+      {isLoadingName ? (
+        <div className="flex items-start gap-2 mb-6 px-4 max-w-[340px]">
+          <div className="w-5 h-5 rounded-full bg-[#E8B4A0]/30 animate-pulse flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-[#E8B4A0]/30 rounded animate-pulse w-full" />
+            <div className="h-4 bg-[#E8B4A0]/30 rounded animate-pulse w-3/4" />
+          </div>
+        </div>
+      ) : (
         <motion.div
-          className="mt-0.5 flex-shrink-0"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.5, type: 'spring', stiffness: 300 }}
+          className="flex items-start gap-2 mb-6 px-4 max-w-[340px]"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
         >
-          <CheckIcon />
+          <motion.div
+            className="mt-0.5 flex-shrink-0"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 300 }}
+          >
+            <CheckIcon />
+          </motion.div>
+          <p className="text-[#6B5B4F] text-base">
+            {cleanValidation}
+          </p>
         </motion.div>
-        <p className="text-[#6B5B4F] text-base">
-          {cleanValidation}
-        </p>
-      </motion.div>
+      )}
 
       {/* Image / Blueprint */}
       <motion.div
@@ -190,7 +235,7 @@ export function ResultsScreen({
 
               {/* Rotating message */}
               <p className="text-[#A47864] text-base font-medium text-center mb-4 min-h-[24px] transition-opacity duration-300">
-                {IMAGE_LOADING_MESSAGES[loadingMessageIndex]}
+                {IMAGE_LOADING_MESSAGES[imageLoadingMsgIndex]}
               </p>
 
               {/* Progress bar (indeterminate) */}
@@ -252,14 +297,14 @@ export function ResultsScreen({
           ) : (
             /* Placeholder */
             <div className="absolute inset-0 flex items-center justify-center bg-[#FAF9F7]">
-              <p className="text-[#9A8A7C] text-sm italic">Manifesting your spread...</p>
+              <p className="text-[#9A8A7C] text-sm italic">Your spread awaits...</p>
             </div>
           )}
         </div>
       </motion.div>
 
       {/* Quick Actions - Copy Caption & Save Image */}
-      {!isLoadingImage && (
+      {!isLoadingImage && !isLoadingName && (
         <div className="w-full max-w-[340px] mb-6">
           <div className="flex gap-3">
             <button
@@ -287,22 +332,36 @@ export function ResultsScreen({
         </div>
       )}
 
-      {/* Tip */}
-      <div className="w-full max-w-[340px] mb-4">
-        <div className="bg-white rounded-xl px-4 py-3 shadow-sm">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex-shrink-0">
-              <LightbulbIcon />
+      {/* Tip - show skeleton when loading */}
+      {isLoadingName ? (
+        <div className="w-full max-w-[340px] mb-4">
+          <div className="bg-white rounded-xl px-4 py-3 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 rounded bg-[#E8B4A0]/30 animate-pulse flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 bg-[#E8B4A0]/30 rounded animate-pulse w-full" />
+                <div className="h-3 bg-[#E8B4A0]/30 rounded animate-pulse w-2/3" />
+              </div>
             </div>
-            <p className="text-[#6B5B4F] text-sm">
-              {tip}
-            </p>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="w-full max-w-[340px] mb-4">
+          <div className="bg-white rounded-xl px-4 py-3 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex-shrink-0">
+                <LightbulbIcon />
+              </div>
+              <p className="text-[#6B5B4F] text-sm">
+                {tip}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Wildcard */}
-      {wildcard && (
+      {/* Wildcard - only show when loaded */}
+      {!isLoadingName && wildcard && (
         <div className="w-full max-w-[340px] mb-6">
           <div className="bg-[#F5E6E0] rounded-xl px-4 py-3">
             <div className="flex items-start gap-3">
@@ -325,7 +384,7 @@ export function ResultsScreen({
       {/* Primary CTA - Share to Stories */}
       <button
         onClick={handleShareToStories}
-        disabled={isSharing || isLoadingImage}
+        disabled={isSharing || isLoadingImage || isLoadingName}
         aria-label="Share to Instagram Stories"
         className="
           w-full max-w-[340px] rounded-xl py-4 px-8

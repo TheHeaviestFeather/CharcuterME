@@ -13,7 +13,7 @@ import type { NamerResponse, SketchResponse } from '@/types';
 // Types
 // =============================================================================
 
-export type Screen = 'input' | 'loading' | 'results' | 'vibecheck';
+export type Screen = 'input' | 'results' | 'vibecheck';
 
 export interface DinnerState {
   screen: Screen;
@@ -209,18 +209,15 @@ export function useDinnerFlow() {
     async (ingredients: string) => {
       dispatch({ type: 'RESET' });
       dispatch({ type: 'SET_INGREDIENTS', ingredients });
-      dispatch({ type: 'SET_SCREEN', screen: 'loading' });
 
-      // Minimum loading time for theatrical effect
-      const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 1500));
+      // Go directly to results - progressive loading shows skeleton states
+      dispatch({ type: 'SET_SCREEN', screen: 'results' });
+      dispatch({ type: 'SET_LOADING_NAME', isLoading: true });
+      dispatch({ type: 'SET_LOADING_IMAGE', isLoading: true });
 
       // Fire both API calls in parallel
-      const namePromise = generateName(ingredients);
+      generateName(ingredients);
       generateSketch(ingredients);
-
-      // Wait for BOTH name to be ready AND minimum loading time
-      await Promise.all([namePromise, minLoadingTime]);
-      dispatch({ type: 'SET_SCREEN', screen: 'results' });
     },
     [generateName, generateSketch]
   );

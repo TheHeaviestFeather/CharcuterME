@@ -84,7 +84,7 @@ const FALLBACK_RESPONSES: Record<string, NamerResponse> = {
   carbs: {
     name: 'Serotonin Delivery System',
     validation: 'Carbs are just a hug for your insides. You needed this.',
-    tip: 'Bread is a food group when you manifest it hard enough.',
+    tip: 'Bread is a food group when you believe hard enough.',
     wildcard: 'Butter makes everything better. That\'s just science.',
   },
   sweet: {

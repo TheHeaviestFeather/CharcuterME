@@ -31,7 +31,7 @@ const NON_FOOD_PATTERNS: Record<string, { pattern: RegExp; responses: string[] }
     pattern: /\b(love|hate|vibes?|energy|thoughts?|prayers?|feelings?|dreams?|hope|sadness|anger|chaos|nothing)\b/i,
     responses: [
       "We appreciate the energy, but we need actual food.",
-      "Manifesting a snack? We still need ingredients.",
+      "Wishing for a snack? We still need ingredients.",
       "That's very philosophical, but also inedible.",
     ],
   },

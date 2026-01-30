@@ -3,11 +3,10 @@
 import { InputScreen } from '@/components/InputScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { VibeCheckScreen } from '@/components/VibeCheckScreen';
-import { LoadingScreen } from '@/components/LoadingScreen';
 import { useDinnerFlow } from '@/hooks';
 
 // =============================================================================
-// Main App Flow
+// Main App Flow - Progressive Loading (no separate loading screen)
 // =============================================================================
 
 export default function CharcuterMeApp() {
@@ -22,21 +21,19 @@ export default function CharcuterMeApp() {
         />
       );
 
-    case 'loading':
-      return <LoadingScreen isLoading={true} />;
-
     case 'results':
       return (
         <ResultsScreen
-          dinnerName={state.dinnerName || 'Creating your masterpiece...'}
-          validation={state.validation || 'Analyzing your choices...'}
-          tip={state.tip || 'Loading wisdom...'}
+          dinnerName={state.dinnerName}
+          validation={state.validation}
+          tip={state.tip}
           wildcard={state.wildcard}
           imageUrl={state.imageUrl}
           svgFallback={state.svgFallback}
           onCheckVibe={actions.goToVibeCheck}
           onJustEat={actions.reset}
           onRetryImage={actions.retryImage}
+          isLoadingName={state.isLoadingName}
           isLoadingImage={state.isLoadingImage}
           imageError={state.imageError}
         />

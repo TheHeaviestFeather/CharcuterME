@@ -7,5 +7,3 @@ export {
   type Screen,
   type DinnerState,
 } from './useDinnerFlow';
-
-export { useLoadingTheater } from './useLoadingTheater';
