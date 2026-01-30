@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 
 const securityHeaders = [
@@ -33,7 +35,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https://*.blob.core.windows.net",
-      "connect-src 'self' https://api.anthropic.com https://api.openai.com",
+      "connect-src 'self' https://api.anthropic.com https://api.openai.com https://*.sentry.io https://*.ingest.sentry.io",
     ].join('; ')
   }
 ];
@@ -59,4 +61,16 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Suppress source map upload logs in CI
+  silent: true,
+
+  // Upload source maps for better stack traces
+  widenClientFileUpload: true,
+
+  // Hides source maps from browser devtools in production
+  hideSourceMaps: true,
+
+  // Disable Sentry telemetry
+  disableLogger: true,
+});

@@ -1,0 +1,31 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#FAF9F7"/>
+
+  <!-- Decorative plate -->
+  <ellipse cx="600" cy="280" rx="180" ry="160" fill="white" stroke="#A47864" stroke-width="3"/>
+  <ellipse cx="600" cy="280" rx="150" ry="130" fill="none" stroke="#E8B4A0" stroke-width="2" stroke-dasharray="8 4"/>
+
+  <!-- Food items (abstract) -->
+  <circle cx="520" cy="250" r="35" fill="#FF6F61" opacity="0.9"/>
+  <circle cx="650" cy="220" r="25" fill="#A78BFA" opacity="0.9"/>
+  <circle cx="580" cy="320" r="30" fill="#E8B4A0" opacity="0.9"/>
+  <circle cx="680" cy="300" r="20" fill="#FF6F61" opacity="0.7"/>
+  <ellipse cx="550" cy="280" rx="40" ry="15" fill="#A47864" opacity="0.6"/>
+
+  <!-- Title -->
+  <text x="600" y="480" text-anchor="middle" font-family="Georgia, serif" font-size="72" font-style="italic" fill="#A47864">
+    CharcuterME
+  </text>
+
+  <!-- Tagline -->
+  <text x="600" y="540" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" fill="#6B5B4F">
+    Turn Fridge Chaos Into Culinary Art
+  </text>
+
+  <!-- Small decorative elements -->
+  <circle cx="200" cy="100" r="8" fill="#FF6F61" opacity="0.5"/>
+  <circle cx="1000" cy="150" r="6" fill="#A78BFA" opacity="0.5"/>
+  <circle cx="150" cy="500" r="10" fill="#E8B4A0" opacity="0.5"/>
+  <circle cx="1050" cy="450" r="7" fill="#FF6F61" opacity="0.5"/>
+</svg>

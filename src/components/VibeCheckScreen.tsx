@@ -52,8 +52,18 @@ interface DinnerData {
 
 interface VibeCheckScreenProps {
   dinnerData: DinnerData;
+  ingredients: string;
   inspirationImage: string | null;
   onStartOver: () => void;
+}
+
+// API Response type (matches /api/vibe response)
+interface VibeApiResponse {
+  score: number;
+  rank: string;
+  compliment: string;
+  sticker: string;
+  improvement?: string;
 }
 
 // =============================================================================
@@ -150,6 +160,7 @@ function generateVibeResult(): VibeCheckResult {
 
 export function VibeCheckScreen({
   dinnerData,
+  ingredients,
   inspirationImage,
   onStartOver
 }: VibeCheckScreenProps) {
@@ -173,24 +184,54 @@ export function VibeCheckScreen({
       const base64 = event.target?.result as string;
       setUserPhoto(base64);
 
-      // Trigger vibe analysis
-      await analyzeVibe();
+      // Trigger vibe analysis with the photo
+      await analyzeVibe(base64);
     };
     reader.readAsDataURL(file);
   };
 
-  // Analyze the vibe - generates truly random results each time
-  const analyzeVibe = async () => {
+  // Analyze the vibe - calls the AI API for witty feedback
+  const analyzeVibe = async (photoBase64: string) => {
     setIsAnalyzing(true);
 
-    // Simulate analysis delay for UX
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // Call the vibe check API
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-    // Generate fresh random verdict
-    const verdict = generateVibeResult();
-    setVibeResult(verdict);
+      const response = await fetch('/api/vibe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          photo: photoBase64,
+          dinnerName,
+          ingredients,
+        }),
+        signal: controller.signal,
+      });
 
-    setIsAnalyzing(false);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data: VibeApiResponse = await response.json();
+
+      // Map API response to component format
+      setVibeResult({
+        score: `${data.score}%`,
+        category: data.rank,
+        validation: data.compliment,
+        observation: data.improvement || getRandomItem(OBSERVATIONS),
+      });
+    } catch (error) {
+      console.error('Vibe check API error:', error);
+      // Fallback to random generation if API fails
+      setVibeResult(generateVibeResult());
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   // Generate caption for sharing
@@ -381,10 +422,10 @@ export function VibeCheckScreen({
       <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center justify-center px-6 py-8">
         <div className="w-12 h-12 border-3 border-[#E8B4A0] border-t-[#E8734A] rounded-full animate-spin mb-6" />
         <p className="text-[#A47864] font-serif text-xl italic mb-2">
-          Analyzing the vibe...
+          AI is judging your plate...
         </p>
         <p className="text-[#9A8A7C] text-sm">
-          Consulting the chaos algorithms
+          GPT-4o is crafting a witty roast
         </p>
       </div>
     );

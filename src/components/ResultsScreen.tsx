@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 
 // =============================================================================
 // Icons (SVG replacements for emojis)
@@ -126,6 +127,14 @@ export function ResultsScreen({
   // Strip checkmark from validation if present (we'll add our own icon)
   const cleanValidation = validation.replace(/^[✓✔]\s*/, '');
   const caption = generateCaption(dinnerName, validation);
+
+  // Sanitize SVG to prevent XSS attacks
+  const sanitizedSvg = useMemo(() => {
+    if (!svgFallback) return null;
+    return DOMPurify.sanitize(svgFallback, {
+      USE_PROFILES: { svg: true, svgFilters: true },
+    });
+  }, [svgFallback]);
 
   // Copy caption to clipboard
   const handleCopyCaption = useCallback(async () => {
@@ -288,12 +297,12 @@ export function ResultsScreen({
                 sizes="340px"
               />
             )
-          ) : svgFallback ? (
-            /* SVG Fallback from API */
+          ) : sanitizedSvg ? (
+            /* SVG Fallback from API (sanitized for XSS protection) */
             <div className="relative w-full h-full">
               <div
                 className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: svgFallback }}
+                dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
               />
               {/* Retry Button - shown when image generation failed */}
               {imageError && onRetryImage && (

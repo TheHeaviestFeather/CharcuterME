@@ -206,6 +206,7 @@ export default function CharcuterMeApp() {
             tip: tip || '',
             wildcard: wildcard,
           }}
+          ingredients={currentIngredients}
           inspirationImage={imageUrl}
           onStartOver={handleJustEat}
         />
