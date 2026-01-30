@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 // =============================================================================
 // Icons (SVG replacements for emojis)
@@ -47,6 +48,18 @@ interface ResultsScreenProps {
   isLoadingImage?: boolean;
 }
 
+// Image loading messages
+const IMAGE_LOADING_MESSAGES = [
+  "Arranging your spread...",
+  "Adjusting the lighting...",
+  "Finding the perfect angle...",
+  "Adding cozy vibes...",
+  "Almost Instagram-ready...",
+  "Perfecting the aesthetic...",
+  "Making it look delicious...",
+  "Final touches...",
+];
+
 export function ResultsScreen({
   dinnerName,
   validation,
@@ -58,6 +71,21 @@ export function ResultsScreen({
   onJustEat,
   isLoadingImage = false,
 }: ResultsScreenProps) {
+  // Rotating loading message for image
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isLoadingImage) {
+      setLoadingMessageIndex(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % IMAGE_LOADING_MESSAGES.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isLoadingImage]);
 
   // Strip checkmark from validation if present (we'll add our own icon)
   const cleanValidation = validation.replace(/^[✓✔]\s*/, '');
@@ -89,10 +117,25 @@ export function ResultsScreen({
       <div className="w-full max-w-[340px] mb-6">
         <div className="relative aspect-square rounded-2xl overflow-hidden shadow-lg bg-white">
           {isLoadingImage ? (
-            /* Loading State */
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#FAF9F7]">
-              <div className="w-12 h-12 border-3 border-[#E8B4A0] border-t-[#E8734A] rounded-full animate-spin mb-4" />
-              <p className="text-[#9A8A7C] text-sm">Crafting your vision...</p>
+            /* Loading State - Enhanced */
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#FAF9F7] p-6">
+              {/* Spinner */}
+              <div className="w-16 h-16 border-4 border-[#E8B4A0] border-t-[#E8734A] rounded-full animate-spin mb-6" />
+
+              {/* Rotating message */}
+              <p className="text-[#A47864] text-base font-medium text-center mb-4 min-h-[24px] transition-opacity duration-300">
+                {IMAGE_LOADING_MESSAGES[loadingMessageIndex]}
+              </p>
+
+              {/* Progress bar (indeterminate) */}
+              <div className="w-48 h-1.5 bg-[#E8B4A0] rounded-full overflow-hidden">
+                <div className="h-full w-1/3 bg-[#E8734A] rounded-full animate-progress-indeterminate" />
+              </div>
+
+              {/* Hint */}
+              <p className="text-[#9A8A7C] text-xs mt-4 text-center">
+                This usually takes 20-30 seconds
+              </p>
             </div>
           ) : imageUrl ? (
             /* Generated Image - use img for data URLs, Next Image for remote URLs */
