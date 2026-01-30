@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from 'next/server';
 import { processGirlDinner } from '@/lib/logic-bridge';
 import { logger } from '@/lib/logger';
@@ -149,50 +150,43 @@ function generateSvgFallback(ingredients: string[], template: string): string {
 }
 
 // =============================================================================
-// Image Generation with Imagen 3 via REST API
+// Image Generation with Gemini 2.0 Flash
 // =============================================================================
 
-async function generateWithImagen(prompt: string): Promise<string | null> {
+async function generateWithGemini(prompt: string): Promise<string | null> {
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
     throw new Error('GOOGLE_API_KEY not configured');
   }
 
-  // Use Imagen 3 model for image generation
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        instances: [{ prompt }],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: '1:1',
-          safetyFilterLevel: 'block_few',
-          personGeneration: 'dont_allow',
-        },
-      }),
-    }
-  );
+  const genAI = new GoogleGenerativeAI(apiKey);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    logger.error('Imagen API error', {
-      status: response.status,
-      error: errorText
-    });
-    throw new Error(`Imagen API error: ${response.status}`);
+  // Use Gemini 2.0 Flash with image generation
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash-exp-image-generation",
+  });
+
+  const response = await model.generateContent({
+    contents: [{
+      role: "user",
+      parts: [{ text: prompt }]
+    }],
+    generationConfig: {
+      // @ts-expect-error - responseModalities is valid but not in types yet
+      responseModalities: ["image", "text"],
+    },
+  });
+
+  const candidate = response.response.candidates?.[0];
+  if (!candidate?.content?.parts) {
+    throw new Error('No content in response');
   }
 
-  const data = await response.json();
-
-  // Extract the base64 image from the response
-  const predictions = data.predictions;
-  if (predictions && predictions.length > 0 && predictions[0].bytesBase64Encoded) {
-    return `data:image/png;base64,${predictions[0].bytesBase64Encoded}`;
+  // Find the image part in the response
+  for (const part of candidate.content.parts) {
+    if (part.inlineData?.mimeType?.startsWith("image/")) {
+      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+    }
   }
 
   throw new Error('No image in response');
@@ -262,9 +256,9 @@ export async function POST(request: NextRequest) {
     let imageData: string | null = null;
 
     try {
-      imageData = await generateWithImagen(prompt);
+      imageData = await generateWithGemini(prompt);
     } catch (error) {
-      logger.error('Imagen generation failed', {
+      logger.error('Gemini image generation failed', {
         promptVersion: PROMPT_VERSION,
         error: error instanceof Error ? error.message : 'Unknown',
       });
@@ -281,7 +275,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    logger.info('Sketch generated with Imagen', {
+    logger.info('Sketch generated with Gemini', {
       promptVersion: PROMPT_VERSION,
       duration: Date.now() - startTime,
       template,
