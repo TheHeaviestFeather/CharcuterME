@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { IngredientChips } from './IngredientChips';
 
 // =============================================================================
-// Input Screen - Simplified (No Emojis)
+// Input Screen - Direction C: Playful Creator (No Emojis)
 // =============================================================================
 
 interface InputScreenProps {
@@ -20,9 +20,7 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
       textarea.style.height = 'auto';
-      // Set height to scrollHeight, with a max of 200px
       textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     }
   }, [ingredients]);
@@ -41,47 +39,47 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center justify-center px-6 py-8">
-      {/* Header */}
-      <header className="text-center mb-12">
-        <h1 className="font-serif text-3xl italic text-[#A47864] mb-2">
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 py-8">
+      {/* Header - Bold and Confident */}
+      <header className="text-center mb-10">
+        <h1 className="font-display text-4xl italic text-coral mb-3 tracking-tight">
           CharcuterME
         </h1>
-        <p className="text-sm text-[#736B63]">
-          Turn Fridge Chaos Into Culinary Art
+        <p className="text-base text-text-secondary font-medium">
+          Turn snacks into a whole personality
         </p>
       </header>
 
       {/* Input Section */}
-      <div className="w-full max-w-[340px] mb-6">
-        {/* Label above input */}
+      <div className="w-full max-w-[360px] mb-8">
+        {/* Prompt - Big and Playful */}
         <label
           htmlFor="ingredients-input"
-          className="block text-center text-[#A47864] text-base mb-3"
+          className="block text-center text-text-primary text-xl font-semibold mb-4"
         >
-          What&apos;s in the abyss today?
+          What&apos;s on the plate tonight?
         </label>
 
-        {/* Floating input box */}
-        <div className="bg-white rounded-xl shadow-md px-5 py-4">
+        {/* Chunky Input Box */}
+        <div className="bg-white rounded-2xl border-2 border-peach shadow-lg px-5 py-4 transition-all duration-200 focus-within:border-coral focus-within:shadow-xl">
           <textarea
             ref={textareaRef}
             id="ingredients-input"
             value={ingredients}
             onChange={(e) => setIngredients(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="brie, crackers, grapes..."
+            placeholder="cheese, crackers, vibes..."
             disabled={isLoading}
             aria-describedby="ingredients-hint"
             rows={1}
-            className="w-full border-none outline-none text-base text-[#A47864] bg-transparent placeholder:text-[#C4B5A9] resize-none overflow-hidden min-h-[24px]"
+            className="w-full border-none outline-none text-lg text-text-primary bg-transparent placeholder:text-text-muted resize-none overflow-hidden min-h-[28px]"
           />
         </div>
         <p id="ingredients-hint" className="sr-only">
           Enter your ingredients separated by commas
         </p>
 
-        {/* Ingredient Chips */}
+        {/* Ingredient Chips - No "Quick add" label, self-explanatory */}
         <IngredientChips
           value={ingredients}
           onChange={setIngredients}
@@ -89,35 +87,28 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
         />
       </div>
 
-      {/* CTA Button */}
+      {/* CTA Button - Chunky and Confident */}
       <button
         onClick={handleSubmit}
         disabled={!ingredients.trim() || isLoading}
         className={`
-          w-full max-w-[340px] rounded-xl py-4 px-8
-          text-base font-semibold text-white
+          w-full max-w-[360px] rounded-2xl py-5 px-8
+          text-lg font-bold text-white
           transition-all duration-200 ease-out
-          shadow-lg shadow-[#E8734A]/30
+          shadow-lg
           ${(!ingredients.trim() || isLoading)
-            ? 'bg-[#E8B4A0] cursor-not-allowed'
-            : 'bg-[#E8734A] hover:bg-[#D4623B] hover:-translate-y-0.5 cursor-pointer active:translate-y-0'
+            ? 'bg-[#E8B4A0] cursor-not-allowed shadow-[#E8B4A0]/20'
+            : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 cursor-pointer active:translate-y-0 active:scale-[0.98]'
           }
         `}
       >
-        {isLoading ? 'Creating magic...' : 'Make it Art, I Guess'}
+        {isLoading ? 'Working on it...' : 'Name My Dinner'}
       </button>
 
-      {/* Progress Dots */}
-      <div className="flex gap-2 mt-10">
-        <div className="w-2 h-2 rounded-full bg-[#E8734A]" />
-        <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
-        <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
-      </div>
-
-      {/* Footer */}
+      {/* Subtle footer */}
       <a
         href="/privacy"
-        className="mt-8 text-xs text-[#736B63] hover:text-[#A47864] transition-colors"
+        className="mt-12 text-xs text-text-muted hover:text-text-secondary transition-colors underline underline-offset-2"
       >
         Privacy Policy
       </a>

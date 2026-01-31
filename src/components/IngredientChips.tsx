@@ -3,17 +3,20 @@
 import { useMemo, useCallback } from 'react';
 
 // =============================================================================
-// Chip Options
+// Chip Options - No emojis, playful labels only
 // =============================================================================
 
 const CHIP_OPTIONS = [
-  { label: 'brie', emoji: '🧀' },
-  { label: 'cheddar', emoji: '🧀' },
-  { label: 'crackers', emoji: '🥨' },
-  { label: 'olives', emoji: '🫒' },
-  { label: 'grapes', emoji: '🍇' },
-  { label: 'pickle', emoji: '🥒' },
-  { label: 'wine', emoji: '🍷' },
+  'brie',
+  'cheddar',
+  'crackers',
+  'olives',
+  'grapes',
+  'pickles',
+  'wine',
+  'hummus',
+  'salami',
+  'nuts',
 ];
 
 // =============================================================================
@@ -28,36 +31,34 @@ interface IngredientChipsProps {
 
 interface ChipProps {
   label: string;
-  emoji: string;
   isActive: boolean;
   onClick: () => void;
   disabled?: boolean;
 }
 
 // =============================================================================
-// Single Chip Component
+// Single Chip Component - Bold and Chunky
 // =============================================================================
 
-function Chip({ label, emoji, isActive, onClick, disabled }: ChipProps) {
+function Chip({ label, isActive, onClick, disabled }: ChipProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       className={`
-        inline-flex items-center gap-1.5 px-3 py-1.5
-        rounded-full text-sm font-medium
-        transition-all duration-200 ease-out
-        border-2 animate-fade-in
+        px-4 py-2
+        rounded-full text-sm font-semibold
+        transition-all duration-150 ease-out
+        border-2
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${isActive
-          ? 'bg-[#E8734A] border-[#E8734A] text-white shadow-md'
-          : 'bg-white border-[#E8B4A0] text-[#A47864] hover:border-[#E8734A] hover:bg-[#FFF5F2]'
+          ? 'bg-coral border-coral text-white shadow-md scale-105'
+          : 'bg-white border-[#E8D4CC] text-text-secondary hover:border-coral hover:text-coral hover:scale-105'
         }
       `}
     >
-      <span>{emoji}</span>
-      <span>{label}</span>
+      {label}
     </button>
   );
 }
@@ -107,18 +108,14 @@ export function IngredientChips({ value, onChange, disabled = false }: Ingredien
   );
 
   return (
-    <div className="mt-4">
-      <p className="text-xs text-[#736B63] mb-2 text-center">
-        Quick add:
-      </p>
+    <div className="mt-5">
       <div className="flex flex-wrap gap-2 justify-center">
         {CHIP_OPTIONS.map((chip) => (
           <Chip
-            key={chip.label}
-            label={chip.label}
-            emoji={chip.emoji}
-            isActive={isChipActive(chip.label)}
-            onClick={() => toggleChip(chip.label)}
+            key={chip}
+            label={chip}
+            isActive={isChipActive(chip)}
+            onClick={() => toggleChip(chip)}
             disabled={disabled}
           />
         ))}
