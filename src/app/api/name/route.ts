@@ -9,6 +9,7 @@ import { NameRequestSchema, validateRequest, sanitizeIngredients } from '@/lib/v
 import { getAnthropicClient } from '@/lib/ai-clients';
 import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
 import { stripEmojis } from '@/lib/ai-response';
+import { applyRateLimit } from '@/lib/rate-limit';
 
 // =============================================================================
 // Configuration
@@ -305,6 +306,10 @@ function normalizeResponse(parsed: NamerResponse): NamerResponse {
 // =============================================================================
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimited = await applyRateLimit(request, 'name');
+  if (rateLimited) return rateLimited;
+
   const startTime = Date.now();
   let ingredients = ''; // Store for error handler access
 

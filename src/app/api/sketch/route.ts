@@ -5,6 +5,7 @@ import { isEnabled } from '@/lib/feature-flags';
 import { parseIngredients } from '@/lib/validation';
 import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
 import { getVertexAccessToken, isVertexConfigured } from '@/lib/vertex-auth';
+import { applyRateLimit } from '@/lib/rate-limit';
 
 // =============================================================================
 // Configuration
@@ -200,6 +201,10 @@ async function generateWithVertexImagen(prompt: string): Promise<string | null> 
 // =============================================================================
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimited = await applyRateLimit(request, 'sketch');
+  if (rateLimited) return rateLimited;
+
   const startTime = Date.now();
 
   try {

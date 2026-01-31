@@ -47,7 +47,7 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
         <h1 className="font-serif text-3xl italic text-[#A47864] mb-2">
           CharcuterME
         </h1>
-        <p className="text-sm text-[#9A8A7C]">
+        <p className="text-sm text-[#736B63]">
           Turn Fridge Chaos Into Culinary Art
         </p>
       </header>
@@ -113,6 +113,14 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
         <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
         <div className="w-2 h-2 rounded-full bg-[#E8B4A0]" />
       </div>
+
+      {/* Footer */}
+      <a
+        href="/privacy"
+        className="mt-8 text-xs text-[#736B63] hover:text-[#A47864] transition-colors"
+      >
+        Privacy Policy
+      </a>
     </div>
   );
 }

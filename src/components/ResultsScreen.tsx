@@ -236,7 +236,7 @@ export function ResultsScreen({
     <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center px-6 py-8">
 
       {/* Tonight's Dinner Label */}
-      <p className="text-[#9A8A7C] text-sm mb-2 mt-4">
+      <p className="text-[#736B63] text-sm mb-2 mt-4">
         Tonight&apos;s Dinner:
       </p>
 
@@ -275,7 +275,7 @@ export function ResultsScreen({
               </div>
 
               {/* Hint */}
-              <p className="text-[#9A8A7C] text-xs mt-4 text-center">
+              <p className="text-[#736B63] text-xs mt-4 text-center">
                 This usually takes 20-30 seconds
               </p>
             </div>
@@ -328,7 +328,7 @@ export function ResultsScreen({
           ) : (
             /* Placeholder */
             <div className="absolute inset-0 flex items-center justify-center bg-[#FAF9F7]">
-              <p className="text-[#9A8A7C] text-sm">Your spread awaits...</p>
+              <p className="text-[#736B63] text-sm">Your spread awaits...</p>
             </div>
           )}
         </div>
@@ -443,7 +443,7 @@ export function ResultsScreen({
         <button
           onClick={onJustEat}
           aria-label="Skip for now and start over"
-          className="mt-4 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors focus:outline-none focus:underline"
+          className="mt-4 text-[#736B63] text-sm hover:text-[#A47864] transition-colors focus:outline-none focus:underline"
         >
           Skip for now
         </button>

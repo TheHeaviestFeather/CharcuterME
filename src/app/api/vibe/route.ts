@@ -8,6 +8,7 @@ import { isEnabled } from '@/lib/feature-flags';
 import { getOpenAIClient } from '@/lib/ai-clients';
 import { MIN_VIBE_SCORE, DEFAULT_DINNER_NAME, AI_MODELS } from '@/lib/constants';
 import { VibeRequestSchema, validateRequest } from '@/lib/validation';
+import { applyRateLimit } from '@/lib/rate-limit';
 
 const FALLBACK_VIBE: VibeCheckResponse = {
   score: 77,
@@ -18,6 +19,10 @@ const FALLBACK_VIBE: VibeCheckResponse = {
 };
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimited = await applyRateLimit(request, 'vibe');
+  if (rateLimited) return rateLimited;
+
   const startTime = Date.now();
 
   try {

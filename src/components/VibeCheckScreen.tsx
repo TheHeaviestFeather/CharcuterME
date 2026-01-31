@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 
 // =============================================================================
@@ -165,6 +165,7 @@ export function VibeCheckScreen({
   onStartOver
 }: VibeCheckScreenProps) {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const [userPhotoBlobUrl, setUserPhotoBlobUrl] = useState<string | null>(null);
   const [vibeResult, setVibeResult] = useState<VibeCheckResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -173,12 +174,30 @@ export function VibeCheckScreen({
   // Destructure dinner data
   const { name: dinnerName, tip, wildcard } = dinnerData;
 
+  // Cleanup blob URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (userPhotoBlobUrl) {
+        URL.revokeObjectURL(userPhotoBlobUrl);
+      }
+    };
+  }, [userPhotoBlobUrl]);
+
   // Handle photo upload
   const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Convert to base64 for display
+    // Revoke previous blob URL if exists
+    if (userPhotoBlobUrl) {
+      URL.revokeObjectURL(userPhotoBlobUrl);
+    }
+
+    // Create blob URL for efficient display
+    const blobUrl = URL.createObjectURL(file);
+    setUserPhotoBlobUrl(blobUrl);
+
+    // Convert to base64 for API (required for GPT-4o Vision)
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
@@ -326,7 +345,7 @@ export function VibeCheckScreen({
     return (
       <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center px-6 py-8">
         {/* Header */}
-        <p className="text-[#9A8A7C] text-sm mb-2 mt-4">
+        <p className="text-[#736B63] text-sm mb-2 mt-4">
           Optional: Level up your share
         </p>
         <h1 className="font-serif text-2xl italic text-[#A47864] text-center mb-2">
@@ -340,7 +359,7 @@ export function VibeCheckScreen({
         {/* Inspiration Preview */}
         {inspirationImage && (
           <div className="w-full max-w-[280px] mb-6">
-            <p className="text-[#9A8A7C] text-xs text-center mb-2 uppercase tracking-wide">
+            <p className="text-[#736B63] text-xs text-center mb-2 uppercase tracking-wide">
               The Inspiration
             </p>
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-md">
@@ -365,7 +384,7 @@ export function VibeCheckScreen({
           <p className="text-[#A47864] font-medium mb-1">
             Show us what you made
           </p>
-          <p className="text-[#9A8A7C] text-sm text-center">
+          <p className="text-[#736B63] text-sm text-center">
             Tap to take a photo or upload
           </p>
         </div>
@@ -398,7 +417,7 @@ export function VibeCheckScreen({
         {/* Back option */}
         <button
           onClick={onStartOver}
-          className="mt-4 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors"
+          className="mt-4 text-[#736B63] text-sm hover:text-[#A47864] transition-colors"
         >
           Back to results
         </button>
@@ -424,7 +443,7 @@ export function VibeCheckScreen({
         <p className="text-[#A47864] font-serif text-xl italic mb-2">
           AI is judging your plate...
         </p>
-        <p className="text-[#9A8A7C] text-sm">
+        <p className="text-[#736B63] text-sm">
           GPT-4o is crafting a witty roast
         </p>
       </div>
@@ -438,7 +457,7 @@ export function VibeCheckScreen({
   return (
     <div className="min-h-screen bg-[#FAF9F7] flex flex-col items-center px-6 py-8">
       {/* Header */}
-      <p className="text-[#9A8A7C] text-sm mb-1 mt-2">
+      <p className="text-[#736B63] text-sm mb-1 mt-2">
         Vibe Check Complete
       </p>
       <h1 className="font-serif text-2xl italic text-[#A47864] text-center mb-6">
@@ -450,7 +469,7 @@ export function VibeCheckScreen({
         <div className="flex gap-3">
           {/* Inspiration */}
           <div className="flex-1">
-            <p className="text-[#9A8A7C] text-xs text-center mb-2 uppercase tracking-wide">
+            <p className="text-[#736B63] text-xs text-center mb-2 uppercase tracking-wide">
               Inspiration
             </p>
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-md bg-white">
@@ -462,7 +481,7 @@ export function VibeCheckScreen({
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[#9A8A7C] text-sm">
+                <div className="w-full h-full flex items-center justify-center text-[#736B63] text-sm">
                   No image
                 </div>
               )}
@@ -471,15 +490,16 @@ export function VibeCheckScreen({
 
           {/* Reality */}
           <div className="flex-1">
-            <p className="text-[#9A8A7C] text-xs text-center mb-2 uppercase tracking-wide">
+            <p className="text-[#736B63] text-xs text-center mb-2 uppercase tracking-wide">
               Reality
             </p>
             <div className="relative aspect-square rounded-xl overflow-hidden shadow-md bg-white">
-              <Image
-                src={userPhoto}
+              {/* Use blob URL for display (more memory efficient than base64) */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={userPhotoBlobUrl || userPhoto || ''}
                 alt="Your creation"
-                fill
-                className="object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
           </div>
@@ -508,7 +528,7 @@ export function VibeCheckScreen({
           </p>
 
           {/* Observation */}
-          <p className="text-[#9A8A7C] text-sm text-center italic">
+          <p className="text-[#736B63] text-sm text-center italic">
             {vibeResult.observation}
           </p>
         </div>
@@ -572,7 +592,7 @@ export function VibeCheckScreen({
       {/* Start Over */}
       <button
         onClick={onStartOver}
-        className="mt-4 text-[#9A8A7C] text-sm hover:text-[#A47864] transition-colors"
+        className="mt-4 text-[#736B63] text-sm hover:text-[#A47864] transition-colors"
       >
         Make another dinner
       </button>

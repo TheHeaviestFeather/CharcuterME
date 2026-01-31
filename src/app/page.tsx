@@ -5,6 +5,35 @@ import { InputScreen } from '@/components/InputScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { VibeCheckScreen } from '@/components/VibeCheckScreen';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { AppErrorBoundary } from '@/components/ErrorBoundary';
+
+// =============================================================================
+// Utilities
+// =============================================================================
+
+const API_TIMEOUTS = {
+  name: 15000,   // 15 seconds for Claude
+  sketch: 45000, // 45 seconds for Imagen (image generation is slow)
+} as const;
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 // =============================================================================
 // Types
@@ -55,11 +84,15 @@ export default function CharcuterMeApp() {
     setIsLoadingName(true);
 
     try {
-      const response = await fetch('/api/name', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: ingredientInput }),
-      });
+      const response = await fetchWithTimeout(
+        '/api/name',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ingredients: ingredientInput }),
+        },
+        API_TIMEOUTS.name
+      );
 
       const data: NamerResponse = await response.json();
 
@@ -86,11 +119,15 @@ export default function CharcuterMeApp() {
     setImageError(false);
 
     try {
-      const response = await fetch('/api/sketch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: ingredientInput }),
-      });
+      const response = await fetchWithTimeout(
+        '/api/sketch',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ingredients: ingredientInput }),
+        },
+        API_TIMEOUTS.sketch
+      );
 
       const data: SketchResponse = await response.json();
 
@@ -168,51 +205,59 @@ export default function CharcuterMeApp() {
   // Render
   // =============================================================================
 
-  switch (screen) {
-    case 'input':
-      return (
-        <InputScreen
-          onSubmit={handleSubmitIngredients}
-          isLoading={isLoadingName}
-        />
-      );
+  const renderScreen = () => {
+    switch (screen) {
+      case 'input':
+        return (
+          <InputScreen
+            onSubmit={handleSubmitIngredients}
+            isLoading={isLoadingName}
+          />
+        );
 
-    case 'loading':
-      return <LoadingScreen isLoading={true} />;
+      case 'loading':
+        return <LoadingScreen isLoading={true} />;
 
-    case 'results':
-      return (
-        <ResultsScreen
-          dinnerName={dinnerName || 'Creating your masterpiece...'}
-          validation={validation || 'Analyzing your choices...'}
-          tip={tip || 'Loading wisdom...'}
-          wildcard={wildcard}
-          imageUrl={imageUrl}
-          svgFallback={svgFallback}
-          onCheckVibe={handleCheckVibe}
-          onJustEat={handleJustEat}
-          onRetryImage={handleRetryImage}
-          isLoadingImage={isLoadingImage}
-          imageError={imageError}
-        />
-      );
+      case 'results':
+        return (
+          <ResultsScreen
+            dinnerName={dinnerName || 'Creating your masterpiece...'}
+            validation={validation || 'Analyzing your choices...'}
+            tip={tip || 'Loading wisdom...'}
+            wildcard={wildcard}
+            imageUrl={imageUrl}
+            svgFallback={svgFallback}
+            onCheckVibe={handleCheckVibe}
+            onJustEat={handleJustEat}
+            onRetryImage={handleRetryImage}
+            isLoadingImage={isLoadingImage}
+            imageError={imageError}
+          />
+        );
 
-    case 'vibecheck':
-      return (
-        <VibeCheckScreen
-          dinnerData={{
-            name: dinnerName || 'Your Creation',
-            validation: validation || '',
-            tip: tip || '',
-            wildcard: wildcard,
-          }}
-          ingredients={currentIngredients}
-          inspirationImage={imageUrl}
-          onStartOver={handleJustEat}
-        />
-      );
+      case 'vibecheck':
+        return (
+          <VibeCheckScreen
+            dinnerData={{
+              name: dinnerName || 'Your Creation',
+              validation: validation || '',
+              tip: tip || '',
+              wildcard: wildcard,
+            }}
+            ingredients={currentIngredients}
+            inspirationImage={imageUrl}
+            onStartOver={handleJustEat}
+          />
+        );
 
-    default:
-      return <InputScreen onSubmit={handleSubmitIngredients} />;
-  }
+      default:
+        return <InputScreen onSubmit={handleSubmitIngredients} />;
+    }
+  };
+
+  return (
+    <AppErrorBoundary onReset={resetState}>
+      {renderScreen()}
+    </AppErrorBoundary>
+  );
 }

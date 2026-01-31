@@ -108,7 +108,7 @@ export function IngredientChips({ value, onChange, disabled = false }: Ingredien
 
   return (
     <div className="mt-4">
-      <p className="text-xs text-[#9A8A7C] mb-2 text-center">
+      <p className="text-xs text-[#736B63] mb-2 text-center">
         Quick add:
       </p>
       <div className="flex flex-wrap gap-2 justify-center">
