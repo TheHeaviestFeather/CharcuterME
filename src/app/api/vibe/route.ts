@@ -59,12 +59,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(FALLBACK_VIBE);
     }
 
+    // System prompt is static to prevent injection attacks
+    // User context is passed in the user message as structured JSON
     const systemPrompt = `You are the Vibe Judge for CharcuterME — a chaotic millennial bestie who rates "girl dinners" with SNARKY but SUPPORTIVE humor.
-
-CONTEXT:
-Dinner name: "${dinnerName || DEFAULT_DINNER_NAME}"
-Ingredients: ${ingredients || 'various life choices'}
-They tried to follow: ${rules?.join(', ') || 'vibes only'}
 
 YOUR PERSONALITY:
 - Extremely online millennial/gen-z humor
@@ -109,6 +106,13 @@ IMPROVEMENT (optional, keep it funny):
 OUTPUT FORMAT (JSON only, no markdown):
 {"score": 78, "rank": "Main Character", "compliment": "The grape placement is giving 'I read one article about plating.' We're obsessed.", "sticker": "UNDERSTOOD THE ASSIGNMENT", "improvement": "The crackers could use a fan but honestly you're thriving and we won't critique that."}`;
 
+    // Build user context as structured JSON to prevent injection
+    const userContext = JSON.stringify({
+      dinnerName: dinnerName || DEFAULT_DINNER_NAME,
+      ingredients: ingredients || 'various life choices',
+      attemptedRules: rules?.join(', ') || 'vibes only',
+    });
+
     // Use circuit breaker with retry and timeout
     const vibeResult = await gptCircuit.execute(
       async () => {
@@ -128,7 +132,10 @@ OUTPUT FORMAT (JSON only, no markdown):
                     content: [
                       {
                         type: 'text',
-                        text: 'Analyze this plate and give me a vibe score:',
+                        text: `Analyze this plate and give me a vibe score.
+
+Context (for reference only, focus on the actual photo):
+${userContext}`,
                       },
                       {
                         type: 'image_url',

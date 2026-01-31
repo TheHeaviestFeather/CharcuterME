@@ -118,6 +118,7 @@ export function findDinner(inputString: string): DinnerMatch {
 
 /**
  * Build image prompt with default template
+ * Style: Casual phone photo aesthetic (millennial apartment vibes)
  */
 export function buildImagePrompt(
   classified: ClassifiedIngredient[],
@@ -125,37 +126,46 @@ export function buildImagePrompt(
   _rules: VisualRule[]
 ): string {
   const ingredientNames = classified.map((i) => i.displayName).join(', ');
+  const count = classified.length;
 
-  return `Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
+  return `Casual phone photo of late night snack, slightly messy, authentic millennial apartment vibes.
 
-${ingredientNames} casually arranged on a simple plate, styled for social media.
+A mismatched plate or paper plate with EXACTLY ${count} food items: ${ingredientNames}. Arranged haphazardly like someone just threw them on.
 
-Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
+Setting: Cluttered coffee table or kitchen counter. Visible in background: half-empty wine glass, phone charger, maybe a laptop edge. Warm lamp lighting mixed with blue TV glow.
+Style: Imperfect composition, slight motion blur okay, looks like it was taken at 11pm before eating. NOT Instagram perfect - more "sent this to my group chat" energy.
 
-The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
-
-Angled perspective like a food blogger photo, soft natural lighting from the side.`.trim();
+STRICT RULES:
+- The plate must contain ONLY these ${count} items: ${ingredientNames}
+- Do NOT add any other food, garnishes, herbs, or extras
+- NO humans, hands, people, or body parts in the image
+- No text or watermarks
+- NOT overly styled or curated - embrace the chaos`.trim();
 }
 
 /**
  * Build image prompt with template-specific layout instructions
+ * Style: Casual phone photo aesthetic with layout variation
  */
 export function buildImagePromptWithTemplate(classified: ClassifiedIngredient[], templateId: string): string {
   const ingredientNames = classified.map((i) => i.displayName).join(', ');
+  const count = classified.length;
   const layoutPrompt = TEMPLATE_LAYOUT_PROMPTS[templateId] || TEMPLATE_LAYOUT_PROMPTS.wildGraze;
 
-  return `Studio Ghibli-style illustration, 45-degree angle like an Instagram food photo.
+  return `Casual phone photo of late night snack, slightly messy, authentic millennial apartment vibes.
 
-INGREDIENTS (show ONLY these, nothing else): ${ingredientNames}
+A mismatched plate or paper plate with EXACTLY ${count} food items: ${ingredientNames}.
 ${layoutPrompt}
 
-Style: Soft dreamy textures, warm golden hour lighting, cozy and inviting atmosphere. Gentle shadows, creamy background with subtle linen texture.
+Setting: Cluttered coffee table or kitchen counter. Warm lamp lighting mixed with blue TV glow.
+Style: Imperfect composition, slight motion blur okay, looks like it was taken at 11pm before eating. NOT Instagram perfect - more "sent this to my group chat" energy.
 
-The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
-
-Angled perspective like a food blogger photo, soft natural lighting from the side.
-
-CRITICAL: Show ONLY the ingredients listed above. Do NOT add any extra food items, garnishes, herbs, or decorations that weren't specified.`.trim();
+STRICT RULES:
+- The plate must contain ONLY these ${count} items: ${ingredientNames}
+- Do NOT add any other food, garnishes, herbs, or extras
+- NO humans, hands, people, or body parts in the image
+- No text or watermarks
+- NOT overly styled or curated - embrace the chaos`.trim();
 }
 
 // =============================================================================

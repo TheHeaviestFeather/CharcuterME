@@ -59,15 +59,17 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
 // Prompt Building for Imagen 3 - Millennial Chaotic Style
 // =============================================================================
 
-function buildImagenPrompt(ingredients: string[], _template: string): string {
+function buildImagenPrompt(ingredients: string[], template: string): string {
   const ingredientList = ingredients.join(', ');
   const count = ingredients.length;
+  const style = TEMPLATE_STYLES[template] || TEMPLATE_STYLES['The Wild Graze'];
 
   return `Casual phone photo of late night snack, slightly messy, authentic millennial apartment vibes.
 
-A mismatched plate or paper plate with EXACTLY ${count} food items: ${ingredientList}. Arranged haphazardly like someone just threw them on.
+A mismatched plate or paper plate with EXACTLY ${count} food items: ${ingredientList}. ${style.layout}
 
-Setting: Cluttered coffee table or kitchen counter. Visible in background: half-empty wine glass, phone charger, maybe a laptop edge. Warm lamp lighting mixed with blue TV glow. Couch blanket visible.
+Setting: ${style.scene}
+Mood: ${style.mood}
 Style: Imperfect composition, slight motion blur okay, looks like it was taken at 11pm before eating. NOT Instagram perfect - more "sent this to my group chat" energy.
 
 STRICT RULES:
