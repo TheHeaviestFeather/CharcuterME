@@ -6,17 +6,20 @@ import { useMemo, useCallback } from 'react';
 // Chip Options - No emojis, playful labels only
 // =============================================================================
 
+// 5 classic + 5 chaotic - the full girl dinner spectrum
 const CHIP_OPTIONS = [
+  // Classic charcuterie
   'brie',
-  'cheddar',
   'crackers',
   'olives',
   'grapes',
-  'pickles',
   'wine',
-  'hummus',
-  'salami',
-  'nuts',
+  // Chaotic additions
+  'pizza',
+  'yogurt',
+  'chocolate',
+  'chips',
+  'pickles',
 ];
 
 // =============================================================================
@@ -48,13 +51,13 @@ function Chip({ label, isActive, onClick, disabled }: ChipProps) {
       disabled={disabled}
       className={`
         px-4 py-2
-        rounded-full text-sm font-semibold
+        rounded-xl text-sm font-semibold
         transition-all duration-150 ease-out
         border-2
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${isActive
-          ? 'bg-coral border-coral text-white shadow-md scale-105'
-          : 'bg-white border-[#E8D4CC] text-text-secondary hover:border-coral hover:text-coral hover:scale-105'
+          ? 'bg-coral border-coral text-white shadow-md'
+          : 'bg-white border-peach text-text-secondary hover:border-coral hover:text-coral'
         }
       `}
     >
