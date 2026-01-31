@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { COPY, SUGGESTION_CATEGORIES, SURPRISE_COMBOS } from '@/lib/copy';
-import { processGirlDinner } from '@/lib/logic-bridge';
 import { analytics } from '@/lib/analytics';
 
 // =============================================================================
@@ -121,53 +120,6 @@ function SuggestionChip({ label, onClick, disabled }: SuggestionChipProps) {
     >
       {label}
     </button>
-  );
-}
-
-// =============================================================================
-// Preview Card
-// =============================================================================
-
-interface PreviewCardProps {
-  ingredients: string[];
-}
-
-function PreviewCard({ ingredients }: PreviewCardProps) {
-  const preview = useMemo(() => {
-    if (ingredients.length < 3) return null;
-    try {
-      const result = processGirlDinner(ingredients);
-      return {
-        template: result.templateSelected,
-        vibe: result.templateReason || 'Chaotic neutral energy',
-      };
-    } catch {
-      return null;
-    }
-  }, [ingredients]);
-
-  if (ingredients.length < 3) {
-    return (
-      <div className="mt-4 p-4 bg-peach/30 rounded-xl border-2 border-dashed border-peach text-center">
-        <p className="text-text-muted text-sm italic">
-          {COPY.input.previewEmpty}
-        </p>
-      </div>
-    );
-  }
-
-  if (!preview) return null;
-
-  return (
-    <div className="mt-4 p-4 bg-white rounded-xl border-2 border-peach shadow-sm">
-      <p className="text-xs text-text-muted mb-2">{COPY.input.previewLabel}</p>
-      <p className="font-display text-lg italic text-coral mb-1">
-        &ldquo;{preview.template}&rdquo;
-      </p>
-      <p className="text-sm text-text-secondary">
-        {preview.vibe}
-      </p>
-    </div>
   );
 }
 
@@ -393,9 +345,6 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
             {COPY.input.helper}
           </span>
         </div>
-
-        {/* Preview Card */}
-        <PreviewCard ingredients={ingredients} />
 
         {/* Category Suggestions */}
         <div className="mt-6">

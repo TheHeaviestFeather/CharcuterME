@@ -7,8 +7,6 @@ export const COPY = {
   // Input Screen
   input: {
     helper: 'Add 3–8 items for best results.',
-    previewEmpty: 'Add 3 items to unlock the chaos.',
-    previewLabel: 'Preview (updates as you add)',
     cta: 'Name This Disaster',
     ctaDisabled: 'Name My Dinner',
     ctaLoading: 'Working on it...',
