@@ -168,6 +168,7 @@ export function VibeCheckScreen({
   const [userPhotoBlobUrl, setUserPhotoBlobUrl] = useState<string | null>(null);
   const [vibeResult, setVibeResult] = useState<VibeCheckResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const comparisonRef = useRef<HTMLDivElement>(null);
 
@@ -261,79 +262,119 @@ export function VibeCheckScreen({
     return `Tonight's dinner: "${dinnerName}"\n\n#CharcuterME #GirlDinner #FoodVibes`;
   }, [dinnerName, vibeResult]);
 
-  // Share functionality (with vibe score)
+  // Share functionality (with vibe score) - smart fallbacks
   const handleShare = useCallback(async () => {
     const caption = generateCaption(true);
 
-    // Try native share if available
-    if (navigator.share) {
-      try {
-        const shareData: ShareData = {
-          title: `${dinnerName} - Vibe Check`,
-          text: caption,
-        };
+    try {
+      // Check if native share is available AND supports files
+      const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
-        // Try to include the user photo if available
-        if (userPhoto) {
-          try {
-            const response = await fetch(userPhoto);
-            const blob = await response.blob();
-            const file = new File([blob], 'charcuterme-vibe.png', { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              shareData.files = [file];
-            }
-          } catch {
-            // Continue without image
+      if (canShareFiles && userPhoto) {
+        // Try to share with image
+        try {
+          const response = await fetch(userPhoto);
+          const blob = await response.blob();
+          const file = new File([blob], 'charcuterme-vibe.png', { type: 'image/png' });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: `${dinnerName} - Vibe Check`,
+              text: caption,
+              files: [file],
+            });
+            setShareFeedback('Shared!');
+            setTimeout(() => setShareFeedback(null), 2000);
+            return;
+          }
+        } catch {
+          // File sharing failed, fall through
+        }
+      }
+
+      // Try text-only share if available
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${dinnerName} - Vibe Check`,
+            text: caption,
+          });
+          setShareFeedback('Caption shared!');
+          setTimeout(() => setShareFeedback(null), 2000);
+          return;
+        } catch (e) {
+          if (e instanceof Error && e.name === 'AbortError') {
+            return; // User cancelled
           }
         }
-
-        await navigator.share(shareData);
-      } catch {
-        // User cancelled or share failed - fallback to clipboard
-        await navigator.clipboard.writeText(caption);
-        alert('Caption copied to clipboard!');
       }
-    } else {
+
       // Fallback: Copy to clipboard
       await navigator.clipboard.writeText(caption);
-      alert('Caption copied to clipboard!');
+      setShareFeedback('Caption copied to clipboard!');
+      setTimeout(() => setShareFeedback(null), 3000);
+
+    } catch {
+      setShareFeedback('Couldn\'t share. Caption copied!');
+      try {
+        await navigator.clipboard.writeText(caption);
+      } catch { /* ignore */ }
+      setTimeout(() => setShareFeedback(null), 3000);
     }
   }, [dinnerName, generateCaption, userPhoto]);
 
-  // Skip upload but still share (no vibe score)
+  // Skip upload but still share (no vibe score) - smart fallbacks
   const handleSkipUploadStillShare = useCallback(async () => {
     const caption = generateCaption(false);
 
-    if (navigator.share) {
-      try {
-        const shareData: ShareData = {
-          title: `${dinnerName} - CharcuterME`,
-          text: caption,
-        };
+    try {
+      const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
-        // Try to include the inspiration image
-        if (inspirationImage) {
-          try {
-            const response = await fetch(inspirationImage);
-            const blob = await response.blob();
-            const file = new File([blob], 'charcuterme-dinner.png', { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              shareData.files = [file];
-            }
-          } catch {
-            // Continue without image
+      if (canShareFiles && inspirationImage) {
+        try {
+          const response = await fetch(inspirationImage);
+          const blob = await response.blob();
+          const file = new File([blob], 'charcuterme-dinner.png', { type: 'image/png' });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: `${dinnerName} - CharcuterME`,
+              text: caption,
+              files: [file],
+            });
+            setShareFeedback('Shared!');
+            setTimeout(() => setShareFeedback(null), 2000);
+            return;
+          }
+        } catch {
+          // File sharing failed, fall through
+        }
+      }
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${dinnerName} - CharcuterME`,
+            text: caption,
+          });
+          setShareFeedback('Caption shared!');
+          setTimeout(() => setShareFeedback(null), 2000);
+          return;
+        } catch (e) {
+          if (e instanceof Error && e.name === 'AbortError') {
+            return;
           }
         }
-
-        await navigator.share(shareData);
-      } catch {
-        // User cancelled - fallback to clipboard
-        await navigator.clipboard.writeText(caption);
-        alert('Caption copied! Open Instagram to share.');
       }
-    } else {
+
       await navigator.clipboard.writeText(caption);
-      alert('Caption copied! Open Instagram to share.');
+      setShareFeedback('Caption copied! Open Instagram to share.');
+      setTimeout(() => setShareFeedback(null), 3000);
+
+    } catch {
+      await navigator.clipboard.writeText(caption);
+      setShareFeedback('Caption copied!');
+      setTimeout(() => setShareFeedback(null), 3000);
     }
   }, [dinnerName, generateCaption, inspirationImage]);
 
@@ -413,6 +454,13 @@ export function VibeCheckScreen({
           <InstagramIcon />
           <span>Skip upload, still share</span>
         </button>
+
+        {/* Share feedback toast */}
+        {shareFeedback && (
+          <p className="text-center text-sm text-[#E8734A] mt-2 animate-pulse">
+            {shareFeedback}
+          </p>
+        )}
 
         {/* Back option */}
         <button
@@ -588,6 +636,13 @@ export function VibeCheckScreen({
         <InstagramIcon />
         <span>Share to Stories</span>
       </button>
+
+      {/* Share feedback toast */}
+      {shareFeedback && (
+        <p className="text-center text-sm text-[#E8734A] mt-2 animate-pulse">
+          {shareFeedback}
+        </p>
+      )}
 
       {/* Start Over */}
       <button

@@ -181,52 +181,72 @@ export function ResultsScreen({
     }
   }, [imageUrl, dinnerName]);
 
-  // Share to Instagram Stories (generates story card and shares)
+  // Share to Instagram Stories (with smart fallbacks)
   const handleShareToStories = useCallback(async () => {
     setIsGeneratingCard(true);
 
     try {
-      // Check if native share is available
-      if (navigator.share) {
-        // Create share data
-        const shareData: ShareData = {
-          title: `${dinnerName} - CharcuterME`,
-          text: caption,
-        };
+      // Check if native share is available AND supports files
+      const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
-        // If we have an image, try to share it as a file
-        if (imageUrl) {
-          try {
-            let blob: Blob;
-            if (imageUrl.startsWith('data:')) {
-              const response = await fetch(imageUrl);
-              blob = await response.blob();
-            } else {
-              const response = await fetch(imageUrl);
-              blob = await response.blob();
-            }
-            const file = new File([blob], 'charcuterme-story.png', { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              shareData.files = [file];
-            }
-          } catch {
-            // If image sharing fails, continue with text-only
+      if (canShareFiles && imageUrl) {
+        // Try to share with image
+        try {
+          let blob: Blob;
+          if (imageUrl.startsWith('data:')) {
+            const response = await fetch(imageUrl);
+            blob = await response.blob();
+          } else {
+            const response = await fetch(imageUrl);
+            blob = await response.blob();
+          }
+          const file = new File([blob], 'charcuterme-story.png', { type: 'image/png' });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: `${dinnerName} - CharcuterME`,
+              text: caption,
+              files: [file],
+            });
+            setCopyFeedback('Shared!');
+            setTimeout(() => setCopyFeedback(null), 2000);
+            return;
+          }
+        } catch {
+          // File sharing failed, fall through to alternatives
+        }
+      }
+
+      // Try text-only share if available
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${dinnerName} - CharcuterME`,
+            text: caption,
+          });
+          setCopyFeedback('Caption shared! Save the image separately.');
+          setTimeout(() => setCopyFeedback(null), 3000);
+          return;
+        } catch (e) {
+          if (e instanceof Error && e.name === 'AbortError') {
+            return; // User cancelled, no message needed
           }
         }
+      }
 
-        await navigator.share(shareData);
+      // Final fallback: copy caption + prompt to save image
+      await navigator.clipboard.writeText(caption);
+      if (imageUrl) {
+        setCopyFeedback('Caption copied! Tap "Save Image" to get the image.');
       } else {
-        // Fallback: copy caption to clipboard
-        await navigator.clipboard.writeText(caption);
-        setCopyFeedback('Caption copied! Open Instagram to share.');
-        setTimeout(() => setCopyFeedback(null), 3000);
+        setCopyFeedback('Caption copied to clipboard!');
       }
-    } catch (error) {
-      // User cancelled or share failed
-      if (error instanceof Error && error.name !== 'AbortError') {
-        setCopyFeedback('Share cancelled');
-        setTimeout(() => setCopyFeedback(null), 2000);
-      }
+      setTimeout(() => setCopyFeedback(null), 3000);
+
+    } catch {
+      // Something went wrong
+      setCopyFeedback('Couldn\'t share. Try Copy + Save instead.');
+      setTimeout(() => setCopyFeedback(null), 3000);
     } finally {
       setIsGeneratingCard(false);
     }
@@ -394,6 +414,18 @@ export function ResultsScreen({
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Caption Preview */}
+      {!isLoadingImage && (
+        <div className="w-full max-w-[340px] mb-4">
+          <p className="text-[#736B63] text-xs text-center mb-2">Your share caption:</p>
+          <div className="bg-white/50 rounded-lg px-3 py-2 border border-[#E8B4A0]/30">
+            <p className="text-[#6B5B4F] text-xs leading-relaxed whitespace-pre-line">
+              {caption}
+            </p>
           </div>
         </div>
       )}

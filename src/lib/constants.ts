@@ -17,8 +17,8 @@ export const BRAND_COLORS = [COLORS.coral, COLORS.lavender, COLORS.mocha, COLORS
 // Default dinner name when AI fails
 export const DEFAULT_DINNER_NAME = 'The Audacity';
 
-// Minimum vibe score (we're not monsters)
-export const MIN_VIBE_SCORE = 35;
+// Minimum vibe score - users won't share low scores, so keep it respectable
+export const MIN_VIBE_SCORE = 65;
 
 // API Models - SINGLE SOURCE OF TRUTH
 export const AI_MODELS = {
