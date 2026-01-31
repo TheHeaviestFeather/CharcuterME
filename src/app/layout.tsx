@@ -39,11 +39,13 @@ export const metadata: Metadata = {
     description: "AI-powered girl dinner generator. Enter your ingredients and get a fancy name, plating blueprint, and vibe check.",
     images: ["/og-image.png"],
   },
-  // TODO: Convert /public/og-image.svg and /public/favicon.svg to PNG/ICO before launch
-  // Use: npx sharp-cli og-image.svg -o og-image.png --resize 1200 630
   icons: {
-    icon: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
 };
 
