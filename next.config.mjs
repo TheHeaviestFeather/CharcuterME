@@ -48,6 +48,12 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  // Limit request body size to prevent DoS attacks
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   images: {
     remotePatterns: [
       {

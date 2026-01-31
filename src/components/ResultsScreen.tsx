@@ -422,6 +422,30 @@ export function ResultsScreen({
           Start over
         </button>
       )}
+
+      {/* Footer Links */}
+      <div className="mt-8 pt-4 border-t border-peach/50 flex gap-4 text-xs text-text-muted">
+        <a
+          href="https://github.com/TheHeaviestFeather/CharcuterME/issues/new?template=content-report.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-coral transition-colors"
+        >
+          Report an issue
+        </a>
+        <a
+          href="/terms"
+          className="hover:text-coral transition-colors"
+        >
+          Terms
+        </a>
+        <a
+          href="/privacy"
+          className="hover:text-coral transition-colors"
+        >
+          Privacy
+        </a>
+      </div>
     </div>
   );
 }

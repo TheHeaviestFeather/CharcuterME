@@ -10,6 +10,7 @@ import { getAnthropicClient } from '@/lib/ai-clients';
 import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
 import { stripEmojis } from '@/lib/ai-response';
 import { applyRateLimit } from '@/lib/rate-limit';
+import { filterNamerResponse } from '@/lib/content-filter';
 
 // =============================================================================
 // Configuration
@@ -409,16 +410,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(getFallback(ingredients));
     }
 
+    // Filter content for safety before returning
+    const fallback = getFallback(ingredients);
+    const filtered = filterNamerResponse(parsed, fallback);
+
     logger.info('Name generated successfully', {
       promptVersion: PROMPT_VERSION,
       duration: Date.now() - startTime,
-      name: parsed.name,
+      name: filtered.name,
+      wasFiltered: filtered !== parsed,
     });
 
     // Cache the result (fire and forget)
-    cacheSet(cacheKey, parsed, CACHE_TTL.dinnerName).catch(() => {});
+    cacheSet(cacheKey, filtered, CACHE_TTL.dinnerName).catch(() => {});
 
-    return NextResponse.json(parsed);
+    return NextResponse.json(filtered);
 
   } catch (error) {
     logger.error('Error generating name', {

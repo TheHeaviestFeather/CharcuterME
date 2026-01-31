@@ -29,6 +29,4 @@ export {
   findDinner,
   processGirlDinner,
   processGirlDinnerWithTemplate,
-  buildImagePrompt,
-  buildImagePromptWithTemplate,
 } from '@/domain';

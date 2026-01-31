@@ -216,12 +216,9 @@ export interface TemplateOption {
 // App State Types
 // =============================================================================
 
-// 4-screen flow: input -> reveal (name + blueprint) -> camera -> results
-export const ScreenSchema = z.enum(['input', 'reveal', 'camera', 'results']);
+// App screens - simplified 3-screen flow
+export const ScreenSchema = z.enum(['input', 'results', 'vibecheck']);
 export type Screen = z.infer<typeof ScreenSchema>;
-
-// Keep old screens for backwards compatibility
-export type LegacyScreen = 'input' | 'name' | 'blueprint' | 'camera' | 'results';
 
 export interface AppState {
   screen: Screen;

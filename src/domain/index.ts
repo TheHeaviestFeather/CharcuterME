@@ -27,7 +27,6 @@ export {
   getTemplateReason,
   VISUAL_RULES,
   getApplicableRules,
-  getRule,
 } from './plating';
 
 // Dinner Domain
@@ -35,8 +34,6 @@ export {
   findDinner,
   processGirlDinner,
   processGirlDinnerWithTemplate,
-  buildImagePrompt,
-  buildImagePromptWithTemplate,
   DINNER_DATABASE,
   VALIDATIONS,
 } from './dinner';
