@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
+import { analytics } from '@/lib/analytics';
+import { addWatermark } from '@/lib/watermark';
 
 // =============================================================================
 // Icons
@@ -189,6 +191,8 @@ export function VibeCheckScreen({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    analytics.vibeUpload();
+
     // Revoke previous blob URL if exists
     if (userPhotoBlobUrl) {
       URL.revokeObjectURL(userPhotoBlobUrl);
@@ -245,6 +249,9 @@ export function VibeCheckScreen({
         validation: data.compliment,
         observation: data.improvement || getRandomItem(OBSERVATIONS),
       });
+
+      // Track vibe completion
+      analytics.vibeComplete(data.score, data.rank);
     } catch (error) {
       console.error('Vibe check API error:', error);
       // Fallback to random generation if API fails
@@ -265,15 +272,17 @@ export function VibeCheckScreen({
   // Share functionality (with vibe score) - smart fallbacks
   const handleShare = useCallback(async () => {
     const caption = generateCaption(true);
+    analytics.shareClick('vibe', !!userPhoto);
 
     try {
       // Check if native share is available AND supports files
       const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
       if (canShareFiles && userPhoto) {
-        // Try to share with image
+        // Try to share with watermarked image
         try {
-          const response = await fetch(userPhoto);
+          const watermarkedUrl = await addWatermark(userPhoto);
+          const response = await fetch(watermarkedUrl);
           const blob = await response.blob();
           const file = new File([blob], 'charcuterme-vibe.png', { type: 'image/png' });
 
@@ -283,6 +292,7 @@ export function VibeCheckScreen({
               text: caption,
               files: [file],
             });
+            analytics.shareComplete('vibe', 'native', true);
             setShareFeedback('Shared!');
             setTimeout(() => setShareFeedback(null), 2000);
             return;
@@ -299,6 +309,7 @@ export function VibeCheckScreen({
             title: `${dinnerName} - Vibe Check`,
             text: caption,
           });
+          analytics.shareComplete('vibe', 'native', false);
           setShareFeedback('Caption shared!');
           setTimeout(() => setShareFeedback(null), 2000);
           return;
@@ -311,6 +322,7 @@ export function VibeCheckScreen({
 
       // Fallback: Copy to clipboard
       await navigator.clipboard.writeText(caption);
+      analytics.shareComplete('vibe', 'clipboard', false);
       setShareFeedback('Caption copied to clipboard!');
       setTimeout(() => setShareFeedback(null), 3000);
 
@@ -326,13 +338,16 @@ export function VibeCheckScreen({
   // Skip upload but still share (no vibe score) - smart fallbacks
   const handleSkipUploadStillShare = useCallback(async () => {
     const caption = generateCaption(false);
+    analytics.shareClick('vibe', !!inspirationImage);
 
     try {
       const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
       if (canShareFiles && inspirationImage) {
         try {
-          const response = await fetch(inspirationImage);
+          // Add watermark to shared image
+          const watermarkedUrl = await addWatermark(inspirationImage);
+          const response = await fetch(watermarkedUrl);
           const blob = await response.blob();
           const file = new File([blob], 'charcuterme-dinner.png', { type: 'image/png' });
 
@@ -342,6 +357,7 @@ export function VibeCheckScreen({
               text: caption,
               files: [file],
             });
+            analytics.shareComplete('vibe', 'native', true);
             setShareFeedback('Shared!');
             setTimeout(() => setShareFeedback(null), 2000);
             return;
@@ -357,6 +373,7 @@ export function VibeCheckScreen({
             title: `${dinnerName} - CharcuterME`,
             text: caption,
           });
+          analytics.shareComplete('vibe', 'native', false);
           setShareFeedback('Caption shared!');
           setTimeout(() => setShareFeedback(null), 2000);
           return;
@@ -368,6 +385,7 @@ export function VibeCheckScreen({
       }
 
       await navigator.clipboard.writeText(caption);
+      analytics.shareComplete('vibe', 'clipboard', false);
       setShareFeedback('Caption copied! Open Instagram to share.');
       setTimeout(() => setShareFeedback(null), 3000);
 

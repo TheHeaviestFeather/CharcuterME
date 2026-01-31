@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import { analytics } from '@/lib/analytics';
+import { addWatermark, createWatermarkedFile } from '@/lib/watermark';
 
 // =============================================================================
 // Icons (SVG replacements for emojis)
@@ -57,6 +59,12 @@ const InstagramIcon = () => (
   </svg>
 );
 
+const RefreshIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  </svg>
+);
+
 // =============================================================================
 // Results Screen - Name Reveal + Blueprint (Share First)
 // =============================================================================
@@ -71,7 +79,9 @@ interface ResultsScreenProps {
   onCheckVibe: () => void;
   onJustEat?: () => void;
   onRetryImage?: () => void;
+  onRegenerateName?: () => void;
   isLoadingImage?: boolean;
+  isLoadingName?: boolean;
   imageError?: boolean;
 }
 
@@ -103,7 +113,9 @@ export function ResultsScreen({
   onCheckVibe,
   onJustEat,
   onRetryImage,
+  onRegenerateName,
   isLoadingImage = false,
+  isLoadingName = false,
   imageError = false,
 }: ResultsScreenProps) {
   // State
@@ -140,6 +152,7 @@ export function ResultsScreen({
   const handleCopyCaption = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(caption);
+      analytics.captionCopy();
       setCopyFeedback('Copied!');
       setTimeout(() => setCopyFeedback(null), 2000);
     } catch {
@@ -148,7 +161,15 @@ export function ResultsScreen({
     }
   }, [caption]);
 
-  // Save image to device
+  // Regenerate name handler
+  const handleRegenerateName = useCallback(() => {
+    if (onRegenerateName) {
+      analytics.nameRegenerate();
+      onRegenerateName();
+    }
+  }, [onRegenerateName]);
+
+  // Save image to device (with watermark)
   const handleSaveImage = useCallback(async () => {
     if (!imageUrl) {
       setCopyFeedback('No image to save');
@@ -157,22 +178,20 @@ export function ResultsScreen({
     }
 
     try {
-      // For data URLs, create a blob and download
-      if (imageUrl.startsWith('data:')) {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `charcuterme-${dinnerName.toLowerCase().replace(/\s+/g, '-')}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } else {
-        // For remote URLs, open in new tab (can't force download cross-origin)
-        window.open(imageUrl, '_blank');
-      }
+      // Add watermark and download
+      const watermarkedUrl = await addWatermark(imageUrl);
+      const response = await fetch(watermarkedUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `charcuterme-${dinnerName.toLowerCase().replace(/\s+/g, '-')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      analytics.imageSave('watermarked');
       setCopyFeedback('Saved!');
       setTimeout(() => setCopyFeedback(null), 2000);
     } catch {
@@ -184,23 +203,16 @@ export function ResultsScreen({
   // Share to Instagram Stories (with smart fallbacks)
   const handleShareToStories = useCallback(async () => {
     setIsGeneratingCard(true);
+    analytics.shareClick('results', !!imageUrl);
 
     try {
       // Check if native share is available AND supports files
       const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
       if (canShareFiles && imageUrl) {
-        // Try to share with image
+        // Try to share with watermarked image
         try {
-          let blob: Blob;
-          if (imageUrl.startsWith('data:')) {
-            const response = await fetch(imageUrl);
-            blob = await response.blob();
-          } else {
-            const response = await fetch(imageUrl);
-            blob = await response.blob();
-          }
-          const file = new File([blob], 'charcuterme-story.png', { type: 'image/png' });
+          const file = await createWatermarkedFile(imageUrl);
 
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
@@ -208,6 +220,7 @@ export function ResultsScreen({
               text: caption,
               files: [file],
             });
+            analytics.shareComplete('results', 'native', true);
             setCopyFeedback('Shared!');
             setTimeout(() => setCopyFeedback(null), 2000);
             return;
@@ -224,6 +237,7 @@ export function ResultsScreen({
             title: `${dinnerName} - CharcuterME`,
             text: caption,
           });
+          analytics.shareComplete('results', 'native', false);
           setCopyFeedback('Caption shared! Save the image separately.');
           setTimeout(() => setCopyFeedback(null), 3000);
           return;
@@ -236,6 +250,7 @@ export function ResultsScreen({
 
       // Final fallback: copy caption + prompt to save image
       await navigator.clipboard.writeText(caption);
+      analytics.shareComplete('results', 'clipboard', false);
       if (imageUrl) {
         setCopyFeedback('Caption copied! Tap "Save Image" to get the image.');
       } else {
@@ -260,10 +275,27 @@ export function ResultsScreen({
         Tonight&apos;s Dinner:
       </p>
 
-      {/* Hero Moment - The Name */}
-      <h1 className="font-serif text-3xl md:text-4xl italic text-[#A47864] text-center mb-4 px-4">
-        &ldquo;{dinnerName}&rdquo;
-      </h1>
+      {/* Hero Moment - The Name with Regenerate Button */}
+      <div className="flex items-center justify-center gap-2 mb-4 px-4">
+        <h1 className={`font-serif text-3xl md:text-4xl italic text-[#A47864] text-center ${isLoadingName ? 'animate-pulse' : ''}`}>
+          &ldquo;{dinnerName}&rdquo;
+        </h1>
+        {onRegenerateName && !isLoadingName && (
+          <button
+            onClick={handleRegenerateName}
+            aria-label="Generate a new name"
+            className="
+              p-2 rounded-full text-[#A47864] hover:bg-[#F5E6E0]
+              transition-colors focus:outline-none focus:ring-2 focus:ring-[#E8734A]
+            "
+          >
+            <RefreshIcon />
+          </button>
+        )}
+        {isLoadingName && (
+          <div className="w-4 h-4 border-2 border-[#E8B4A0] border-t-[#E8734A] rounded-full animate-spin" />
+        )}
+      </div>
 
       {/* Validation */}
       <div className="flex items-start gap-2 mb-6 px-4 max-w-[340px]">

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { InputScreen } from '@/components/InputScreen';
 import { ResultsScreen } from '@/components/ResultsScreen';
 import { VibeCheckScreen } from '@/components/VibeCheckScreen';
-import { LoadingScreen } from '@/components/LoadingScreen';
 import { AppErrorBoundary } from '@/components/ErrorBoundary';
 
 // =============================================================================
@@ -39,7 +38,7 @@ async function fetchWithTimeout(
 // Types
 // =============================================================================
 
-type Screen = 'input' | 'loading' | 'results' | 'vibecheck';
+type Screen = 'input' | 'results' | 'vibecheck';
 
 interface NamerResponse {
   name: string;
@@ -160,18 +159,19 @@ export default function CharcuterMeApp() {
     // Reset previous results before starting new request
     resetState();
     setCurrentIngredients(ingredientInput);
-    setScreen('loading');
 
-    // Minimum loading time for theatrical effect (1.5 seconds)
-    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1500));
+    // Go directly to results screen - show loading states inline
+    setScreen('results');
 
     // Fire both API calls in parallel
-    const namePromise = generateName(ingredientInput);
+    generateName(ingredientInput);
     generateSketch(ingredientInput);
+  };
 
-    // Wait for BOTH name to be ready AND minimum loading time
-    await Promise.all([namePromise, minLoadingTime]);
-    setScreen('results');
+  const handleRegenerateName = async () => {
+    if (!currentIngredients) return;
+    // Just regenerate the name, keep the existing image
+    await generateName(currentIngredients);
   };
 
   const handleRetryImage = () => {
@@ -215,9 +215,6 @@ export default function CharcuterMeApp() {
           />
         );
 
-      case 'loading':
-        return <LoadingScreen isLoading={true} />;
-
       case 'results':
         return (
           <ResultsScreen
@@ -230,7 +227,9 @@ export default function CharcuterMeApp() {
             onCheckVibe={handleCheckVibe}
             onJustEat={handleJustEat}
             onRetryImage={handleRetryImage}
+            onRegenerateName={handleRegenerateName}
             isLoadingImage={isLoadingImage}
+            isLoadingName={isLoadingName}
             imageError={imageError}
           />
         );
