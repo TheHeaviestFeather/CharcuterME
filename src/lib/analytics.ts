@@ -76,6 +76,14 @@ export const analytics = {
   resultsView: (hasImage: boolean, isFallback: boolean) =>
     track('funnel_results_view', { has_image: hasImage, is_fallback: isFallback }),
 
+  // Ingredient events
+  ingredientAdded: (count: number, source: 'typed' | 'suggestion' | 'surprise') =>
+    track('ingredient_added', { count, source }),
+  ingredientRemoved: (count: number) =>
+    track('ingredient_removed', { count }),
+  surpriseClicked: (ingredientsAdded: number) =>
+    track('surprise_clicked', { ingredients_added: ingredientsAdded }),
+
   // Share events
   shareClick: (screen: 'results' | 'vibe', hasImage: boolean) =>
     track('share_click', { screen, has_image: hasImage }),

@@ -38,6 +38,7 @@ const config: Config = {
         'progress-indeterminate': 'progressIndeterminate 1.5s ease-in-out infinite',
         'bounce-subtle': 'bounceSubtle 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
+        'chip-pop': 'chipPop 0.2s ease-out forwards',
       },
       keyframes: {
         float: {
@@ -69,6 +70,11 @@ const config: Config = {
         },
         scaleIn: {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        chipPop: {
+          '0%': { transform: 'scale(0.9)', opacity: '0.5' },
+          '50%': { transform: 'scale(1.05)' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
       },
