@@ -158,16 +158,53 @@ export function ResultsScreen({
     }
   }, [caption]);
 
+  // Convert SVG to PNG data URL
+  const svgToDataUrl = useCallback((svg: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, 400, 400);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load SVG'));
+      };
+      img.src = url;
+    });
+  }, []);
+
   // Save image with watermark
   const handleSaveImage = useCallback(async () => {
-    if (!imageUrl) {
+    // Check for image or SVG
+    if (!imageUrl && !sanitizedSvg) {
       setCopyFeedback('No image yet');
       setTimeout(() => setCopyFeedback(null), 2000);
       return;
     }
 
     try {
-      const watermarkedUrl = await addWatermark(imageUrl);
+      // Convert SVG to data URL if needed
+      let sourceUrl = imageUrl;
+      if (!sourceUrl && sanitizedSvg) {
+        sourceUrl = await svgToDataUrl(sanitizedSvg);
+      }
+      if (!sourceUrl) {
+        throw new Error('No image source');
+      }
+
+      const watermarkedUrl = await addWatermark(sourceUrl);
       const response = await fetch(watermarkedUrl);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
@@ -186,7 +223,7 @@ export function ResultsScreen({
       setCopyFeedback('Failed to save');
       setTimeout(() => setCopyFeedback(null), 2000);
     }
-  }, [imageUrl, dinnerName]);
+  }, [imageUrl, sanitizedSvg, dinnerName, svgToDataUrl]);
 
   // Primary share action
   const handleShare = useCallback(async () => {
@@ -395,7 +432,7 @@ export function ResultsScreen({
           </button>
           <button
             onClick={handleSaveImage}
-            disabled={!imageUrl}
+            disabled={!imageUrl && !sanitizedSvg}
             className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-peach text-text-secondary font-semibold hover:border-coral hover:text-coral transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <DownloadIcon />
