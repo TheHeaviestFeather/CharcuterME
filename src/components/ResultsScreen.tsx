@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import { analytics } from '@/lib/analytics';
 import { addWatermark, createWatermarkedFile } from '@/lib/watermark';
+import { COPY } from '@/lib/copy';
 
 // =============================================================================
 // Icons - Clean SVG, no emoji
@@ -52,6 +53,36 @@ const SparklesIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
   </svg>
 );
+
+// =============================================================================
+// Skeleton Components
+// =============================================================================
+
+function ImageSkeleton() {
+  return (
+    <div className="absolute inset-0 bg-gradient-to-br from-peach/50 to-cream animate-pulse">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full bg-peach/70 animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
+function CaptionSkeleton() {
+  return (
+    <div className="space-y-2 animate-pulse">
+      <div className="h-4 bg-peach/50 rounded w-3/4" />
+      <div className="h-4 bg-peach/50 rounded w-full" />
+      <div className="h-4 bg-peach/50 rounded w-1/2" />
+    </div>
+  );
+}
+
+function ButtonSkeleton() {
+  return (
+    <div className="h-[68px] bg-peach/50 rounded-2xl animate-pulse" />
+  );
+}
 
 // =============================================================================
 // Results Screen - Direction C: Share-First, Bold, Playful
@@ -107,10 +138,26 @@ export function ResultsScreen({
   // to keep the share-first UI clean. They're passed through for future use.
   void _tip;
   void _wildcard;
+
   // State
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const [editedCaption, setEditedCaption] = useState<string | null>(null);
+
+  // Generate default caption
+  const defaultCaption = useMemo(
+    () => generateCaption(dinnerName, validation),
+    [dinnerName, validation]
+  );
+
+  // Use edited caption or default
+  const caption = editedCaption ?? defaultCaption;
+
+  // Reset edited caption when dinner name changes
+  useEffect(() => {
+    setEditedCaption(null);
+  }, [dinnerName]);
 
   useEffect(() => {
     if (!isLoadingImage) {
@@ -127,7 +174,6 @@ export function ResultsScreen({
 
   // Clean validation text
   const cleanValidation = validation.replace(/^[✓✔]\s*/, '');
-  const caption = generateCaption(dinnerName, validation);
 
   // Sanitize SVG fallback
   const sanitizedSvg = useMemo(() => {
@@ -157,6 +203,11 @@ export function ResultsScreen({
       setTimeout(() => setCopyFeedback(null), 2000);
     }
   }, [caption]);
+
+  // Reset caption
+  const handleResetCaption = useCallback(() => {
+    setEditedCaption(null);
+  }, []);
 
   // Convert SVG to PNG data URL
   const svgToDataUrl = useCallback((svg: string): Promise<string> => {
@@ -283,117 +334,11 @@ export function ResultsScreen({
     }
   }, [dinnerName, caption, imageUrl]);
 
+  // Check if content is ready (not loading)
+  const isContentReady = !isLoadingImage && (imageUrl || sanitizedSvg);
+
   return (
-    <div className="min-h-screen bg-cream flex flex-col items-center px-5 py-6">
-      {/* Mini Label */}
-      <p className="text-text-muted text-sm font-medium mb-2 mt-2">
-        tonight&apos;s dinner:
-      </p>
-
-      {/* THE NAME - Big, Bold, Shareable */}
-      <div className="flex items-center justify-center gap-3 mb-3 px-4">
-        <h1
-          className={`
-            font-display text-4xl md:text-5xl italic text-coral text-center leading-tight
-            ${isLoadingName ? 'animate-pulse' : ''}
-          `}
-        >
-          &ldquo;{dinnerName}&rdquo;
-        </h1>
-        {onRegenerateName && !isLoadingName && (
-          <button
-            onClick={handleRegenerateName}
-            aria-label="Generate a new name"
-            className="p-2 rounded-full text-text-secondary hover:text-coral hover:bg-peach transition-all"
-          >
-            <RefreshIcon />
-          </button>
-        )}
-        {isLoadingName && (
-          <div className="w-5 h-5 border-2 border-peach border-t-coral rounded-full animate-spin" />
-        )}
-      </div>
-
-      {/* Validation - The affirmation */}
-      <div className="flex items-start gap-2 mb-5 px-4 max-w-[360px]">
-        <div className="mt-0.5 flex-shrink-0">
-          <CheckIcon />
-        </div>
-        <p className="text-text-primary text-base leading-relaxed">
-          {cleanValidation}
-        </p>
-      </div>
-
-      {/* The Image - The shareable hero */}
-      <div className="w-full max-w-[360px] mb-5">
-        <div className="relative aspect-square rounded-2xl overflow-hidden shadow-xl bg-white border-2 border-peach">
-          {isLoadingImage ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream p-6">
-              <div className="w-14 h-14 border-4 border-peach border-t-coral rounded-full animate-spin mb-5" />
-              <p className="text-coral text-base font-medium text-center mb-2">
-                {IMAGE_LOADING_MESSAGES[loadingMessageIndex]}
-              </p>
-              <div className="w-40 h-1.5 bg-peach rounded-full overflow-hidden">
-                <div className="h-full w-1/3 bg-coral rounded-full animate-progress-indeterminate" />
-              </div>
-            </div>
-          ) : imageUrl ? (
-            imageUrl.startsWith('data:') ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={imageUrl}
-                alt={dinnerName}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            ) : (
-              <Image
-                src={imageUrl}
-                alt={dinnerName}
-                fill
-                className="object-cover"
-                sizes="360px"
-              />
-            )
-          ) : sanitizedSvg ? (
-            <div className="relative w-full h-full">
-              <div
-                className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
-              />
-              {imageError && onRetryImage && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                  <button
-                    onClick={onRetryImage}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full text-coral text-sm font-semibold shadow-lg hover:scale-105 transition-all"
-                  >
-                    <SparklesIcon />
-                    <span>Try Again</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-cream">
-              <p className="text-text-muted text-sm">Your spread is loading...</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Caption Preview - Show exactly what they'll share */}
-      {!isLoadingImage && (
-        <div className="w-full max-w-[360px] mb-5">
-          <p className="text-text-muted text-xs text-center mb-2 font-medium uppercase tracking-wide">
-            Your caption
-          </p>
-          <div className="bg-white rounded-xl px-4 py-3 border border-peach">
-            <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-line">
-              {caption}
-            </p>
-          </div>
-        </div>
-      )}
-
+    <div className="min-h-screen bg-cream flex flex-col items-center px-5 py-6 lg:py-10">
       {/* Feedback Toast */}
       {copyFeedback && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-text-primary text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-fade-in z-50">
@@ -401,87 +346,221 @@ export function ResultsScreen({
         </div>
       )}
 
-      {/* PRIMARY CTA - Share */}
-      <button
-        onClick={handleShare}
-        disabled={isSharing || isLoadingImage}
-        className={`
-          w-full max-w-[360px] rounded-2xl py-5 px-8
-          text-lg font-bold text-white
-          transition-all duration-200 ease-out
-          shadow-lg flex items-center justify-center gap-3
-          ${(isSharing || isLoadingImage)
-            ? 'bg-[#E8B4A0] cursor-not-allowed'
-            : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 active:translate-y-0 active:scale-[0.98]'
-          }
-        `}
-      >
-        <ShareIcon />
-        <span>{isSharing ? 'Sharing...' : 'Share This Masterpiece'}</span>
-      </button>
+      {/* Desktop: wider container */}
+      <div className="w-full max-w-[360px] lg:max-w-[480px] xl:max-w-[520px]">
+        {/* Mini Label */}
+        <p className="text-text-muted text-sm font-medium mb-2 mt-2 text-center">
+          tonight&apos;s dinner:
+        </p>
 
-      {/* Secondary Actions */}
-      {!isLoadingImage && (
-        <div className="flex gap-3 mt-4 w-full max-w-[360px]">
-          <button
-            onClick={handleCopyCaption}
-            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-peach text-text-secondary font-semibold hover:border-coral hover:text-coral transition-all"
+        {/* THE NAME - Big, Bold, Shareable */}
+        <div className="flex items-center justify-center gap-3 mb-3 px-4">
+          <h1
+            className={`
+              font-display text-4xl md:text-5xl lg:text-6xl italic text-coral text-center leading-tight
+              ${isLoadingName ? 'animate-pulse' : ''}
+            `}
           >
-            <CopyIcon />
-            <span>Copy</span>
-          </button>
-          <button
-            onClick={handleSaveImage}
-            disabled={!imageUrl && !sanitizedSvg}
-            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-peach text-text-secondary font-semibold hover:border-coral hover:text-coral transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <DownloadIcon />
-            <span>Save</span>
-          </button>
+            &ldquo;{dinnerName}&rdquo;
+          </h1>
+          {onRegenerateName && !isLoadingName && (
+            <button
+              onClick={handleRegenerateName}
+              aria-label={COPY.results.regenerateName}
+              title={COPY.results.regenerateName}
+              className="p-2 rounded-full text-text-secondary hover:text-coral hover:bg-peach transition-all group relative"
+            >
+              <RefreshIcon />
+            </button>
+          )}
+          {isLoadingName && (
+            <div className="w-5 h-5 border-2 border-peach border-t-coral rounded-full animate-spin" />
+          )}
         </div>
-      )}
 
-      {/* Tertiary: Vibe Check Upsell */}
-      <button
-        onClick={onCheckVibe}
-        className="mt-6 flex items-center gap-2 text-text-secondary hover:text-coral transition-colors font-medium"
-      >
-        <CameraIcon />
-        <span>Upload your real plate for a vibe score</span>
-      </button>
+        {/* Validation - The affirmation */}
+        <div className="flex items-start gap-2 mb-5 px-4 justify-center">
+          <div className="mt-0.5 flex-shrink-0">
+            <CheckIcon />
+          </div>
+          <p className="text-text-primary text-base lg:text-lg leading-relaxed max-w-[320px]">
+            {cleanValidation}
+          </p>
+        </div>
 
-      {/* Quaternary: Start Over */}
-      {onJustEat && (
-        <button
-          onClick={onJustEat}
-          className="mt-4 text-text-muted text-sm hover:text-text-secondary transition-colors underline underline-offset-2"
-        >
-          Start over
-        </button>
-      )}
+        {/* The Image - The shareable hero */}
+        <div className="mb-5">
+          <div className="relative aspect-square rounded-2xl overflow-hidden shadow-xl bg-white border-2 border-peach lg:rounded-3xl">
+            {isLoadingImage ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream p-6">
+                <div className="w-14 h-14 lg:w-16 lg:h-16 border-4 border-peach border-t-coral rounded-full animate-spin mb-5" />
+                <p className="text-coral text-base lg:text-lg font-medium text-center mb-2">
+                  {IMAGE_LOADING_MESSAGES[loadingMessageIndex]}
+                </p>
+                <div className="w-40 lg:w-48 h-1.5 bg-peach rounded-full overflow-hidden">
+                  <div className="h-full w-1/3 bg-coral rounded-full animate-progress-indeterminate" />
+                </div>
+              </div>
+            ) : imageUrl ? (
+              imageUrl.startsWith('data:') ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={imageUrl}
+                  alt={dinnerName}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={imageUrl}
+                  alt={dinnerName}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 360px, 480px"
+                />
+              )
+            ) : sanitizedSvg ? (
+              <div className="relative w-full h-full">
+                <div
+                  className="w-full h-full"
+                  dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
+                />
+                {imageError && onRetryImage && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+                    <button
+                      onClick={onRetryImage}
+                      className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full text-coral text-sm font-semibold shadow-lg hover:scale-105 transition-all"
+                    >
+                      <SparklesIcon />
+                      <span>Try Again</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <ImageSkeleton />
+            )}
+          </div>
+        </div>
 
-      {/* Footer Links */}
-      <div className="mt-8 pt-4 border-t border-peach/50 flex gap-4 text-xs text-text-muted">
-        <a
-          href="https://github.com/TheHeaviestFeather/CharcuterME/issues/new?template=content-report.md"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-coral transition-colors"
-        >
-          Report an issue
-        </a>
-        <a
-          href="/terms"
-          className="hover:text-coral transition-colors"
-        >
-          Terms
-        </a>
-        <a
-          href="/privacy"
-          className="hover:text-coral transition-colors"
-        >
-          Privacy
-        </a>
+        {/* Caption - Editable */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <p className="text-text-muted text-xs font-medium uppercase tracking-wide">
+              Your caption
+            </p>
+            {editedCaption !== null && (
+              <button
+                onClick={handleResetCaption}
+                className="text-xs text-coral hover:text-coral-dark transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+          {isLoadingImage ? (
+            <div className="bg-white rounded-xl px-4 py-3 border border-peach">
+              <CaptionSkeleton />
+            </div>
+          ) : (
+            <textarea
+              value={caption}
+              onChange={(e) => setEditedCaption(e.target.value)}
+              className="w-full bg-white rounded-xl px-4 py-3 border border-peach text-text-secondary text-sm lg:text-base leading-relaxed resize-none focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral transition-all"
+              rows={5}
+              aria-label="Edit caption"
+            />
+          )}
+        </div>
+
+        {/* PRIMARY CTA - Share */}
+        {isLoadingImage ? (
+          <ButtonSkeleton />
+        ) : (
+          <button
+            onClick={handleShare}
+            disabled={isSharing || isLoadingImage}
+            className={`
+              w-full rounded-2xl py-5 px-8
+              text-lg lg:text-xl font-bold text-white
+              transition-all duration-200 ease-out
+              shadow-lg flex items-center justify-center gap-3
+              ${(isSharing || isLoadingImage)
+                ? 'bg-[#E8B4A0] cursor-not-allowed'
+                : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 active:translate-y-0 active:scale-[0.98]'
+              }
+            `}
+          >
+            <ShareIcon />
+            <span>{isSharing ? 'Sharing...' : COPY.results.primaryCta}</span>
+          </button>
+        )}
+
+        {/* Secondary Actions */}
+        {isContentReady && (
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={handleCopyCaption}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-peach text-text-secondary font-semibold hover:border-coral hover:text-coral transition-all lg:py-4"
+            >
+              <CopyIcon />
+              <span>{COPY.results.copyCaption}</span>
+            </button>
+            <button
+              onClick={handleSaveImage}
+              disabled={!imageUrl && !sanitizedSvg}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-peach text-text-secondary font-semibold hover:border-coral hover:text-coral transition-all disabled:opacity-50 disabled:cursor-not-allowed lg:py-4"
+            >
+              <DownloadIcon />
+              <span>{COPY.results.saveImage}</span>
+            </button>
+          </div>
+        )}
+
+        {/* Tertiary: Vibe Check Upsell */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={onCheckVibe}
+            className="inline-flex items-center gap-2 text-text-secondary hover:text-coral transition-colors font-medium lg:text-lg"
+          >
+            <CameraIcon />
+            <span>{COPY.results.vibeHook}</span>
+          </button>
+          <p className="text-xs text-text-muted mt-1">{COPY.results.vibeSubtext}</p>
+        </div>
+
+        {/* Quaternary: Start Over */}
+        {onJustEat && (
+          <button
+            onClick={onJustEat}
+            className="mt-4 text-text-muted text-sm hover:text-text-secondary transition-colors underline underline-offset-2 w-full text-center"
+          >
+            Start over
+          </button>
+        )}
+
+        {/* Footer Links */}
+        <div className="mt-8 pt-4 border-t border-peach/50 flex gap-4 text-xs text-text-muted justify-center">
+          <a
+            href="https://github.com/TheHeaviestFeather/CharcuterME/issues/new?template=content-report.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-coral transition-colors"
+          >
+            Report an issue
+          </a>
+          <a
+            href="/terms"
+            className="hover:text-coral transition-colors"
+          >
+            Terms
+          </a>
+          <a
+            href="/privacy"
+            className="hover:text-coral transition-colors"
+          >
+            Privacy
+          </a>
+        </div>
       </div>
     </div>
   );
