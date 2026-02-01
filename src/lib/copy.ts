@@ -50,7 +50,7 @@ export const SUGGESTION_CATEGORIES = {
   Sweet: ['chocolate', 'cookies', 'grapes', 'gummy bears', 'nutella', 'fruit snacks', 'granola', 'dried mango'],
   Crunch: ['crackers', 'tortilla chips', 'toast', 'carrots', 'cucumbers', 'croutons', 'pita chips', 'apple slices'],
   'Protein-ish': ['cheese', 'hummus', 'peanut butter', 'yogurt', 'pepperoni', 'hard-boiled egg', 'deli turkey', 'cottage cheese'],
-  Chaos: ['pizza', 'wine', 'hot sauce', 'cereal', 'sushi', 'french fries', 'mystery tupperware', 'leftover takeout'],
+  Chaos: ['pizza', 'wine', 'hot sauce', 'cereal', 'sushi', 'french fries', 'mystery tupperware', 'regret'],
 } as const;
 
 // For "Surprise me" - chaotic but weirdly good combos
