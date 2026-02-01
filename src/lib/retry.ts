@@ -26,10 +26,7 @@ const defaultShouldRetry = (error: Error): boolean => {
   );
 };
 
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {}
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const {
     maxRetries = 3,
     baseDelay = 1000,
@@ -50,10 +47,7 @@ export async function withRetry<T>(
       }
 
       // Exponential backoff with jitter
-      const delay = Math.min(
-        baseDelay * Math.pow(2, attempt) + Math.random() * 1000,
-        maxDelay
-      );
+      const delay = Math.min(baseDelay * Math.pow(2, attempt) + Math.random() * 1000, maxDelay);
 
       logger.warn('Retry attempt failed, retrying', {
         attempt: attempt + 1,

@@ -1,4 +1,5 @@
 # CharcuterME
+
 ## Turn Fridge Chaos Into Culinary Art
 
 ---
@@ -12,11 +13,11 @@ INPUT → REVEAL → PLATE → VIBE CHECK → SHARE
 
 ### The Three Emotional Beats
 
-| Beat | Time | What Happens | User Feels |
-|------|------|--------------|------------|
-| **1. The Name** | 0-5s | "Cheese Is A Personality"| "Oh that's cute!" (smile) |
-| **2. The Blueprint** | 5-15s | Ghibli-style illustration | "I can do this" (confidence) |
-| **3. The Vibe Check** | 30-60s | Score: 78 "NAILED IT!" | "I did it!" (pride) |
+| Beat                  | Time   | What Happens              | User Feels                   |
+| --------------------- | ------ | ------------------------- | ---------------------------- |
+| **1. The Name**       | 0-5s   | "Cheese Is A Personality" | "Oh that's cute!" (smile)    |
+| **2. The Blueprint**  | 5-15s  | Ghibli-style illustration | "I can do this" (confidence) |
+| **3. The Vibe Check** | 30-60s | Score: 78 "NAILED IT!"    | "I did it!" (pride)          |
 
 Every beat provides validation. Every exit is a win.
 
@@ -56,20 +57,21 @@ ENABLE_CLAUDE_NAMING=true
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `ARCHITECTURE.md` | Full system design |
-| `PROMPTS.md` | AI prompts for all 3 calls |
-| `QA-TEST-SUITE.md` | Testing & validation |
-| `src/lib/logic-bridge.ts` | Classification engine |
-| `src/lib/ai-clients.ts` | Shared AI client utilities |
-| `src/lib/constants.ts` | Brand colors, model names, settings |
+| File                      | Purpose                             |
+| ------------------------- | ----------------------------------- |
+| `ARCHITECTURE.md`         | Full system design                  |
+| `PROMPTS.md`              | AI prompts for all 3 calls          |
+| `QA-TEST-SUITE.md`        | Testing & validation                |
+| `src/lib/logic-bridge.ts` | Classification engine               |
+| `src/lib/ai-clients.ts`   | Shared AI client utilities          |
+| `src/lib/constants.ts`    | Brand colors, model names, settings |
 
 ---
 
 ## The System
 
 ### Architecture
+
 ```
 User Input → Logic Bridge → AI Calls → User Interface
               (classify)    (name,     (4 screens)
@@ -79,11 +81,11 @@ User Input → Logic Bridge → AI Calls → User Interface
 
 ### AI Calls
 
-| Call | Model | Purpose | Cost |
-|------|-------|---------|------|
-| 1. Namer | Claude 3.5 Haiku | Instant name + validation | $0.001 |
-| 2. Sketch | DALL-E 3 | Studio Ghibli illustration | $0.040 |
-| 3. Judge | GPT-4o Vision | Photo scoring | $0.010 |
+| Call      | Model            | Purpose                    | Cost   |
+| --------- | ---------------- | -------------------------- | ------ |
+| 1. Namer  | Claude 3.5 Haiku | Instant name + validation  | $0.001 |
+| 2. Sketch | DALL-E 3         | Studio Ghibli illustration | $0.040 |
+| 3. Judge  | GPT-4o Vision    | Photo scoring              | $0.010 |
 
 **With gpt-4o-mini:** Vibe check drops to $0.003 (~70% savings)
 
@@ -95,10 +97,10 @@ User Input → Logic Bridge → AI Calls → User Interface
 
 ### Why "Girl Dinner" Framing?
 
-| Charcuterie Framing | Girl Dinner Framing |
-|---------------------|---------------------|
-| "Culinary art" | "Whatever you have is enough" |
-| Aspirational | Validating with snarky humor |
+| Charcuterie Framing   | Girl Dinner Framing                                          |
+| --------------------- | ------------------------------------------------------------ |
+| "Culinary art"        | "Whatever you have is enough"                                |
+| Aspirational          | Validating with snarky humor                                 |
 | "You should try this" | "You looked in your fridge and said 'this is fine.' Iconic." |
 
 We lead with validation AND humor, not aspiration.
@@ -106,6 +108,7 @@ We lead with validation AND humor, not aspiration.
 ### Why Three Beats?
 
 Each beat catches users at different commitment levels:
+
 - **40%** exit after name (got validation, happy)
 - **30%** exit after blueprint (got guidance, inspired)
 - **30%** complete full loop (got score + shareable)
@@ -115,6 +118,7 @@ No dead ends. Every exit is a win.
 ### Why Ghibli Style?
 
 The illustration style matters:
+
 - **Warm, inviting** — not clinical or commercial
 - **Achievable** — looks like something they could make
 - **Shareable** — aesthetic enough for social media
@@ -126,20 +130,21 @@ The illustration style matters:
 
 All generated images follow the Studio Ghibli aesthetic:
 
-| Element | Requirement |
-|---------|-------------|
-| Colors | Warm, muted, soft gradients |
-| Lighting | Golden hour, top-left |
-| Texture | Watercolor, hand-painted |
-| Mood | Cozy, inviting, nostalgic |
-| Angle | 45-degree (Instagram-style) |
-| Background | Creamy linen, shallow DoF |
+| Element    | Requirement                 |
+| ---------- | --------------------------- |
+| Colors     | Warm, muted, soft gradients |
+| Lighting   | Golden hour, top-left       |
+| Texture    | Watercolor, hand-painted    |
+| Mood       | Cozy, inviting, nostalgic   |
+| Angle      | 45-degree (Instagram-style) |
+| Background | Creamy linen, shallow DoF   |
 
 ---
 
 ## Screens (4-Screen Flow)
 
 ### 1. Input
+
 ```
 ┌────────────────────────────┐
 │  CharcuterME               │
@@ -154,6 +159,7 @@ All generated images follow the Studio Ghibli aesthetic:
 ```
 
 ### 2. Reveal (Combined Name + Blueprint)
+
 ```
 ┌────────────────────────────┐
 │  Tonight's Dinner:         │
@@ -169,6 +175,7 @@ All generated images follow the Studio Ghibli aesthetic:
 ```
 
 ### 3. Blueprint (Ghibli Illustration)
+
 ```
 ┌────────────────────────────┐
 │  "The French Affair"       │
@@ -189,6 +196,7 @@ All generated images follow the Studio Ghibli aesthetic:
 ```
 
 ### 4. Vibe Check Results
+
 ```
 ┌────────────────────────────┐
 │  VIBE CHECK                │
@@ -215,13 +223,13 @@ All generated images follow the Studio Ghibli aesthetic:
 
 Stickers are selected by tier (not exact match from AI):
 
-| Score | Tier | Example Stickers |
-|-------|------|------------------|
-| 90-100 | `legendary` | GRAZE QUEEN 👑, CHEF'S KISS 💋 |
-| 75-89 | `great` | NAILED IT!, MAIN CHARACTER ✨ |
-| 60-74 | `good` | WE LOVE TO SEE IT, VIBE ACHIEVED ✓ |
-| 45-59 | `chaotic` | CHAOTIC GOOD 🔥, ART IS SUBJECTIVE |
-| 35-44 | `messy` | I TRIED 🤷, POINTS FOR TRYING |
+| Score  | Tier        | Example Stickers                   |
+| ------ | ----------- | ---------------------------------- |
+| 90-100 | `legendary` | GRAZE QUEEN 👑, CHEF'S KISS 💋     |
+| 75-89  | `great`     | NAILED IT!, MAIN CHARACTER ✨      |
+| 60-74  | `good`      | WE LOVE TO SEE IT, VIBE ACHIEVED ✓ |
+| 45-59  | `chaotic`   | CHAOTIC GOOD 🔥, ART IS SUBJECTIVE |
+| 35-44  | `messy`     | I TRIED 🤷, POINTS FOR TRYING      |
 
 AI returns `stickerTier`, client randomly selects from that tier's options.
 
@@ -254,31 +262,34 @@ vercel --prod
 ```
 
 Required environment variables in Vercel:
+
 - `ANTHROPIC_API_KEY`
 - `OPENAI_API_KEY`
 
 Optional:
+
 - `GPT_VISION_MODEL` (defaults to `gpt-4o`)
 
 ---
 
 ## Cost Optimization
 
-| Optimization | Savings |
-|--------------|---------|
-| GPT-4o-mini for vibe checks | 70% on vision calls |
-| `detail: 'low'` for images | 50% on vision tokens |
-| Exit after name (40% users) | Skip DALL-E cost |
+| Optimization                | Savings              |
+| --------------------------- | -------------------- |
+| GPT-4o-mini for vibe checks | 70% on vision calls  |
+| `detail: 'low'` for images  | 50% on vision tokens |
+| Exit after name (40% users) | Skip DALL-E cost     |
 
 Set `GPT_VISION_MODEL=gpt-4o-mini` to enable cheaper vision.
 
 ---
 
 > **Did they chuckle at the name?**
+
 ## License
 
 MIT
 
 ---
 
-*Built with 🧀 and chaos*
+_Built with 🧀 and chaos_

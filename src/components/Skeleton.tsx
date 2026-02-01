@@ -13,12 +13,7 @@ interface SkeletonProps {
   rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
 }
 
-export function Skeleton({
-  className = '',
-  width,
-  height,
-  rounded = 'md',
-}: SkeletonProps) {
+export function Skeleton({ className = '', width, height, rounded = 'md' }: SkeletonProps) {
   const roundedClasses = {
     none: '',
     sm: 'rounded-sm',
@@ -139,23 +134,9 @@ export function CardSkeleton({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {showImage && (
-        <Skeleton
-          className="w-full aspect-square mb-4"
-          rounded="lg"
-        />
-      )}
-      {showTitle && (
-        <Skeleton
-          className="mb-2"
-          height="1.5rem"
-          width="70%"
-          rounded="sm"
-        />
-      )}
-      {showDescription && (
-        <TextSkeleton lines={2} />
-      )}
+      {showImage && <Skeleton className="w-full aspect-square mb-4" rounded="lg" />}
+      {showTitle && <Skeleton className="mb-2" height="1.5rem" width="70%" rounded="sm" />}
+      {showDescription && <TextSkeleton lines={2} />}
     </motion.div>
   );
 }
@@ -265,11 +246,7 @@ interface ProgressiveRevealProps {
   className?: string;
 }
 
-export function ProgressiveReveal({
-  children,
-  delay = 0,
-  className = '',
-}: ProgressiveRevealProps) {
+export function ProgressiveReveal({ children, delay = 0, className = '' }: ProgressiveRevealProps) {
   return (
     <motion.div
       className={className}

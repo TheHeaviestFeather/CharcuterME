@@ -10,15 +10,6 @@ export {
   getIngredientNames,
 } from './database';
 
-export {
-  classifyIngredients,
-  summarizeIngredients,
-  fuzzyMatch,
-} from './classifier';
+export { classifyIngredients, summarizeIngredients, fuzzyMatch } from './classifier';
 
-export {
-  validateIngredient,
-  NON_FOOD_PATTERNS,
-  SNARK_BANK,
-  AMBIGUOUS_ITEMS,
-} from './validator';
+export { validateIngredient, NON_FOOD_PATTERNS, SNARK_BANK, AMBIGUOUS_ITEMS } from './validator';

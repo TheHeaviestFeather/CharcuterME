@@ -1,4 +1,5 @@
 # CharcuterME: Unified Product Architecture
+
 ## From Sketch → Vibe Check → Emotional Validation
 
 ---
@@ -77,13 +78,14 @@ STEP 4: RESULTS + SHARE
 
 ## The Three Emotional Beats
 
-| Beat | Timing | What Happens | Emotion |
-|------|--------|--------------|---------|
-| **1. The Name** | 0-5 sec | Snarky name + validation | "lol that's me" (chuckle) |
-| **2. The Blueprint** | 5-15 sec | Ghibli-style visual guide | "I can do this" (confidence) |
-| **3. The Vibe Check** | 30-60 sec | Photo scored + roasted lovingly | "I did it!" (pride) |
+| Beat                  | Timing    | What Happens                    | Emotion                      |
+| --------------------- | --------- | ------------------------------- | ---------------------------- |
+| **1. The Name**       | 0-5 sec   | Snarky name + validation        | "lol that's me" (chuckle)    |
+| **2. The Blueprint**  | 5-15 sec  | Ghibli-style visual guide       | "I can do this" (confidence) |
+| **3. The Vibe Check** | 30-60 sec | Photo scored + roasted lovingly | "I did it!" (pride)          |
 
 **Key insight:** Each beat provides validation with snarky millennial humor:
+
 - Beat 1: "Your ingredients are valid (and we're going to lovingly roast you)"
 - Beat 2: "Here's how to make them Instagram-worthy"
 - Beat 3: "You understood the assignment (or beautifully failed trying)"
@@ -150,22 +152,25 @@ STEP 4: RESULTS + SHARE
 ## Shared Utilities
 
 ### AI Clients (`src/lib/ai-clients.ts`)
+
 ```typescript
 // Lazy-loaded singleton clients
-getOpenAIClient()     // For DALL-E and GPT-4o
-getAnthropicClient()  // For Claude Haiku
-resetClients()        // For testing/key rotation
+getOpenAIClient(); // For DALL-E and GPT-4o
+getAnthropicClient(); // For Claude Haiku
+resetClients(); // For testing/key rotation
 ```
 
 ### Constants (`src/lib/constants.ts`)
+
 ```typescript
-COLORS = { mocha, coral, lavender, cream }
-AI_MODELS = { naming: 'claude-3-haiku', sketch: 'dall-e-3', vibe: 'gpt-4o' }
-DALLE_SETTINGS = { size: '1024x1024', quality: 'standard', style: 'natural' }
-MIN_VIBE_SCORE = 40
+COLORS = { mocha, coral, lavender, cream };
+AI_MODELS = { naming: 'claude-3-haiku', sketch: 'dall-e-3', vibe: 'gpt-4o' };
+DALLE_SETTINGS = { size: '1024x1024', quality: 'standard', style: 'natural' };
+MIN_VIBE_SCORE = 40;
 ```
 
 ### Resilience Patterns
+
 - **Circuit Breakers** - Prevent cascade failures (`src/lib/circuit-breaker.ts`)
 - **Retry Logic** - Exponential backoff (`src/lib/retry.ts`)
 - **Timeouts** - Configurable per-call (`src/lib/timeout.ts`)
@@ -217,7 +222,7 @@ Gentle shadows, creamy background with subtle linen texture.
 The food looks delicious and effortlessly arranged. Dreamy, whimsical Ghibli aesthetic
 with rich warm colors. Casual "girl dinner" vibes - cute but not trying too hard.
 
-Angled perspective like a food blogger photo, soft natural lighting from the side.`
+Angled perspective like a food blogger photo, soft natural lighting from the side.`;
 
 // Output: Image URL from Azure blob storage
 ```
@@ -259,22 +264,26 @@ Angled perspective like a food blogger photo, soft natural lighting from the sid
 
 ```javascript
 const STICKERS = {
-  legendary: {  // 90-100
-    ranks: ["Graze Girlboss", "Pinterest Made Real", "Influencer Energy"],
-    stickers: ["GRAZE QUEEN", "SLAY", "NO NOTES", "OBSESSED"]
+  legendary: {
+    // 90-100
+    ranks: ['Graze Girlboss', 'Pinterest Made Real', 'Influencer Energy'],
+    stickers: ['GRAZE QUEEN', 'SLAY', 'NO NOTES', 'OBSESSED'],
   },
-  great: {  // 75-89
-    ranks: ["Main Character", "Understood The Assignment", "Suspiciously Competent"],
-    stickers: ["ATE THAT UP", "MAIN CHARACTER", "UNDERSTOOD THE ASSIGNMENT"]
+  great: {
+    // 75-89
+    ranks: ['Main Character', 'Understood The Assignment', 'Suspiciously Competent'],
+    stickers: ['ATE THAT UP', 'MAIN CHARACTER', 'UNDERSTOOD THE ASSIGNMENT'],
   },
-  good: {  // 60-74
-    ranks: ["Chaotic Good", "It's Giving Effort", "We See You Trying"],
-    stickers: ["TRUST THE PROCESS", "IT'S THE EFFORT", "VALID"]
+  good: {
+    // 60-74
+    ranks: ['Chaotic Good', "It's Giving Effort", 'We See You Trying'],
+    stickers: ['TRUST THE PROCESS', "IT'S THE EFFORT", 'VALID'],
   },
-  chaotic: {  // 40-59
-    ranks: ["Beautiful Disaster", "Chaos Coordinator", "Art Is Subjective Bestie"],
-    stickers: ["CHAOS IS ART", "POINTS FOR TRYING", "STILL ATE THO"]
-  }
+  chaotic: {
+    // 40-59
+    ranks: ['Beautiful Disaster', 'Chaos Coordinator', 'Art Is Subjective Bestie'],
+    stickers: ['CHAOS IS ART', 'POINTS FOR TRYING', 'STILL ATE THO'],
+  },
 };
 
 // Minimum score is 40 - we're not monsters
@@ -285,6 +294,7 @@ const STICKERS = {
 ## Screen-by-Screen Specifications
 
 ### Screen 1: Input
+
 ```
 ┌────────────────────────────┐
 │  CharcuterME               │
@@ -304,6 +314,7 @@ const STICKERS = {
 ```
 
 ### Screen 2: Reveal (Combined Name + Blueprint)
+
 ```
 ┌────────────────────────────┐
 │  Tonight's Dinner:         │
@@ -335,6 +346,7 @@ const STICKERS = {
 ```
 
 ### Screen 3: Camera
+
 ```
 ┌────────────────────────────┐
 │  Show us your spread!      │
@@ -354,6 +366,7 @@ const STICKERS = {
 ```
 
 ### Screen 4: Vibe Check Results
+
 ```
 ┌────────────────────────────┐
 │  "Cheese Is A Personality" │
@@ -387,10 +400,10 @@ const STICKERS = {
 
 Users can exit happy at multiple points:
 
-| Exit Point | What They Got | % Expected |
-|------------|---------------|------------|
-| After reveal | Name + validation + blueprint | 70% |
-| After vibe check | Full experience | 30% |
+| Exit Point       | What They Got                 | % Expected |
+| ---------------- | ----------------------------- | ---------- |
+| After reveal     | Name + validation + blueprint | 70%        |
+| After vibe check | Full experience               | 30%        |
 
 **Design principle:** Every exit is a happy exit. No dead ends.
 
@@ -398,12 +411,12 @@ Users can exit happy at multiple points:
 
 ## Cost Estimates (Per Session)
 
-| Call | Model | Est. Cost |
-|------|-------|-----------|
-| Name | Claude Haiku | $0.001 |
-| Sketch | DALL-E 3 | $0.04 |
-| Vibe Check | GPT-4o Vision | $0.01 |
-| **Total** | | **$0.05/session** |
+| Call       | Model         | Est. Cost         |
+| ---------- | ------------- | ----------------- |
+| Name       | Claude Haiku  | $0.001            |
+| Sketch     | DALL-E 3      | $0.04             |
+| Vibe Check | GPT-4o Vision | $0.01             |
+| **Total**  |               | **$0.05/session** |
 
 If 70% of users stop at reveal: **$0.02 avg/session**
 

@@ -42,7 +42,8 @@ export const VISUAL_RULES: Record<string, VisualRule> = {
   anchorPlacement: {
     name: 'Anchor Prominence',
     check: (summary) => summary.anchors.length > 0,
-    instruction: 'Anchor items should be visually prominent - larger, centered, or at focal points.',
+    instruction:
+      'Anchor items should be visually prominent - larger, centered, or at focal points.',
   },
 };
 

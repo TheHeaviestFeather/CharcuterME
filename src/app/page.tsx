@@ -11,7 +11,7 @@ import { AppErrorBoundary } from '@/components/ErrorBoundary';
 // =============================================================================
 
 const API_TIMEOUTS = {
-  name: 15000,   // 15 seconds for Claude
+  name: 15000, // 15 seconds for Claude
   sketch: 45000, // 45 seconds for Imagen (image generation is slow)
 } as const;
 
@@ -208,12 +208,7 @@ export default function CharcuterMeApp() {
   const renderScreen = () => {
     switch (screen) {
       case 'input':
-        return (
-          <InputScreen
-            onSubmit={handleSubmitIngredients}
-            isLoading={isLoadingName}
-          />
-        );
+        return <InputScreen onSubmit={handleSubmitIngredients} isLoading={isLoadingName} />;
 
       case 'results':
         return (
@@ -254,9 +249,5 @@ export default function CharcuterMeApp() {
     }
   };
 
-  return (
-    <AppErrorBoundary onReset={resetState}>
-      {renderScreen()}
-    </AppErrorBoundary>
-  );
+  return <AppErrorBoundary onReset={resetState}>{renderScreen()}</AppErrorBoundary>;
 }

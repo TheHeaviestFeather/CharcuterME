@@ -67,8 +67,8 @@ export async function addWatermark(imageUrl: string): Promise<string> {
     } else {
       // For remote URLs, we need to fetch and convert to data URL first
       fetch(imageUrl)
-        .then(response => response.blob())
-        .then(blob => {
+        .then((response) => response.blob())
+        .then((blob) => {
           const reader = new FileReader();
           reader.onload = () => {
             img.src = reader.result as string;
@@ -84,10 +84,7 @@ export async function addWatermark(imageUrl: string): Promise<string> {
 /**
  * Download a watermarked image
  */
-export async function downloadWithWatermark(
-  imageUrl: string,
-  filename: string
-): Promise<void> {
+export async function downloadWithWatermark(imageUrl: string, filename: string): Promise<void> {
   const watermarkedUrl = await addWatermark(imageUrl);
 
   const response = await fetch(watermarkedUrl);

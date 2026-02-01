@@ -1,19 +1,19 @@
 import * as Sentry from '@sentry/nextjs';
 
+// Export router transition hook for navigation instrumentation
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
   // Only enable in production
   enabled: process.env.NODE_ENV === 'production',
 
-  // Adjust sample rate for your traffic (0.1 = 10% of errors)
-  // For <100 users, capture everything
+  // Capture all errors for small user base
   tracesSampleRate: 1.0,
 
   // Capture console errors
-  integrations: [
-    Sentry.browserTracingIntegration(),
-  ],
+  integrations: [Sentry.browserTracingIntegration()],
 
   // Filter out known non-issues
   ignoreErrors: [

@@ -1,37 +1,40 @@
 # CharcuterME: AI Prompts v3.0
+
 ## Three Calls, Three Beats
 
 ---
 
 ## Overview
 
-| Call | Purpose | Model | Latency | Cost |
-|------|---------|-------|---------|------|
-| **1. The Namer** | Instant name + validation | Claude 3.5 Haiku | <2s | $0.001 |
-| **2. The Sketch Artist** | Studio Ghibli food illustration | DALL-E 3 | 10-15s | $0.04 |
-| **3. The Vibe Judge** | Photo scoring with context | GPT-4o Vision | <5s | $0.01 |
+| Call                     | Purpose                         | Model            | Latency | Cost   |
+| ------------------------ | ------------------------------- | ---------------- | ------- | ------ |
+| **1. The Namer**         | Instant name + validation       | Claude 3.5 Haiku | <2s     | $0.001 |
+| **2. The Sketch Artist** | Studio Ghibli food illustration | DALL-E 3         | 10-15s  | $0.04  |
+| **3. The Vibe Judge**    | Photo scoring with context      | GPT-4o Vision    | <5s     | $0.01  |
 
 ---
 
 ## Prompt Engineering Patterns
 
 ### System vs User Messages
+
 All prompts now use proper message separation:
 
 ```typescript
 // ✅ CORRECT: Personality in system, task in user
 messages.create({
-  system: SYSTEM_PROMPT,  // Who you are, rules, examples
-  messages: [{ role: 'user', content: userMessage }]  // The task
+  system: SYSTEM_PROMPT, // Who you are, rules, examples
+  messages: [{ role: 'user', content: userMessage }], // The task
 });
 
 // ❌ WRONG: Everything in user message
 messages.create({
-  messages: [{ role: 'user', content: hugePromptWithEverything }]
+  messages: [{ role: 'user', content: hugePromptWithEverything }],
 });
 ```
 
 ### Prompt Versioning
+
 All prompts include version tracking for A/B testing:
 
 ```typescript
@@ -44,12 +47,15 @@ logger.info('Generated', { promptVersion: PROMPT_VERSION });
 ## CALL 1: The Namer (Chaotic Millennial Bestie)
 
 ### Purpose
+
 Generate a playful dinner name and validation message within 2 seconds. This is the "aha moment" — the core emotional beat.
 
 ### Model
+
 Claude 3.5 Haiku (fast, creative, good at humor)
 
 ### Input
+
 ```json
 {
   "ingredients": "brie, crackers, grapes, salami"
@@ -144,11 +150,13 @@ Return ONLY valid JSON, no markdown:
 ```
 
 ### User Message
+
 ```
 Name this girl dinner: brie, crackers, grapes, salami
 ```
 
 ### Expected Output
+
 ```json
 {
   "name": "The French Affair",
@@ -158,6 +166,7 @@ Name this girl dinner: brie, crackers, grapes, salami
 ```
 
 ### API Configuration
+
 ```typescript
 {
   model: 'claude-3-5-haiku-20241022',
@@ -169,27 +178,31 @@ Name this girl dinner: brie, crackers, grapes, salami
 ```
 
 ### Fallback Responses
+
 Pattern-matched fallbacks when API fails:
 
-| Pattern | Name | Validation |
-|---------|------|------------|
-| Contains "pizza" | "Yesterday's Choices" | "✓ Cold pizza is a lifestyle." |
+| Pattern           | Name                      | Validation                                               |
+| ----------------- | ------------------------- | -------------------------------------------------------- |
+| Contains "pizza"  | "Yesterday's Choices"     | "✓ Cold pizza is a lifestyle."                           |
 | Contains "cheese" | "Cheese Is A Personality" | "✓ Your calcium intake is giving main character energy." |
-| Contains "chips" | "Crunch Time Realness" | "✓ Chips are just deconstructed potatoes." |
-| Contains "wine" | "Grapes & Consequences" | "✓ Wine is just aged grape juice." |
-| Default | "The Audacity" | "✓ You looked at your fridge and said 'this is fine.'" |
+| Contains "chips"  | "Crunch Time Realness"    | "✓ Chips are just deconstructed potatoes."               |
+| Contains "wine"   | "Grapes & Consequences"   | "✓ Wine is just aged grape juice."                       |
+| Default           | "The Audacity"            | "✓ You looked at your fridge and said 'this is fine.'"   |
 
 ---
 
 ## CALL 2: The Sketch Artist (Anime Style)
 
 ### Purpose
+
 Generate an anime-style painted food illustration with warm, cozy vibes.
 
 ### Model
+
 DALL-E 3 with `style: 'vivid'` for saturated anime-like colors
 
 ### Input
+
 ```javascript
 {
   ingredients: ["brie", "crackers", "grapes"],
@@ -198,7 +211,9 @@ DALL-E 3 with `style: 'vivid'` for saturated anime-like colors
 ```
 
 ### Template Selection UI
+
 Users can pick their vibe on the input screen:
+
 - **Minimalist** - Less is more, breathing room
 - **The Anchor** - One hero, supporting cast
 - **Snack Line** - Dip + dippers in a row
@@ -221,6 +236,7 @@ Food arranged artfully with breathing room. Looks delicious and cozy, like a fra
 ```
 
 ### Example Generated Prompt
+
 ```
 Anime-style painted food illustration. brie, crackers, grapes on white plate, cream linen background.
 
@@ -230,6 +246,7 @@ Food arranged artfully with breathing room. Looks delicious and cozy, like a fra
 ```
 
 ### API Configuration
+
 ```typescript
 {
   model: 'dall-e-3',
@@ -242,6 +259,7 @@ Food arranged artfully with breathing room. Looks delicious and cozy, like a fra
 ```
 
 ### SVG Fallback
+
 When DALL-E fails, return a beautiful SVG placeholder (not embarrassing ASCII):
 
 ```svg
@@ -259,12 +277,15 @@ When DALL-E fails, return a beautiful SVG placeholder (not embarrassing ASCII):
 ## CALL 3: The Vibe Judge (Snarky Millennial)
 
 ### Purpose
+
 Analyze user's photo and provide a snarky but supportive score with lovingly roasting feedback.
 
 ### Model
+
 GPT-4o Vision (or `gpt-4o-mini` for 70% cost savings)
 
 ### Input
+
 ```javascript
 {
   photo: "[base64 or data URL]",
@@ -329,6 +350,7 @@ OUTPUT FORMAT (JSON only, no markdown):
 ```
 
 ### GPT-4o Vision API Call
+
 ```javascript
 // From src/app/api/vibe/route.ts
 const response = await openai.chat.completions.create({
@@ -360,6 +382,7 @@ const response = await openai.chat.completions.create({
 ```
 
 ### Fallback (if API fails)
+
 ```javascript
 const FALLBACK_VIBE = {
   score: 77,
@@ -451,6 +474,7 @@ Not food error:
 ```
 
 ### User Message (with context)
+
 ```
 Rate this girl dinner plate!
 They named it: "The French Affair"
@@ -459,6 +483,7 @@ Plating tips to look for: S-curve flow, Odd clusters, Color balance
 ```
 
 ### API Configuration
+
 ```typescript
 {
   model: 'gpt-4o',  // or 'gpt-4o-mini' for cost savings
@@ -498,6 +523,7 @@ function selectSticker(tier: StickerTier): string {
 ```
 
 **Why tier-based?**
+
 - AI was inconsistent with exact sticker text ("NAILED IT" vs "NAILED IT!" vs "Nailed It!")
 - Tier selection is reliable, client adds randomness
 - Easier to A/B test sticker copy
@@ -506,12 +532,12 @@ function selectSticker(tier: StickerTier): string {
 
 ## Cost Summary
 
-| Scenario | Calls | Cost |
-|----------|-------|------|
-| User exits at name | 1 (Claude) | $0.001 |
-| User views blueprint | 2 (Claude + DALL-E) | $0.041 |
-| Full flow | 3 (all) | $0.051 |
-| Full flow with gpt-4o-mini | 3 (all) | $0.044 |
+| Scenario                   | Calls               | Cost   |
+| -------------------------- | ------------------- | ------ |
+| User exits at name         | 1 (Claude)          | $0.001 |
+| User views blueprint       | 2 (Claude + DALL-E) | $0.041 |
+| Full flow                  | 3 (all)             | $0.051 |
+| Full flow with gpt-4o-mini | 3 (all)             | $0.044 |
 
 **Expected average:** ~$0.03/session (70% exit at reveal)
 
@@ -537,11 +563,11 @@ All user input is sanitized before being included in prompts:
 ```typescript
 function sanitizeIngredients(raw: string): string {
   return raw
-    .replace(/[{}"'`<>]/g, '')  // Remove JSON/XML breaking chars
-    .replace(/\n/g, ', ')        // Newlines to commas
-    .replace(/\s+/g, ' ')        // Collapse whitespace
+    .replace(/[{}"'`<>]/g, '') // Remove JSON/XML breaking chars
+    .replace(/\n/g, ', ') // Newlines to commas
+    .replace(/\s+/g, ' ') // Collapse whitespace
     .trim()
-    .slice(0, 500);              // Hard limit
+    .slice(0, 500); // Hard limit
 }
 ```
 
@@ -550,6 +576,7 @@ function sanitizeIngredients(raw: string): string {
 ## Testing Checklist
 
 ### Call 1 (Namer)
+
 - [ ] Returns valid JSON
 - [ ] Name is 2-5 words
 - [ ] Name is SNARKY (not generic like "The Board")
@@ -564,6 +591,7 @@ function sanitizeIngredients(raw: string): string {
 - [ ] Rejects prompt injection
 
 ### Call 2 (Sketch)
+
 - [ ] Image has Ghibli aesthetic (warm, soft, dreamy)
 - [ ] Only listed ingredients appear
 - [ ] NO text or labels in image
@@ -573,6 +601,7 @@ function sanitizeIngredients(raw: string): string {
 - [ ] Responds in <15 seconds
 
 ### Call 3 (Vibe Judge)
+
 - [ ] Score is 35-100 (never below 35)
 - [ ] stickerTier is valid enum value
 - [ ] Compliment is specific to photo
@@ -583,5 +612,5 @@ function sanitizeIngredients(raw: string): string {
 
 ---
 
-*Whatever you have is enough. (But we're still going to lovingly roast it.)*
-*End of AI Prompts Documentation v3.0*
+_Whatever you have is enough. (But we're still going to lovingly roast it.)_
+_End of AI Prompts Documentation v3.0_

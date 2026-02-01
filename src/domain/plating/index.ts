@@ -11,8 +11,4 @@ export {
   getTemplateReason,
 } from './templates';
 
-export {
-  VISUAL_RULES,
-  getApplicableRules,
-  getRule,
-} from './rules';
+export { VISUAL_RULES, getApplicableRules, getRule } from './rules';

@@ -11,14 +11,22 @@ import { addWatermark } from '@/lib/watermark';
 
 const CameraIcon = () => (
   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+    />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
 const ShareIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+    />
   </svg>
 );
 
@@ -60,12 +68,12 @@ interface VibeApiResponse {
 // =============================================================================
 
 const OBSERVATIONS = [
-  "The lighting suggests you ate this on the couch. Valid.",
-  "Bold choice to ignore the arrangement completely.",
+  'The lighting suggests you ate this on the couch. Valid.',
+  'Bold choice to ignore the arrangement completely.',
   "We can tell you're watching something good.",
-  "The background blanket adds +10 cozy points.",
+  'The background blanket adds +10 cozy points.',
   "This has 'third dinner' energy.",
-  "Presentation: chaotic. Taste: probably amazing.",
+  'Presentation: chaotic. Taste: probably amazing.',
 ];
 
 function getRandomItem<T>(array: T[]): T {
@@ -75,7 +83,7 @@ function getRandomItem<T>(array: T[]): T {
 function generateRandomScore(): string {
   const rand = Math.random();
   if (rand < 0.05) {
-    const funnyScores = ["yes", "100+", "nice"];
+    const funnyScores = ['yes', '100+', 'nice'];
     return funnyScores[Math.floor(Math.random() * funnyScores.length)];
   } else if (rand < 0.15) {
     return `${Math.floor(Math.random() * 15) + 101}%`;
@@ -84,11 +92,11 @@ function generateRandomScore(): string {
 }
 
 function generateVibeResult(): VibeCheckResult {
-  const categories = ["Culinary Rebel", "Chaos Curator", "Vibe Virtuoso", "Snack Architect"];
+  const categories = ['Culinary Rebel', 'Chaos Curator', 'Vibe Virtuoso', 'Snack Architect'];
   const validations = [
-    "Chaotic perfection. The algorithm is impressed.",
-    "You understood the assignment.",
-    "The vibes are immaculate.",
+    'Chaotic perfection. The algorithm is impressed.',
+    'You understood the assignment.',
+    'The vibes are immaculate.',
     "Chef's kiss. Or at least a chef's nod.",
   ];
   return {
@@ -107,7 +115,7 @@ export function VibeCheckScreen({
   dinnerData,
   ingredients,
   inspirationImage,
-  onStartOver
+  onStartOver,
 }: VibeCheckScreenProps) {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [userPhotoBlobUrl, setUserPhotoBlobUrl] = useState<string | null>(null);
@@ -194,12 +202,15 @@ export function VibeCheckScreen({
   };
 
   // Generate caption
-  const generateCaption = useCallback((includeVibeScore: boolean = false) => {
-    if (includeVibeScore && vibeResult) {
-      return `Tonight's dinner: "${dinnerName}"\n\nVibe Score: ${vibeResult.score} — ${vibeResult.category}\n"${vibeResult.validation}"\n\n#CharcuterME #GirlDinner`;
-    }
-    return `Tonight's dinner: "${dinnerName}"\n\n#CharcuterME #GirlDinner`;
-  }, [dinnerName, vibeResult]);
+  const generateCaption = useCallback(
+    (includeVibeScore: boolean = false) => {
+      if (includeVibeScore && vibeResult) {
+        return `Tonight's dinner: "${dinnerName}"\n\nVibe Score: ${vibeResult.score} — ${vibeResult.category}\n"${vibeResult.validation}"\n\n#CharcuterME #GirlDinner`;
+      }
+      return `Tonight's dinner: "${dinnerName}"\n\n#CharcuterME #GirlDinner`;
+    },
+    [dinnerName, vibeResult]
+  );
 
   // Share with vibe score
   const handleShare = useCallback(async () => {
@@ -207,7 +218,8 @@ export function VibeCheckScreen({
     analytics.shareClick('vibe', !!userPhoto);
 
     try {
-      const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
+      const canShareFiles =
+        typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
       if (canShareFiles && userPhoto) {
         try {
@@ -253,12 +265,13 @@ export function VibeCheckScreen({
       analytics.shareComplete('vibe', 'clipboard', false);
       setShareFeedback('Caption copied!');
       setTimeout(() => setShareFeedback(null), 3000);
-
     } catch {
       setShareFeedback('Caption copied!');
       try {
         await navigator.clipboard.writeText(caption);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       setTimeout(() => setShareFeedback(null), 3000);
     }
   }, [dinnerName, generateCaption, userPhoto]);
@@ -269,7 +282,8 @@ export function VibeCheckScreen({
     analytics.shareClick('vibe', !!inspirationImage);
 
     try {
-      const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
+      const canShareFiles =
+        typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
       if (canShareFiles && inspirationImage) {
         try {
@@ -315,7 +329,6 @@ export function VibeCheckScreen({
       analytics.shareComplete('vibe', 'clipboard', false);
       setShareFeedback('Caption copied!');
       setTimeout(() => setShareFeedback(null), 3000);
-
     } catch {
       await navigator.clipboard.writeText(caption);
       setShareFeedback('Caption copied!');
@@ -330,9 +343,7 @@ export function VibeCheckScreen({
   if (!userPhoto) {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center px-5 py-6">
-        <p className="text-text-muted text-sm font-medium mb-2 mt-2">
-          optional upgrade:
-        </p>
+        <p className="text-text-muted text-sm font-medium mb-2 mt-2">optional upgrade:</p>
         <h1 className="font-display text-3xl italic text-coral text-center mb-2">
           &ldquo;{dinnerName}&rdquo;
         </h1>
@@ -347,12 +358,7 @@ export function VibeCheckScreen({
               The Inspiration
             </p>
             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-lg border-2 border-peach">
-              <Image
-                src={inspirationImage}
-                alt="Inspiration"
-                fill
-                className="object-cover"
-              />
+              <Image src={inspirationImage} alt="Inspiration" fill className="object-cover" />
             </div>
           </div>
         )}
@@ -365,12 +371,8 @@ export function VibeCheckScreen({
           <div className="w-16 h-16 rounded-full bg-peach flex items-center justify-center mb-4 text-coral">
             <CameraIcon />
           </div>
-          <p className="text-coral font-semibold mb-1">
-            Show us what you actually made
-          </p>
-          <p className="text-text-muted text-sm text-center">
-            Tap to take a photo or upload
-          </p>
+          <p className="text-coral font-semibold mb-1">Show us what you actually made</p>
+          <p className="text-text-muted text-sm text-center">Tap to take a photo or upload</p>
         </div>
 
         <input
@@ -417,12 +419,8 @@ export function VibeCheckScreen({
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 py-8">
         <div className="w-14 h-14 border-4 border-peach border-t-coral rounded-full animate-spin mb-6" />
-        <p className="text-coral font-display text-2xl italic mb-2">
-          AI is judging your plate...
-        </p>
-        <p className="text-text-muted text-sm">
-          Preparing a witty roast
-        </p>
+        <p className="text-coral font-display text-2xl italic mb-2">AI is judging your plate...</p>
+        <p className="text-text-muted text-sm">Preparing a witty roast</p>
       </div>
     );
   }
@@ -433,9 +431,7 @@ export function VibeCheckScreen({
 
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center px-5 py-6">
-      <p className="text-text-muted text-sm font-medium mb-2 mt-2">
-        vibe check complete:
-      </p>
+      <p className="text-text-muted text-sm font-medium mb-2 mt-2">vibe check complete:</p>
       <h1 className="font-display text-3xl italic text-coral text-center mb-6">
         &ldquo;{dinnerName}&rdquo;
       </h1>
@@ -477,9 +473,7 @@ export function VibeCheckScreen({
       {vibeResult && (
         <div className="w-full max-w-[360px] bg-white rounded-2xl p-6 shadow-xl border-2 border-peach mb-5">
           <div className="text-center mb-4">
-            <p className="text-6xl font-bold text-coral mb-1">
-              {vibeResult.score}
-            </p>
+            <p className="text-6xl font-bold text-coral mb-1">{vibeResult.score}</p>
             <p className="text-text-secondary font-semibold uppercase tracking-wide text-sm">
               {vibeResult.category}
             </p>
@@ -488,9 +482,7 @@ export function VibeCheckScreen({
           <p className="text-text-primary text-center mb-3 font-medium">
             &ldquo;{vibeResult.validation}&rdquo;
           </p>
-          <p className="text-text-muted text-sm text-center italic">
-            {vibeResult.observation}
-          </p>
+          <p className="text-text-muted text-sm text-center italic">{vibeResult.observation}</p>
         </div>
       )}
 

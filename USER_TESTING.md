@@ -1,4 +1,5 @@
 # USER TESTING SCRIPTS
+
 ## Scraps to Spread — Discovery & Validation
 
 **Version:** 2.0  
@@ -9,6 +10,7 @@
 ## Overview
 
 This document contains all scripts for:
+
 1. **Finding ICPs** — Where to look, how to reach out
 2. **Screening** — Qualifying the right people
 3. **Discovery Calls** — Understanding the problem (pre-product)
@@ -22,6 +24,7 @@ This document contains all scripts for:
 ### Target Profile Reminder
 
 **The Weeknight Grazer:**
+
 - 28-38 years old
 - Lives alone or with partner, no kids
 - Eats snack plate dinner 2-3x/week
@@ -30,31 +33,33 @@ This document contains all scripts for:
 
 ### Where to Find Them
 
-| Channel | How to Find | Outreach Approach |
-|---------|-------------|-------------------|
-| **TikTok** | Search #girldinner, find people who *post* their own (not influencers) | Comment genuinely, then DM |
-| **Instagram** | Search #girldinner #snackdinner, find relatable posts | Comment, then DM |
-| **Reddit** | r/EatCheapAndHealthy, r/MealPrepSunday, r/1200isplenty | Post asking for chats, or DM active users |
-| **Twitter/X** | Search "girl dinner", "snack plate dinner" | Reply to tweets, then DM |
-| **Your network** | Post on LinkedIn/Instagram Stories | Ask for intros |
-| **Trader Joe's subreddit** | r/traderjoes — people asking "what to do with..." | DM those users |
+| Channel                    | How to Find                                                            | Outreach Approach                         |
+| -------------------------- | ---------------------------------------------------------------------- | ----------------------------------------- |
+| **TikTok**                 | Search #girldinner, find people who _post_ their own (not influencers) | Comment genuinely, then DM                |
+| **Instagram**              | Search #girldinner #snackdinner, find relatable posts                  | Comment, then DM                          |
+| **Reddit**                 | r/EatCheapAndHealthy, r/MealPrepSunday, r/1200isplenty                 | Post asking for chats, or DM active users |
+| **Twitter/X**              | Search "girl dinner", "snack plate dinner"                             | Reply to tweets, then DM                  |
+| **Your network**           | Post on LinkedIn/Instagram Stories                                     | Ask for intros                            |
+| **Trader Joe's subreddit** | r/traderjoes — people asking "what to do with..."                      | DM those users                            |
 
 ### Outreach Templates
 
 **TikTok/Instagram DM (Cold):**
+
 ```
 Hey! Loved your [girl dinner/snack plate] post — that's literally me 3x a week 😅
 
-I'm working on a little project to help people feel good about snack plate dinners and would love to chat with someone who actually does this. 
+I'm working on a little project to help people feel good about snack plate dinners and would love to chat with someone who actually does this.
 
 Would you be up for a 15-min call? I'm not selling anything, just trying to understand the experience better. Happy to send you a $10 coffee gift card as thanks!
 ```
 
 **Reddit Post:**
+
 ```
 Title: Looking to chat with fellow "snack plate dinner" people
 
-Hey all! I'm researching the experience of eating snack plates/girl dinners for a side project. 
+Hey all! I'm researching the experience of eating snack plates/girl dinners for a side project.
 
 If you regularly eat cheese + crackers + random stuff as a meal and would be willing to chat for 15 minutes about your experience, I'd really appreciate it. Not selling anything — just want to understand how people approach this.
 
@@ -62,8 +67,9 @@ Happy to send a small thank you (gift card or Venmo) for your time. DM me if int
 ```
 
 **LinkedIn/Personal Network:**
+
 ```
-Weird ask: Do you know anyone who regularly eats "snack plate dinners"? 
+Weird ask: Do you know anyone who regularly eats "snack plate dinners"?
 
 (You know — cheese, crackers, deli meat, random fridge stuff assembled on a plate instead of cooking?)
 
@@ -83,6 +89,7 @@ Drop a comment or DM me if you or someone you know fits the bill!
 ## Part 2: Screening Script
 
 ### Purpose
+
 Ensure you're talking to the right people before scheduling a full call.
 
 ### Screening Questions (DM or Quick Call)
@@ -90,7 +97,7 @@ Ensure you're talking to the right people before scheduling a full call.
 ```
 Thanks for being willing to chat! Before we schedule, I just want to make sure you're the right fit. Quick questions:
 
-1. How often do you eat "snack plate dinner" — like, cheese and crackers and random stuff instead of cooking? 
+1. How often do you eat "snack plate dinner" — like, cheese and crackers and random stuff instead of cooking?
    - Looking for: 2+ times per week
 
 2. When you do this, is it usually planned or more "I don't feel like cooking tonight"?
@@ -122,9 +129,11 @@ If they don't fit:
 ## Part 3: Discovery Call Script (Pre-Product)
 
 ### Purpose
+
 Understand the problem deeply before showing any solution. Listen more than talk.
 
 ### Setup
+
 - **Duration:** 30 minutes
 - **Recording:** Ask permission to record
 - **Mindset:** You're a researcher, not a salesperson
@@ -194,7 +203,7 @@ Did you feel like what you had was "enough"? Like, enough for a meal?
 
 [Listen for: validation needs, guilt, uncertainty]
 
-How did you feel *while* eating it? 
+How did you feel *while* eating it?
 
 [Listen for: satisfaction, guilt, enjoyment, "this counts as dinner" thoughts]
 
@@ -281,33 +290,35 @@ Thanks so much for your time! I'll send over that gift card right after this. Re
 
 ### What to Listen For
 
-| Signal | What It Tells You |
-|--------|-------------------|
-| "I felt guilty" | Validation is a real need |
-| "It was fine" (flat tone) | May not be a strong problem |
-| "I took a photo" | Social/aesthetic motivation exists |
-| "I just grabbed stuff" | Low effort = feature, not bug |
-| "I didn't know what goes together" | Pairing guidance could help |
-| "It felt sad" | Elevation/transformation is the value |
-| "I wished it looked nicer" | Presentation matters |
+| Signal                             | What It Tells You                     |
+| ---------------------------------- | ------------------------------------- |
+| "I felt guilty"                    | Validation is a real need             |
+| "It was fine" (flat tone)          | May not be a strong problem           |
+| "I took a photo"                   | Social/aesthetic motivation exists    |
+| "I just grabbed stuff"             | Low effort = feature, not bug         |
+| "I didn't know what goes together" | Pairing guidance could help           |
+| "It felt sad"                      | Elevation/transformation is the value |
+| "I wished it looked nicer"         | Presentation matters                  |
 
 ### Red Flags
 
-| Signal | What It Means |
-|--------|---------------|
-| "I love cooking" | Wrong ICP |
-| "I plan my meals" | Wrong ICP |
-| "I don't really care what it looks like" | May not value the solution |
-| "I just eat the ingredients separately" | Doesn't see assembly as a thing |
+| Signal                                   | What It Means                   |
+| ---------------------------------------- | ------------------------------- |
+| "I love cooking"                         | Wrong ICP                       |
+| "I plan my meals"                        | Wrong ICP                       |
+| "I don't really care what it looks like" | May not value the solution      |
+| "I just eat the ingredients separately"  | Doesn't see assembly as a thing |
 
 ---
 
 ## Part 4: Prototype Testing Script
 
 ### Purpose
+
 Validate that the Aha! moment lands. Watch more than ask.
 
 ### Setup
+
 - **Duration:** 15-20 minutes
 - **Method:** Screen share (Zoom, Google Meet) or in-person
 - **What you need:** Working prototype URL, recording permission
@@ -444,39 +455,39 @@ Thanks so much! This was incredibly helpful. I'll send your gift card right afte
 
 During the test, note:
 
-| Moment | Observation |
-|--------|-------------|
-| First screen | Did they understand the prompt? |
-| Input | How long did they take? What did they type? |
-| Button tap | Any hesitation? |
-| Loading | Did they seem impatient? |
-| Name reveal | **Face reaction?** Did they smile? |
-| Name reveal | Did they read it out loud? |
-| Tips (if shown) | Did they read them? React? |
-| Wildcard (if shown) | Did they say "oh I have that"? |
-| Overall | Would they screenshot this? |
+| Moment              | Observation                                 |
+| ------------------- | ------------------------------------------- |
+| First screen        | Did they understand the prompt?             |
+| Input               | How long did they take? What did they type? |
+| Button tap          | Any hesitation?                             |
+| Loading             | Did they seem impatient?                    |
+| Name reveal         | **Face reaction?** Did they smile?          |
+| Name reveal         | Did they read it out loud?                  |
+| Tips (if shown)     | Did they read them? React?                  |
+| Wildcard (if shown) | Did they say "oh I have that"?              |
+| Overall             | Would they screenshot this?                 |
 
 ### Success Signals
 
-| Signal | What It Means |
-|--------|---------------|
-| Smiles or laughs at name | ✅ Aha! landed |
-| Reads name out loud | ✅ Engaged |
-| Says "that's cute" or "I like that" | ✅ Delight |
-| Asks "can I try another one?" | ✅ Wants more |
-| Takes screenshot | ✅ Strong signal |
-| "I'd show this to my friend" | ✅ Word of mouth potential |
+| Signal                              | What It Means              |
+| ----------------------------------- | -------------------------- |
+| Smiles or laughs at name            | ✅ Aha! landed             |
+| Reads name out loud                 | ✅ Engaged                 |
+| Says "that's cute" or "I like that" | ✅ Delight                 |
+| Asks "can I try another one?"       | ✅ Wants more              |
+| Takes screenshot                    | ✅ Strong signal           |
+| "I'd show this to my friend"        | ✅ Word of mouth potential |
 
 ### Failure Signals
 
-| Signal | What It Means |
-|--------|---------------|
-| Confused by input | ❌ UX issue |
-| "Okay" (flat tone) at name | ❌ Name didn't land |
-| Doesn't read tips | ❌ Tips may be noise |
+| Signal                         | What It Means         |
+| ------------------------------ | --------------------- |
+| Confused by input              | ❌ UX issue           |
+| "Okay" (flat tone) at name     | ❌ Name didn't land   |
+| Doesn't read tips              | ❌ Tips may be noise  |
 | "I don't have that" (wildcard) | ❌ Wildcard too fancy |
-| "I don't get it" | ❌ Concept issue |
-| "I'd just Google it" | ❌ Not differentiated |
+| "I don't get it"               | ❌ Concept issue      |
+| "I'd just Google it"           | ❌ Not differentiated |
 
 ---
 
@@ -490,37 +501,37 @@ Fill out this template:
 ## Test Session: [Name/ID] — [Date]
 
 ### Profile
-- Age: 
-- Living situation: 
-- Snack plate frequency: 
+- Age:
+- Living situation:
+- Snack plate frequency:
 - Fits ICP: Yes / No / Partial
 
 ### Key Observations
-- First impression: 
-- Input behavior: 
-- Reaction to name: 
-- Reaction to tips: 
-- Reaction to wildcard: 
+- First impression:
+- Input behavior:
+- Reaction to name:
+- Reaction to tips:
+- Reaction to wildcard:
 
 ### Quotes
 - "..."
 - "..."
 
 ### Scores (1-5)
-- Understood the concept: 
-- Liked the board name: 
-- Found tips helpful: 
-- Would use again: 
-- Would recommend: 
+- Understood the concept:
+- Liked the board name:
+- Found tips helpful:
+- Would use again:
+- Would recommend:
 
 ### What Worked
-- 
+-
 
 ### What Didn't Work
-- 
+-
 
 ### Changes to Consider
-- 
+-
 ```
 
 ### After 5 Sessions
@@ -536,14 +547,14 @@ Look for patterns:
 - How many seemed flat/unimpressed? ___/5
 
 ### Common Feedback
-- Most mentioned strength: 
-- Most mentioned weakness: 
-- Most requested feature: 
+- Most mentioned strength:
+- Most mentioned weakness:
+- Most requested feature:
 
 ### Prompt Quality
-- Names that landed: 
-- Names that didn't: 
-- Pattern: 
+- Names that landed:
+- Names that didn't:
+- Pattern:
 
 ### Decision
 Based on this round:
@@ -624,4 +635,4 @@ No pressure to be nice — honest feedback helps most!
 
 ---
 
-*End of User Testing Scripts*
+_End of User Testing Scripts_
