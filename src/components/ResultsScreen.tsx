@@ -12,45 +12,118 @@ import { COPY } from '@/lib/copy';
 // =============================================================================
 
 const CheckIcon = () => (
-  <svg className="w-5 h-5 text-coral" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+  <svg
+    className="w-5 h-5 text-coral"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2.5}
+    aria-hidden="true"
+  >
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
 );
 
 const RefreshIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+    />
   </svg>
 );
 
 const ShareIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+    />
   </svg>
 );
 
 const DownloadIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+    />
   </svg>
 );
 
 const CopyIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+    />
   </svg>
 );
 
 const CameraIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+    />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
 const SparklesIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+    />
   </svg>
 );
 
@@ -79,9 +152,7 @@ function CaptionSkeleton() {
 }
 
 function ButtonSkeleton() {
-  return (
-    <div className="h-[68px] bg-peach/50 rounded-2xl animate-pulse" />
-  );
+  return <div className="h-[68px] bg-peach/50 rounded-2xl animate-pulse" />;
 }
 
 // =============================================================================
@@ -106,11 +177,11 @@ interface ResultsScreenProps {
 
 // Playful loading messages
 const IMAGE_LOADING_MESSAGES = [
-  "Arranging your spread...",
-  "Adjusting the mood lighting...",
-  "Making it look intentional...",
-  "Adding main character energy...",
-  "Almost Instagram-ready...",
+  'Arranging your spread...',
+  'Adjusting the mood lighting...',
+  'Making it look intentional...',
+  'Adding main character energy...',
+  'Almost Instagram-ready...',
 ];
 
 // Generate caption text
@@ -282,7 +353,8 @@ export function ResultsScreen({
     analytics.shareClick('results', !!imageUrl);
 
     try {
-      const canShareFiles = typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
+      const canShareFiles =
+        typeof navigator.share === 'function' && typeof navigator.canShare === 'function';
 
       if (canShareFiles && imageUrl) {
         try {
@@ -325,9 +397,8 @@ export function ResultsScreen({
       analytics.shareComplete('results', 'clipboard', false);
       setCopyFeedback('Caption copied! Save image to share.');
       setTimeout(() => setCopyFeedback(null), 3000);
-
     } catch {
-      setCopyFeedback('Couldn\'t share. Try the buttons below.');
+      setCopyFeedback("Couldn't share. Try the buttons below.");
       setTimeout(() => setCopyFeedback(null), 3000);
     } finally {
       setIsSharing(false);
@@ -420,10 +491,7 @@ export function ResultsScreen({
               )
             ) : sanitizedSvg ? (
               <div className="relative w-full h-full">
-                <div
-                  className="w-full h-full"
-                  dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
-                />
+                <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: sanitizedSvg }} />
                 {imageError && onRetryImage && (
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
                     <button
@@ -484,9 +552,10 @@ export function ResultsScreen({
               text-base lg:text-lg font-bold text-white
               transition-all duration-200 ease-out
               shadow-lg flex items-center justify-center gap-2
-              ${(isSharing || isLoadingImage)
-                ? 'bg-[#E8B4A0] cursor-not-allowed'
-                : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 active:translate-y-0 active:scale-[0.98]'
+              ${
+                isSharing || isLoadingImage
+                  ? 'bg-[#E8B4A0] cursor-not-allowed'
+                  : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 active:translate-y-0 active:scale-[0.98]'
               }
             `}
           >
@@ -548,16 +617,10 @@ export function ResultsScreen({
           >
             Report an issue
           </a>
-          <a
-            href="/terms"
-            className="hover:text-coral transition-colors"
-          >
+          <a href="/terms" className="hover:text-coral transition-colors">
             Terms
           </a>
-          <a
-            href="/privacy"
-            className="hover:text-coral transition-colors"
-          >
+          <a href="/privacy" className="hover:text-coral transition-colors">
             Privacy
           </a>
         </div>

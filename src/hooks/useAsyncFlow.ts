@@ -65,12 +65,7 @@ export function useAsyncFlow<T, Args extends unknown[] = []>(
   asyncFn: (...args: Args) => Promise<T>,
   options: UseAsyncFlowOptions<T> = {}
 ): UseAsyncFlowReturn<T, Args> {
-  const {
-    initialData = null,
-    onSuccess,
-    onError,
-    resetOnSuccessDelay,
-  } = options;
+  const { initialData = null, onSuccess, onError, resetOnSuccessDelay } = options;
 
   const [status, setStatus] = useState<AsyncStatus>('idle');
   const [data, setData] = useState<T | null>(initialData);

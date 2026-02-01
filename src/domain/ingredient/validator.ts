@@ -13,7 +13,8 @@ import { fuzzyMatch } from './classifier';
 
 const NON_FOOD_PATTERNS: Record<string, { pattern: RegExp; responses: string[] }> = {
   objects: {
-    pattern: /\b(keys?|phone|wallet|napkin|paper|plastic|brick|rock|stone|glass|plate|bowl|fork|knife|spoon|cup|remote|charger|cable|shoe|sock|shirt|pants|hat|bag|purse|book|pen|pencil)\b/i,
+    pattern:
+      /\b(keys?|phone|wallet|napkin|paper|plastic|brick|rock|stone|glass|plate|bowl|fork|knife|spoon|cup|remote|charger|cable|shoe|sock|shirt|pants|hat|bag|purse|book|pen|pencil)\b/i,
     responses: [
       "That's not food. That's clutter. Let's focus on edibles.",
       "We're flattered you think we can plate anything, but no.",
@@ -21,17 +22,19 @@ const NON_FOOD_PATTERNS: Record<string, { pattern: RegExp; responses: string[] }
     ],
   },
   dangerous: {
-    pattern: /\b(poison|bleach|cleaning|detergent|chemical|drug|medication|pill|tide pod|gasoline|antifreeze)\b/i,
+    pattern:
+      /\b(poison|bleach|cleaning|detergent|chemical|drug|medication|pill|tide pod|gasoline|antifreeze)\b/i,
     responses: [
       "That's not safe. Please don't put that on any plate.",
       "Absolutely not. That's a hazard, not an ingredient.",
     ],
   },
   abstract: {
-    pattern: /\b(love|hate|vibes?|energy|thoughts?|prayers?|feelings?|dreams?|hope|sadness|anger|chaos|nothing)\b/i,
+    pattern:
+      /\b(love|hate|vibes?|energy|thoughts?|prayers?|feelings?|dreams?|hope|sadness|anger|chaos|nothing)\b/i,
     responses: [
-      "We appreciate the energy, but we need actual food.",
-      "Manifesting a snack? We still need ingredients.",
+      'We appreciate the energy, but we need actual food.',
+      'Manifesting a snack? We still need ingredients.',
       "That's very philosophical, but also inedible.",
     ],
   },
@@ -39,7 +42,7 @@ const NON_FOOD_PATTERNS: Record<string, { pattern: RegExp; responses: string[] }
     pattern: /\b(wood|metal|cotton|leather|rubber|concrete|dirt|sand|mud|grass(?! jelly)|lawn)\b/i,
     responses: [
       "That's a building material, not a snack material.",
-      "We work with food, not hardware store inventory.",
+      'We work with food, not hardware store inventory.',
     ],
   },
 };
@@ -51,12 +54,12 @@ const NON_FOOD_PATTERNS: Record<string, { pattern: RegExp; responses: string[] }
 const SNARK_BANK: Record<string, string> = {
   brick: "We admire the commitment to 'rustic,' but we need actual food.",
   keys: "Those open doors, not appetites. What's actually in your fridge?",
-  phone: "The only thing your phone should be on is airplane mode while you eat.",
+  phone: 'The only thing your phone should be on is airplane mode while you eat.',
   napkin: "That's... not an ingredient. That's evidence of eating.",
   nothing: "Well, that's honest. But we need SOMETHING to work with.",
   water: "Hydration is important, but we're building boards, not pools.",
-  air: "Minimalism is chic, but even we need ingredients.",
-  tears: "Salty, but not the kind we work with.",
+  air: 'Minimalism is chic, but even we need ingredients.',
+  tears: 'Salty, but not the kind we work with.',
   regret: "That's a breakfast emotion, not a dinner ingredient.",
 };
 
@@ -66,7 +69,7 @@ const SNARK_BANK: Record<string, string> = {
 
 const AMBIGUOUS_ITEMS: Record<string, { clarification: string; validForms: string[] }> = {
   grass: {
-    clarification: "Wheatgrass? Lemongrass? Or like... lawn grass? Be specific!",
+    clarification: 'Wheatgrass? Lemongrass? Or like... lawn grass? Be specific!',
     validForms: ['wheatgrass', 'lemongrass', 'grass jelly'],
   },
   flowers: {
@@ -74,7 +77,7 @@ const AMBIGUOUS_ITEMS: Record<string, { clarification: string; validForms: strin
     validForms: ['edible flowers', 'nasturtium', 'lavender', 'rose petals'],
   },
   leaves: {
-    clarification: "Basil leaves? Mint leaves? Or random tree leaves?",
+    clarification: 'Basil leaves? Mint leaves? Or random tree leaves?',
     validForms: ['basil leaves', 'mint leaves', 'bay leaves', 'grape leaves'],
   },
 };

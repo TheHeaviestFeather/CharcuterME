@@ -13,7 +13,8 @@ import { applyRateLimit } from '@/lib/rate-limit';
 const FALLBACK_VIBE: VibeCheckResponse = {
   score: 77,
   rank: 'Chaotic Good',
-  compliment: "Our AI is napping but honestly? This gives 'main character energy' and we're here for it.",
+  compliment:
+    "Our AI is napping but honestly? This gives 'main character energy' and we're here for it.",
   sticker: 'TRUST THE PROCESS',
   improvement: undefined,
 };
@@ -31,18 +32,12 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
     }
 
     const validation = validateRequest(VibeRequestSchema, body);
     if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const { photo, dinnerName, ingredients, rules } = validation.data!;
@@ -141,7 +136,9 @@ ${userContext}`,
                       {
                         type: 'image_url',
                         image_url: {
-                          url: photo.startsWith('data:') ? photo : `data:image/jpeg;base64,${photo}`,
+                          url: photo.startsWith('data:')
+                            ? photo
+                            : `data:image/jpeg;base64,${photo}`,
                         },
                       },
                     ],

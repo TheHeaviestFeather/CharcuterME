@@ -9,26 +9,14 @@ import { analytics } from '@/lib/analytics';
 // =============================================================================
 
 const TIME_GREETINGS = {
-  morning: [
-    "Breakfast for dinner energy?",
-    "Starting the day chaotic?",
-    "Morning snack incoming?",
-  ],
-  afternoon: [
-    "Lunch situation?",
-    "Afternoon grazing?",
-    "Midday munchies?",
-  ],
-  evening: [
-    "What's for dinner?",
-    "Evening spread incoming?",
-    "Dinner vibes?",
-  ],
+  morning: ['Breakfast for dinner energy?', 'Starting the day chaotic?', 'Morning snack incoming?'],
+  afternoon: ['Lunch situation?', 'Afternoon grazing?', 'Midday munchies?'],
+  evening: ["What's for dinner?", 'Evening spread incoming?', 'Dinner vibes?'],
   latenight: [
-    "Late night snack attack?",
-    "Midnight cravings?",
-    "Post-bedtime snacking?",
-    "Fridge raid detected?",
+    'Late night snack attack?',
+    'Midnight cravings?',
+    'Post-bedtime snacking?',
+    'Fridge raid detected?',
   ],
 };
 
@@ -121,9 +109,10 @@ function SuggestionChip({ label, onClick, disabled }: SuggestionChipProps) {
         px-3 py-1.5 rounded-full text-sm font-medium
         border-2 border-peach text-text-secondary
         transition-all duration-150
-        ${disabled
-          ? 'opacity-50 cursor-not-allowed'
-          : 'hover:border-coral hover:text-coral hover:bg-peach/30 active:scale-95'
+        ${
+          disabled
+            ? 'opacity-50 cursor-not-allowed'
+            : 'hover:border-coral hover:text-coral hover:bg-peach/30 active:scale-95'
         }
       `}
     >
@@ -185,36 +174,42 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
   }, []);
 
   // Add ingredient
-  const addIngredient = useCallback((ingredient: string, source: 'typed' | 'suggestion' | 'surprise') => {
-    const normalized = ingredient.trim().toLowerCase();
-    if (!normalized) return;
+  const addIngredient = useCallback(
+    (ingredient: string, source: 'typed' | 'suggestion' | 'surprise') => {
+      const normalized = ingredient.trim().toLowerCase();
+      if (!normalized) return;
 
-    if (ingredients.includes(normalized)) {
-      showToast(COPY.input.duplicateToast);
-      return;
-    }
+      if (ingredients.includes(normalized)) {
+        showToast(COPY.input.duplicateToast);
+        return;
+      }
 
-    if (ingredients.length >= MAX_INGREDIENTS) {
-      showToast(`Max ${MAX_INGREDIENTS} ingredients`);
-      return;
-    }
+      if (ingredients.length >= MAX_INGREDIENTS) {
+        showToast(`Max ${MAX_INGREDIENTS} ingredients`);
+        return;
+      }
 
-    setIngredients(prev => [...prev, normalized]);
-    setNewChipIndex(ingredients.length);
-    setInputValue('');
-    analytics.ingredientAdded(ingredients.length + 1, source);
+      setIngredients((prev) => [...prev, normalized]);
+      setNewChipIndex(ingredients.length);
+      setInputValue('');
+      analytics.ingredientAdded(ingredients.length + 1, source);
 
-    // Haptic feedback if available
-    if ('vibrate' in navigator) {
-      navigator.vibrate(10);
-    }
-  }, [ingredients, showToast]);
+      // Haptic feedback if available
+      if ('vibrate' in navigator) {
+        navigator.vibrate(10);
+      }
+    },
+    [ingredients, showToast]
+  );
 
   // Remove ingredient
-  const removeIngredient = useCallback((index: number) => {
-    setIngredients(prev => prev.filter((_, i) => i !== index));
-    analytics.ingredientRemoved(ingredients.length - 1);
-  }, [ingredients.length]);
+  const removeIngredient = useCallback(
+    (index: number) => {
+      setIngredients((prev) => prev.filter((_, i) => i !== index));
+      analytics.ingredientRemoved(ingredients.length - 1);
+    },
+    [ingredients.length]
+  );
 
   // Handle input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,13 +245,16 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
   const handleSurprise = () => {
     const combo = SURPRISE_COMBOS[Math.floor(Math.random() * SURPRISE_COMBOS.length)];
     const newIngredients: string[] = [];
-    combo.forEach(ing => {
-      if (!ingredients.includes(ing) && newIngredients.length + ingredients.length < MAX_INGREDIENTS) {
+    combo.forEach((ing) => {
+      if (
+        !ingredients.includes(ing) &&
+        newIngredients.length + ingredients.length < MAX_INGREDIENTS
+      ) {
         newIngredients.push(ing);
       }
     });
     if (newIngredients.length > 0) {
-      setIngredients(prev => [...prev, ...newIngredients]);
+      setIngredients((prev) => [...prev, ...newIngredients]);
       newIngredients.forEach((_, i) => {
         setTimeout(() => setNewChipIndex(ingredients.length + i), i * 100);
       });
@@ -274,11 +272,12 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
   };
 
   const canSubmit = ingredients.length >= MIN_INGREDIENTS;
-  const countColor = ingredients.length < MIN_INGREDIENTS
-    ? 'text-text-muted'
-    : ingredients.length <= MAX_INGREDIENTS
-    ? 'text-coral'
-    : 'text-amber-500';
+  const countColor =
+    ingredients.length < MIN_INGREDIENTS
+      ? 'text-text-muted'
+      : ingredients.length <= MAX_INGREDIENTS
+        ? 'text-coral'
+        : 'text-amber-500';
 
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 py-8">
@@ -291,12 +290,8 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
 
       {/* Header */}
       <header className="text-center mb-6">
-        <h1 className="font-display text-4xl italic text-coral mb-2 tracking-tight">
-          CharcuterME
-        </h1>
-        <p className="text-base text-text-secondary">
-          Turn snacks into a whole personality
-        </p>
+        <h1 className="font-display text-4xl italic text-coral mb-2 tracking-tight">CharcuterME</h1>
+        <p className="text-base text-text-secondary">Turn snacks into a whole personality</p>
       </header>
 
       {/* Greeting */}
@@ -310,9 +305,7 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
         >
           {greetings[greetingIndex]}
         </p>
-        <p className="text-text-secondary text-sm">
-          What&apos;s on the plate?
-        </p>
+        <p className="text-text-secondary text-sm">What&apos;s on the plate?</p>
       </div>
 
       {/* Main Input Area */}
@@ -350,9 +343,7 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
           <span className={`text-sm font-medium ${countColor}`}>
             {ingredients.length}/{MAX_INGREDIENTS}
           </span>
-          <span className="text-xs text-text-muted">
-            {COPY.input.helper}
-          </span>
+          <span className="text-xs text-text-muted">{COPY.input.helper}</span>
         </div>
 
         {/* Category Suggestions */}
@@ -372,13 +363,16 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
                   className={`
                     flex items-center gap-1 px-2 py-1.5 rounded-full text-[11px] font-semibold
                     transition-all duration-150
-                    ${activeCategory === category
-                      ? 'bg-coral text-white shadow-sm'
-                      : 'bg-peach/80 text-text-secondary hover:bg-coral/20'
+                    ${
+                      activeCategory === category
+                        ? 'bg-coral text-white shadow-sm'
+                        : 'bg-peach/80 text-text-secondary hover:bg-coral/20'
                     }
                   `}
                 >
-                  <span className="text-xs" aria-hidden="true">{CATEGORY_EMOJIS[category]}</span>
+                  <span className="text-xs" aria-hidden="true">
+                    {CATEGORY_EMOJIS[category]}
+                  </span>
                   {shortLabel}
                 </button>
               );
@@ -388,14 +382,16 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
           {/* Suggestions for Active Category */}
           {activeCategory && (
             <div className="flex flex-wrap gap-2 justify-center animate-fade-in">
-              {SUGGESTION_CATEGORIES[activeCategory as keyof typeof SUGGESTION_CATEGORIES].map((suggestion) => (
-                <SuggestionChip
-                  key={suggestion}
-                  label={suggestion}
-                  onClick={() => addIngredient(suggestion, 'suggestion')}
-                  disabled={isLoading || ingredients.includes(suggestion)}
-                />
-              ))}
+              {SUGGESTION_CATEGORIES[activeCategory as keyof typeof SUGGESTION_CATEGORIES].map(
+                (suggestion) => (
+                  <SuggestionChip
+                    key={suggestion}
+                    label={suggestion}
+                    onClick={() => addIngredient(suggestion, 'suggestion')}
+                    disabled={isLoading || ingredients.includes(suggestion)}
+                  />
+                )
+              )}
             </div>
           )}
         </div>
@@ -412,9 +408,10 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
             text-lg font-bold text-white
             transition-all duration-200 ease-out
             shadow-lg min-h-[68px]
-            ${(!canSubmit || isLoading)
-              ? 'bg-[#E8B4A0] cursor-not-allowed shadow-[#E8B4A0]/20'
-              : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 cursor-pointer active:translate-y-0 active:scale-[0.98]'
+            ${
+              !canSubmit || isLoading
+                ? 'bg-[#E8B4A0] cursor-not-allowed shadow-[#E8B4A0]/20'
+                : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 cursor-pointer active:translate-y-0 active:scale-[0.98]'
             }
           `}
         >
@@ -440,9 +437,10 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
             text-base font-semibold
             border-2 border-peach text-text-secondary
             transition-all duration-200
-            ${isLoading || ingredients.length >= MAX_INGREDIENTS
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:border-coral hover:text-coral hover:bg-peach/30'
+            ${
+              isLoading || ingredients.length >= MAX_INGREDIENTS
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:border-coral hover:text-coral hover:bg-peach/30'
             }
           `}
         >
@@ -453,10 +451,16 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
 
       {/* Footer */}
       <div className="mt-8 flex gap-4 text-xs text-text-muted">
-        <a href="/privacy" className="hover:text-text-secondary transition-colors underline underline-offset-2">
+        <a
+          href="/privacy"
+          className="hover:text-text-secondary transition-colors underline underline-offset-2"
+        >
           Privacy
         </a>
-        <a href="/terms" className="hover:text-text-secondary transition-colors underline underline-offset-2">
+        <a
+          href="/terms"
+          className="hover:text-text-secondary transition-colors underline underline-offset-2"
+        >
           Terms
         </a>
       </div>

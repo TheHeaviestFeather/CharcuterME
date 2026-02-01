@@ -15,9 +15,9 @@ describe('useAsyncFlow', () => {
   });
 
   it('should transition to loading when executed', async () => {
-    const asyncFn = vi.fn().mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve('result'), 100))
-    );
+    const asyncFn = vi
+      .fn()
+      .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve('result'), 100)));
     const { result } = renderHook(() => useAsyncFlow(asyncFn));
 
     act(() => {
@@ -58,9 +58,7 @@ describe('useAsyncFlow', () => {
   it('should call onSuccess callback', async () => {
     const onSuccess = vi.fn();
     const asyncFn = vi.fn().mockResolvedValue('result');
-    const { result } = renderHook(() =>
-      useAsyncFlow(asyncFn, { onSuccess })
-    );
+    const { result } = renderHook(() => useAsyncFlow(asyncFn, { onSuccess }));
 
     await act(async () => {
       await result.current.execute();
@@ -73,9 +71,7 @@ describe('useAsyncFlow', () => {
     const onError = vi.fn();
     const error = new Error('Test error');
     const asyncFn = vi.fn().mockRejectedValue(error);
-    const { result } = renderHook(() =>
-      useAsyncFlow(asyncFn, { onError })
-    );
+    const { result } = renderHook(() => useAsyncFlow(asyncFn, { onError }));
 
     await act(async () => {
       await result.current.execute();
@@ -86,9 +82,7 @@ describe('useAsyncFlow', () => {
 
   it('should pass arguments to async function', async () => {
     const asyncFn = vi.fn().mockResolvedValue('result');
-    const { result } = renderHook(() =>
-      useAsyncFlow(asyncFn)
-    );
+    const { result } = renderHook(() => useAsyncFlow(asyncFn));
 
     await act(async () => {
       await result.current.execute('arg1', 'arg2');
@@ -129,40 +123,28 @@ describe('useAsyncFlow', () => {
 
 describe('useParallelAsync', () => {
   it('should detect any loading', () => {
-    const flows = [
-      { status: 'loading' as const },
-      { status: 'idle' as const },
-    ];
+    const flows = [{ status: 'loading' as const }, { status: 'idle' as const }];
 
     const result = useParallelAsync(flows);
     expect(result.isAnyLoading).toBe(true);
   });
 
   it('should detect all complete', () => {
-    const flows = [
-      { status: 'success' as const },
-      { status: 'error' as const },
-    ];
+    const flows = [{ status: 'success' as const }, { status: 'error' as const }];
 
     const result = useParallelAsync(flows);
     expect(result.areAllComplete).toBe(true);
   });
 
   it('should detect all success', () => {
-    const flows = [
-      { status: 'success' as const },
-      { status: 'success' as const },
-    ];
+    const flows = [{ status: 'success' as const }, { status: 'success' as const }];
 
     const result = useParallelAsync(flows);
     expect(result.areAllSuccess).toBe(true);
   });
 
   it('should detect any error', () => {
-    const flows = [
-      { status: 'success' as const },
-      { status: 'error' as const },
-    ];
+    const flows = [{ status: 'success' as const }, { status: 'error' as const }];
 
     const result = useParallelAsync(flows);
     expect(result.hasAnyError).toBe(true);

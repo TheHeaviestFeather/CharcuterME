@@ -23,11 +23,11 @@ const PROMPT_VERSION = 'namer_v4.0_chaotic_millennial';
 // =============================================================================
 
 const WILDCARD_SUGGESTIONS = [
-  'Add a pickle. It\'s giving main character.',
+  "Add a pickle. It's giving main character.",
   'Wine. Your therapist would understand.',
   'Olives. Very "I studied abroad" energy.',
   'Hot sauce. Because we feel things now.',
-  'One fancy cracker. You\'re worth it.',
+  "One fancy cracker. You're worth it.",
   'Honey drizzle. This is your glow-up era.',
   'Something crunchy. Texture is a whole mood.',
   'One chocolate square. For serotonin purposes.',
@@ -61,7 +61,7 @@ const FALLBACK_RESPONSES: Record<string, NamerResponse> = {
   },
   cheese: {
     name: 'Lactose Tolerant-ish',
-    validation: 'Your ancestors didn\'t survive everything for you to skip the cheese.',
+    validation: "Your ancestors didn't survive everything for you to skip the cheese.",
     tip: 'Room temp cheese is self-care. Cold cheese is a cry for help.',
     wildcard: 'One fancy cracker. Treat yourself.',
   },
@@ -81,18 +81,18 @@ const FALLBACK_RESPONSES: Record<string, NamerResponse> = {
     name: 'Millennial Retirement Fund',
     validation: 'Wine is just grape juice that believed in itself.',
     tip: 'Pairs nicely with your unread emails and general vibes.',
-    wildcard: 'Cheese is wine\'s emotional support animal.',
+    wildcard: "Cheese is wine's emotional support animal.",
   },
   carbs: {
     name: 'Serotonin Delivery System',
     validation: 'Carbs are just a hug for your insides. You needed this.',
     tip: 'Bread is a food group when you believe hard enough.',
-    wildcard: 'Butter makes everything better. That\'s just science.',
+    wildcard: "Butter makes everything better. That's just science.",
   },
   sweet: {
     name: 'Treat Yourself 2.0',
     validation: 'Life is short and rent is high. Eat the sweet stuff.',
-    tip: 'Calories consumed standing up don\'t count. Internet law.',
+    tip: "Calories consumed standing up don't count. Internet law.",
     wildcard: 'A single strawberry makes it "balanced."',
   },
 };
@@ -112,10 +112,20 @@ function getFallback(ingredients: string): NamerResponse {
   if (lower.includes('wine') || lower.includes('beer') || lower.includes('drink')) {
     return { ...FALLBACK_RESPONSES.wine, wildcard: getRandomWildcard() };
   }
-  if (lower.includes('bread') || lower.includes('cracker') || lower.includes('toast') || lower.includes('bagel')) {
+  if (
+    lower.includes('bread') ||
+    lower.includes('cracker') ||
+    lower.includes('toast') ||
+    lower.includes('bagel')
+  ) {
     return { ...FALLBACK_RESPONSES.carbs, wildcard: getRandomWildcard() };
   }
-  if (lower.includes('chocolate') || lower.includes('cookie') || lower.includes('candy') || lower.includes('ice cream')) {
+  if (
+    lower.includes('chocolate') ||
+    lower.includes('cookie') ||
+    lower.includes('candy') ||
+    lower.includes('ice cream')
+  ) {
     return { ...FALLBACK_RESPONSES.sweet, wildcard: getRandomWildcard() };
   }
 
@@ -300,7 +310,9 @@ function normalizeResponse(parsed: NamerResponse): NamerResponse {
     name: stripEmojis(String(parsed.name).slice(0, 50)),
     validation: stripEmojis(String(parsed.validation).slice(0, 150)),
     tip: stripEmojis(String(parsed.tip).slice(0, 200)),
-    wildcard: parsed.wildcard ? stripEmojis(String(parsed.wildcard).slice(0, 100)) : getRandomWildcard(),
+    wildcard: parsed.wildcard
+      ? stripEmojis(String(parsed.wildcard).slice(0, 100))
+      : getRandomWildcard(),
   };
 }
 
@@ -382,7 +394,11 @@ export async function POST(request: NextRequest) {
               maxRetries: 2,
               shouldRetry: (error) => {
                 const msg = error.message.toLowerCase();
-                return msg.includes('rate limit') || msg.includes('timeout') || msg.includes('overloaded');
+                return (
+                  msg.includes('rate limit') ||
+                  msg.includes('timeout') ||
+                  msg.includes('overloaded')
+                );
               },
             }
           ),
@@ -427,7 +443,6 @@ export async function POST(request: NextRequest) {
     cacheSet(cacheKey, filtered, CACHE_TTL.dinnerName).catch(() => {});
 
     return NextResponse.json(filtered);
-
   } catch (error) {
     logger.error('Error generating name', {
       promptVersion: PROMPT_VERSION,

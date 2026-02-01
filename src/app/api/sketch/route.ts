@@ -25,8 +25,10 @@ interface TemplateStyle {
 
 const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
   'The Minimalist': {
-    layout: 'Items slightly askew on the plate. One thing rolling toward the edge. Imperfect but intentional.',
-    scene: 'Clean kitchen counter near a window. Sriracha bottle photobombing in background. Bright daylight.',
+    layout:
+      'Items slightly askew on the plate. One thing rolling toward the edge. Imperfect but intentional.',
+    scene:
+      'Clean kitchen counter near a window. Sriracha bottle photobombing in background. Bright daylight.',
     mood: 'Too tired to care about presentation. Authentic chaos.',
   },
 
@@ -39,17 +41,18 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
   'The Snack Line': {
     layout: 'Items in a vaguely straight line. Some overlapping. One fell over.',
     scene: 'Coffee table in a bright living room. TV remote half-visible. Cozy daytime vibes.',
-    mood: 'Netflix asked if I\'m still watching. Yes. Obviously.',
+    mood: "Netflix asked if I'm still watching. Yes. Obviously.",
   },
 
   'The Bento': {
     layout: 'Attempted organization that gave up halfway. Some zones respected, some chaos.',
-    scene: 'Desk near window with natural light. Coffee mug with attitude. Work-from-home realness.',
+    scene:
+      'Desk near window with natural light. Coffee mug with attitude. Work-from-home realness.',
     mood: 'Multitasking between emails and emotional eating.',
   },
 
   'The Wild Graze': {
-    layout: 'Gloriously haphazard pile. Items touching that shouldn\'t. Zero fucks given.',
+    layout: "Gloriously haphazard pile. Items touching that shouldn't. Zero fucks given.",
     scene: 'Couch in a sunlit room. Wine glass already half empty. Afternoon self-care.',
     mood: 'Sunday scaries but make it aesthetic. Chaotic self-care.',
   },
@@ -97,15 +100,17 @@ function generateSvgFallback(ingredients: string[], template: string): string {
   const displayIngredients = ingredients.slice(0, 4);
   const ingredientText = displayIngredients.join(' + ') || 'your spread';
 
-  const circles = displayIngredients.map((_, i) => {
-    const angle = (i * 90) + 45;
-    const radius = 55;
-    const x = 200 + radius * Math.cos((angle * Math.PI) / 180);
-    const y = 195 + radius * Math.sin((angle * Math.PI) / 180);
-    const circleColors = [colors.coral, colors.lavender, colors.mocha, '#E8B4A0'];
-    const size = 20 + Math.random() * 10;
-    return `<circle cx="${x}" cy="${y}" r="${size}" fill="${circleColors[i]}" opacity="0.75"/>`;
-  }).join('\n    ');
+  const circles = displayIngredients
+    .map((_, i) => {
+      const angle = i * 90 + 45;
+      const radius = 55;
+      const x = 200 + radius * Math.cos((angle * Math.PI) / 180);
+      const y = 195 + radius * Math.sin((angle * Math.PI) / 180);
+      const circleColors = [colors.coral, colors.lavender, colors.mocha, '#E8B4A0'];
+      const size = 20 + Math.random() * 10;
+      return `<circle cx="${x}" cy="${y}" r="${size}" fill="${circleColors[i]}" opacity="0.75"/>`;
+    })
+    .join('\n    ');
 
   return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <rect width="400" height="400" fill="${colors.cream}"/>
@@ -143,7 +148,7 @@ async function generateWithVertexImagen(prompt: string): Promise<string | null> 
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -161,7 +166,7 @@ async function generateWithVertexImagen(prompt: string): Promise<string | null> 
     const errorText = await response.text();
     logger.error('Vertex AI Imagen error', {
       status: response.status,
-      error: errorText
+      error: errorText,
     });
     throw new Error(`Vertex AI error: ${response.status} - ${errorText}`);
   }
@@ -182,10 +187,11 @@ async function generateWithVertexImagen(prompt: string): Promise<string | null> 
     const prediction = predictions[0];
 
     // Try different possible field names
-    const imageData = prediction.bytesBase64Encoded ||
-                      prediction.image?.bytesBase64Encoded ||
-                      prediction.generatedImage?.bytesBase64Encoded ||
-                      prediction.imageBytes;
+    const imageData =
+      prediction.bytesBase64Encoded ||
+      prediction.image?.bytesBase64Encoded ||
+      prediction.generatedImage?.bytesBase64Encoded ||
+      prediction.imageBytes;
 
     if (imageData) {
       return `data:image/png;base64,${imageData}`;
@@ -194,7 +200,7 @@ async function generateWithVertexImagen(prompt: string): Promise<string | null> 
 
   // Log what we got for debugging
   logger.error('Unexpected response structure', {
-    data: JSON.stringify(data).slice(0, 500)
+    data: JSON.stringify(data).slice(0, 500),
   });
 
   throw new Error('No image in response');
@@ -227,7 +233,13 @@ export async function POST(request: NextRequest) {
 
     // Check cache first
     const cacheKey = generateCacheKey('sketch', rawIngredients);
-    const cached = await cacheGet<{ type: string; imageUrl?: string; template: string; reason?: string; rules?: string[] }>(cacheKey);
+    const cached = await cacheGet<{
+      type: string;
+      imageUrl?: string;
+      template: string;
+      reason?: string;
+      rules?: string[];
+    }>(cacheKey);
     if (cached) {
       logger.info('Cache hit for sketch', { cacheKey: cacheKey.slice(0, 50) });
       return NextResponse.json(cached);
@@ -314,7 +326,6 @@ export async function POST(request: NextRequest) {
     cacheSet(cacheKey, result, CACHE_TTL.sketch).catch(() => {});
 
     return NextResponse.json(result);
-
   } catch (error) {
     logger.error('Error generating sketch', {
       promptVersion: PROMPT_VERSION,

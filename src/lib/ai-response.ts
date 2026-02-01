@@ -31,37 +31,39 @@ export interface VibeResult {
  * Handles Unicode emoji ranges, variation selectors, and common symbols
  */
 export function stripEmojis(text: string): string {
-  return text
-    // Remove emoji and pictographic characters
-    .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Emoticons
-    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Misc Symbols and Pictographs
-    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // Transport and Map
-    .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '') // Flags
-    .replace(/[\u{2600}-\u{26FF}]/gu, '')   // Misc symbols
-    .replace(/[\u{2700}-\u{27BF}]/gu, '')   // Dingbats
-    .replace(/[\u{FE00}-\u{FE0F}]/gu, '')   // Variation Selectors
-    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '') // Supplemental Symbols
-    .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '') // Chess Symbols
-    .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '') // Symbols and Pictographs Extended-A
-    .replace(/[\u{231A}-\u{231B}]/gu, '')   // Watch, Hourglass
-    .replace(/[\u{23E9}-\u{23F3}]/gu, '')   // Media controls
-    .replace(/[\u{23F8}-\u{23FA}]/gu, '')   // More media
-    .replace(/[\u{25AA}-\u{25AB}]/gu, '')   // Squares
-    .replace(/[\u{25B6}]/gu, '')            // Play button
-    .replace(/[\u{25C0}]/gu, '')            // Reverse button
-    .replace(/[\u{25FB}-\u{25FE}]/gu, '')   // More squares
-    .replace(/[\u{2934}-\u{2935}]/gu, '')   // Arrows
-    .replace(/[\u{2B05}-\u{2B07}]/gu, '')   // More arrows
-    .replace(/[\u{2B1B}-\u{2B1C}]/gu, '')   // Large squares
-    .replace(/[\u{2B50}]/gu, '')            // Star
-    .replace(/[\u{2B55}]/gu, '')            // Circle
-    .replace(/[\u{3030}]/gu, '')            // Wavy dash
-    .replace(/[\u{303D}]/gu, '')            // Part alternation mark
-    .replace(/[\u{3297}]/gu, '')            // Circled Ideograph Congratulation
-    .replace(/[\u{3299}]/gu, '')            // Circled Ideograph Secret
-    .replace(/[\u{200D}]/gu, '')            // Zero Width Joiner
-    .replace(/[\u{20E3}]/gu, '')            // Combining Enclosing Keycap
-    .trim();
+  return (
+    text
+      // Remove emoji and pictographic characters
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '') // Emoticons
+      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '') // Misc Symbols and Pictographs
+      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '') // Transport and Map
+      .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '') // Flags
+      .replace(/[\u{2600}-\u{26FF}]/gu, '') // Misc symbols
+      .replace(/[\u{2700}-\u{27BF}]/gu, '') // Dingbats
+      .replace(/[\u{FE00}-\u{FE0F}]/gu, '') // Variation Selectors
+      .replace(/[\u{1F900}-\u{1F9FF}]/gu, '') // Supplemental Symbols
+      .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '') // Chess Symbols
+      .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '') // Symbols and Pictographs Extended-A
+      .replace(/[\u{231A}-\u{231B}]/gu, '') // Watch, Hourglass
+      .replace(/[\u{23E9}-\u{23F3}]/gu, '') // Media controls
+      .replace(/[\u{23F8}-\u{23FA}]/gu, '') // More media
+      .replace(/[\u{25AA}-\u{25AB}]/gu, '') // Squares
+      .replace(/[\u{25B6}]/gu, '') // Play button
+      .replace(/[\u{25C0}]/gu, '') // Reverse button
+      .replace(/[\u{25FB}-\u{25FE}]/gu, '') // More squares
+      .replace(/[\u{2934}-\u{2935}]/gu, '') // Arrows
+      .replace(/[\u{2B05}-\u{2B07}]/gu, '') // More arrows
+      .replace(/[\u{2B1B}-\u{2B1C}]/gu, '') // Large squares
+      .replace(/[\u{2B50}]/gu, '') // Star
+      .replace(/[\u{2B55}]/gu, '') // Circle
+      .replace(/[\u{3030}]/gu, '') // Wavy dash
+      .replace(/[\u{303D}]/gu, '') // Part alternation mark
+      .replace(/[\u{3297}]/gu, '') // Circled Ideograph Congratulation
+      .replace(/[\u{3299}]/gu, '') // Circled Ideograph Secret
+      .replace(/[\u{200D}]/gu, '') // Zero Width Joiner
+      .replace(/[\u{20E3}]/gu, '') // Combining Enclosing Keycap
+      .trim()
+  );
 }
 
 // =============================================================================
@@ -128,9 +130,7 @@ export function parseClaudeNamerResponse(raw: string): NamerResult | null {
     name: stripEmojis(String(parsed.name)).slice(0, 50),
     validation: stripEmojis(String(parsed.validation)).slice(0, 150),
     tip: stripEmojis(String(parsed.tip)).slice(0, 200),
-    wildcard: parsed.wildcard
-      ? stripEmojis(String(parsed.wildcard)).slice(0, 100)
-      : undefined,
+    wildcard: parsed.wildcard ? stripEmojis(String(parsed.wildcard)).slice(0, 100) : undefined,
   };
 }
 

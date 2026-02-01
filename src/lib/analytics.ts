@@ -18,10 +18,7 @@ const getSessionId = (): string => {
 };
 
 // Track an event
-export function track(
-  event: string,
-  properties?: Record<string, unknown>
-): void {
+export function track(event: string, properties?: Record<string, unknown>): void {
   const eventData = {
     event,
     session_id: getSessionId(),
@@ -79,8 +76,7 @@ export const analytics = {
   // Ingredient events
   ingredientAdded: (count: number, source: 'typed' | 'suggestion' | 'surprise') =>
     track('ingredient_added', { count, source }),
-  ingredientRemoved: (count: number) =>
-    track('ingredient_removed', { count }),
+  ingredientRemoved: (count: number) => track('ingredient_removed', { count }),
   surpriseClicked: (ingredientsAdded: number) =>
     track('surprise_clicked', { ingredients_added: ingredientsAdded }),
 
@@ -91,22 +87,16 @@ export const analytics = {
     track('share_complete', { screen, method, had_image: hadImage }),
 
   // Save events
-  imageSave: (format: 'png' | 'watermarked') =>
-    track('image_save', { format }),
-  captionCopy: () =>
-    track('caption_copy'),
+  imageSave: (format: 'png' | 'watermarked') => track('image_save', { format }),
+  captionCopy: () => track('caption_copy'),
 
   // Name events
-  nameRegenerate: () =>
-    track('name_regenerate'),
+  nameRegenerate: () => track('name_regenerate'),
 
   // Vibe events
-  vibeStart: () =>
-    track('vibe_start'),
-  vibeUpload: () =>
-    track('vibe_upload'),
-  vibeComplete: (score: number, rank: string) =>
-    track('vibe_complete', { score, rank }),
+  vibeStart: () => track('vibe_start'),
+  vibeUpload: () => track('vibe_upload'),
+  vibeComplete: (score: number, rank: string) => track('vibe_complete', { score, rank }),
 
   // Return visits
   returnVisit: () => {

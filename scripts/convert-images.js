@@ -17,10 +17,7 @@ async function convertImages() {
   const ogPngPath = path.join(PUBLIC_DIR, 'og-image.png');
 
   if (fs.existsSync(ogSvgPath)) {
-    await sharp(ogSvgPath)
-      .resize(1200, 630)
-      .png()
-      .toFile(ogPngPath);
+    await sharp(ogSvgPath).resize(1200, 630).png().toFile(ogPngPath);
     console.log('✓ og-image.svg → og-image.png (1200x630)');
   } else {
     console.log('✗ og-image.svg not found');

@@ -7,14 +7,14 @@ import { useState, useEffect } from 'react';
 // =============================================================================
 
 const LOADING_MESSAGES = [
-  "Consulting the cheese gods...",
-  "Arranging tiny pickles...",
-  "Achieving optimal spread angles...",
-  "Summoning artisanal energy...",
+  'Consulting the cheese gods...',
+  'Arranging tiny pickles...',
+  'Achieving optimal spread angles...',
+  'Summoning artisanal energy...',
   "Channeling grandma's wisdom...",
-  "Calculating cracker ratios...",
-  "Infusing with cozy vibes...",
-  "Aligning the charcuterie stars...",
+  'Calculating cracker ratios...',
+  'Infusing with cozy vibes...',
+  'Aligning the charcuterie stars...',
 ];
 
 // =============================================================================

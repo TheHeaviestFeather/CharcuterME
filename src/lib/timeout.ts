@@ -4,7 +4,10 @@
 // =============================================================================
 
 export class TimeoutError extends Error {
-  constructor(message: string, public readonly timeoutMs: number) {
+  constructor(
+    message: string,
+    public readonly timeoutMs: number
+  ) {
     super(message);
     this.name = 'TimeoutError';
   }
@@ -35,8 +38,8 @@ export async function withTimeout<T>(
 
 // Preset timeouts for different operations
 export const TIMEOUTS = {
-  DALLE_IMAGE: 45000,    // DALL-E can take up to 30-40s
-  CLAUDE_NAMING: 15000,  // Claude Haiku is fast
+  DALLE_IMAGE: 45000, // DALL-E can take up to 30-40s
+  CLAUDE_NAMING: 15000, // Claude Haiku is fast
   GPT_VIBE_CHECK: 30000, // GPT-4o vision takes a bit longer
   DEFAULT: 30000,
 } as const;

@@ -135,7 +135,12 @@ describe('parseGPTVibeResponse', () => {
     const overInput = JSON.stringify({ score: 150, rank: 'test', compliment: 'test', sticker: '' });
     expect(parseGPTVibeResponse(overInput)?.score).toBe(100);
 
-    const underInput = JSON.stringify({ score: -50, rank: 'test', compliment: 'test', sticker: '' });
+    const underInput = JSON.stringify({
+      score: -50,
+      rank: 'test',
+      compliment: 'test',
+      sticker: '',
+    });
     expect(parseGPTVibeResponse(underInput)?.score).toBe(0);
   });
 

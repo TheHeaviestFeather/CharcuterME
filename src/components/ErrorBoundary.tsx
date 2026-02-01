@@ -30,9 +30,7 @@ function DefaultFallback({ error, resetErrorBoundary }: FallbackProps) {
 
         {/* Message */}
         <div className="space-y-2">
-          <h2 className="text-xl font-serif text-[#5D4E45]">
-            Oops, something went wrong
-          </h2>
+          <h2 className="text-xl font-serif text-[#5D4E45]">Oops, something went wrong</h2>
           <p className="text-[#736B63] text-sm">
             Even the best charcuterie boards have a cheese that rolls off sometimes.
           </p>
@@ -41,9 +39,7 @@ function DefaultFallback({ error, resetErrorBoundary }: FallbackProps) {
         {/* Error details (development only) */}
         {process.env.NODE_ENV === 'development' && error instanceof Error && error.message && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-left">
-            <p className="text-xs font-mono text-red-600 break-all">
-              {error.message}
-            </p>
+            <p className="text-xs font-mono text-red-600 break-all">{error.message}</p>
           </div>
         )}
 

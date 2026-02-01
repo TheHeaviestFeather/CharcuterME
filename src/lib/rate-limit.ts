@@ -98,9 +98,7 @@ export async function checkRateLimit(
 
   // Get identifier: prefer IP, fallback to a hash of user-agent
   const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded?.split(',')[0]?.trim() ||
-             request.headers.get('x-real-ip') ||
-             'anonymous';
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'anonymous';
 
   try {
     const result = await limiter.limit(ip);

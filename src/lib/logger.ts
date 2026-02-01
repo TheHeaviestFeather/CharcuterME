@@ -68,10 +68,7 @@ export const logger = {
 };
 
 // Helper for timing operations
-export function withTiming<T>(
-  operation: string,
-  fn: () => Promise<T>
-): Promise<T> {
+export function withTiming<T>(operation: string, fn: () => Promise<T>): Promise<T> {
   const start = Date.now();
   return fn()
     .then((result) => {

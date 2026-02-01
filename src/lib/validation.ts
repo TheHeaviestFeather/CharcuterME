@@ -38,10 +38,10 @@ export function parseIngredients(raw: string): string[] {
 export function sanitizeIngredients(raw: string): string {
   return raw
     .replace(/[{}"'`<>]/g, '') // Remove JSON/XML breaking characters
-    .replace(/\n/g, ', ')       // Newlines to commas
-    .replace(/\s+/g, ' ')       // Collapse whitespace
+    .replace(/\n/g, ', ') // Newlines to commas
+    .replace(/\s+/g, ' ') // Collapse whitespace
     .trim()
-    .slice(0, 500);             // Hard limit
+    .slice(0, 500); // Hard limit
 }
 
 // =============================================================================
@@ -49,17 +49,11 @@ export function sanitizeIngredients(raw: string): string {
 // =============================================================================
 
 export const NameRequestSchema = z.object({
-  ingredients: z
-    .string()
-    .min(1, 'Ingredients are required')
-    .max(1000, 'Input too long'),
+  ingredients: z.string().min(1, 'Ingredients are required').max(1000, 'Input too long'),
 });
 
 export const SketchRequestSchema = z.object({
-  ingredients: z
-    .string()
-    .min(1, 'Ingredients are required')
-    .max(1000, 'Input too long'),
+  ingredients: z.string().min(1, 'Ingredients are required').max(1000, 'Input too long'),
 });
 
 // Max photo size: 10MB base64 (~7.5MB actual image)
@@ -74,18 +68,9 @@ export const VibeRequestSchema = z.object({
       (val) => val.startsWith('data:image/') || /^[A-Za-z0-9+/=]+$/.test(val.slice(0, 100)),
       'Invalid photo format'
     ),
-  dinnerName: z
-    .string()
-    .max(200, 'Dinner name too long')
-    .optional(),
-  ingredients: z
-    .string()
-    .max(1000, 'Ingredients too long')
-    .optional(),
-  rules: z
-    .array(z.string().max(200))
-    .max(20)
-    .optional(),
+  dinnerName: z.string().max(200, 'Dinner name too long').optional(),
+  ingredients: z.string().max(1000, 'Ingredients too long').optional(),
+  rules: z.array(z.string().max(200)).max(20).optional(),
 });
 
 // =============================================================================
@@ -110,10 +95,7 @@ export interface ValidationResult<T> {
  * Validate request body against a Zod schema
  * Returns typed data or error message
  */
-export function validateRequest<T>(
-  schema: z.ZodSchema<T>,
-  body: unknown
-): ValidationResult<T> {
+export function validateRequest<T>(schema: z.ZodSchema<T>, body: unknown): ValidationResult<T> {
   const result = schema.safeParse(body);
 
   if (!result.success) {
