@@ -87,6 +87,9 @@ export default withSentryConfig(nextConfig, {
   // Hides source maps from browser devtools in production
   hideSourceMaps: true,
 
-  // Disable Sentry telemetry
-  disableLogger: true,
+  // Disable Sentry debug logging (replaces deprecated disableLogger)
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
+    excludeReplayShadowDom: true,
+  },
 });
