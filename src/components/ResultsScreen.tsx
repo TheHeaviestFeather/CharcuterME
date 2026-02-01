@@ -338,7 +338,7 @@ export function ResultsScreen({
   const isContentReady = !isLoadingImage && (imageUrl || sanitizedSvg);
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col items-center px-5 py-6 lg:py-10">
+    <div className="min-h-screen bg-cream flex flex-col items-center px-4 py-4 lg:py-10">
       {/* Feedback Toast */}
       {copyFeedback && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-text-primary text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-fade-in z-50">
@@ -349,15 +349,15 @@ export function ResultsScreen({
       {/* Desktop: wider container */}
       <div className="w-full max-w-[360px] lg:max-w-[480px] xl:max-w-[520px]">
         {/* Mini Label */}
-        <p className="text-text-muted text-sm font-medium mb-2 mt-2 text-center">
+        <p className="text-text-muted text-xs lg:text-sm font-medium mb-1 text-center">
           tonight&apos;s dinner:
         </p>
 
         {/* THE NAME - Big, Bold, Shareable */}
-        <div className="flex items-center justify-center gap-3 mb-3 px-4">
+        <div className="flex items-center justify-center gap-2 mb-2 px-2">
           <h1
             className={`
-              font-display text-4xl md:text-5xl lg:text-6xl italic text-coral text-center leading-tight
+              font-display text-3xl md:text-4xl lg:text-5xl italic text-coral text-center leading-tight
               ${isLoadingName ? 'animate-pulse' : ''}
             `}
           >
@@ -368,29 +368,29 @@ export function ResultsScreen({
               onClick={handleRegenerateName}
               aria-label={COPY.results.regenerateName}
               title={COPY.results.regenerateName}
-              className="p-2 rounded-full text-text-secondary hover:text-coral hover:bg-peach transition-all group relative"
+              className="p-1.5 rounded-full text-text-secondary hover:text-coral hover:bg-peach transition-all group relative flex-shrink-0"
             >
               <RefreshIcon />
             </button>
           )}
           {isLoadingName && (
-            <div className="w-5 h-5 border-2 border-peach border-t-coral rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-peach border-t-coral rounded-full animate-spin flex-shrink-0" />
           )}
         </div>
 
         {/* Validation - The affirmation */}
-        <div className="flex items-start gap-2 mb-5 px-4 justify-center">
+        <div className="flex items-start gap-1.5 mb-3 px-2 justify-center">
           <div className="mt-0.5 flex-shrink-0">
             <CheckIcon />
           </div>
-          <p className="text-text-primary text-base lg:text-lg leading-relaxed max-w-[320px]">
+          <p className="text-text-primary text-sm lg:text-base leading-snug max-w-[300px]">
             {cleanValidation}
           </p>
         </div>
 
         {/* The Image - The shareable hero */}
-        <div className="mb-5">
-          <div className="relative aspect-square rounded-2xl overflow-hidden shadow-xl bg-white border-2 border-peach lg:rounded-3xl">
+        <div className="mb-3 lg:mb-5">
+          <div className="relative aspect-square rounded-xl lg:rounded-2xl overflow-hidden shadow-lg bg-white border-2 border-peach">
             {isLoadingImage ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream p-6">
                 <div className="w-14 h-14 lg:w-16 lg:h-16 border-4 border-peach border-t-coral rounded-full animate-spin mb-5" />
@@ -443,8 +443,8 @@ export function ResultsScreen({
         </div>
 
         {/* Caption - Editable */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2 px-1">
+        <div className="mb-3 lg:mb-5">
+          <div className="flex items-center justify-between mb-1 px-1">
             <p className="text-text-muted text-xs font-medium uppercase tracking-wide">
               Your caption
             </p>
@@ -458,15 +458,15 @@ export function ResultsScreen({
             )}
           </div>
           {isLoadingImage ? (
-            <div className="bg-white rounded-xl px-4 py-3 border border-peach">
+            <div className="bg-white rounded-lg lg:rounded-xl px-3 py-2 lg:px-4 lg:py-3 border border-peach">
               <CaptionSkeleton />
             </div>
           ) : (
             <textarea
               value={caption}
               onChange={(e) => setEditedCaption(e.target.value)}
-              className="w-full bg-white rounded-xl px-4 py-3 border border-peach text-text-secondary text-sm lg:text-base leading-relaxed resize-none focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral transition-all"
-              rows={5}
+              className="w-full bg-white rounded-lg lg:rounded-xl px-3 py-2 lg:px-4 lg:py-3 border border-peach text-text-secondary text-xs lg:text-sm leading-relaxed resize-none focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral transition-all"
+              rows={4}
               aria-label="Edit caption"
             />
           )}
@@ -480,10 +480,10 @@ export function ResultsScreen({
             onClick={handleShare}
             disabled={isSharing || isLoadingImage}
             className={`
-              w-full rounded-2xl py-5 px-8
-              text-lg lg:text-xl font-bold text-white
+              w-full rounded-xl lg:rounded-2xl py-4 lg:py-5 px-6
+              text-base lg:text-lg font-bold text-white
               transition-all duration-200 ease-out
-              shadow-lg flex items-center justify-center gap-3
+              shadow-lg flex items-center justify-center gap-2
               ${(isSharing || isLoadingImage)
                 ? 'bg-[#E8B4A0] cursor-not-allowed'
                 : 'bg-coral hover:bg-coral-dark hover:-translate-y-1 hover:shadow-xl shadow-coral/30 active:translate-y-0 active:scale-[0.98]'
@@ -497,49 +497,49 @@ export function ResultsScreen({
 
         {/* Secondary Actions */}
         {isContentReady && (
-          <div className="flex gap-3 mt-4">
+          <div className="flex gap-2 mt-3 lg:gap-3 lg:mt-4">
             <button
               onClick={handleCopyCaption}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-peach text-text-secondary font-semibold hover:border-coral hover:text-coral transition-all lg:py-4"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg lg:rounded-xl bg-white border-2 border-peach text-text-secondary text-sm font-semibold hover:border-coral hover:text-coral transition-all lg:py-3 lg:gap-2"
             >
               <CopyIcon />
-              <span>{COPY.results.copyCaption}</span>
+              <span>Copy</span>
             </button>
             <button
               onClick={handleSaveImage}
               disabled={!imageUrl && !sanitizedSvg}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border-2 border-peach text-text-secondary font-semibold hover:border-coral hover:text-coral transition-all disabled:opacity-50 disabled:cursor-not-allowed lg:py-4"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg lg:rounded-xl bg-white border-2 border-peach text-text-secondary text-sm font-semibold hover:border-coral hover:text-coral transition-all disabled:opacity-50 disabled:cursor-not-allowed lg:py-3 lg:gap-2"
             >
               <DownloadIcon />
-              <span>{COPY.results.saveImage}</span>
+              <span>Save</span>
             </button>
           </div>
         )}
 
         {/* Tertiary: Vibe Check Upsell */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 lg:mt-6 text-center">
           <button
             onClick={onCheckVibe}
-            className="inline-flex items-center gap-2 text-text-secondary hover:text-coral transition-colors font-medium lg:text-lg"
+            className="inline-flex items-center gap-1.5 text-text-secondary hover:text-coral transition-colors font-medium text-sm lg:text-base lg:gap-2"
           >
             <CameraIcon />
             <span>{COPY.results.vibeHook}</span>
           </button>
-          <p className="text-xs text-text-muted mt-1">{COPY.results.vibeSubtext}</p>
+          <p className="text-xs text-text-muted mt-0.5">{COPY.results.vibeSubtext}</p>
         </div>
 
         {/* Quaternary: Start Over */}
         {onJustEat && (
           <button
             onClick={onJustEat}
-            className="mt-4 text-text-muted text-sm hover:text-text-secondary transition-colors underline underline-offset-2 w-full text-center"
+            className="mt-3 lg:mt-4 text-text-muted text-xs lg:text-sm hover:text-text-secondary transition-colors underline underline-offset-2 w-full text-center"
           >
             Start over
           </button>
         )}
 
         {/* Footer Links */}
-        <div className="mt-8 pt-4 border-t border-peach/50 flex gap-4 text-xs text-text-muted justify-center">
+        <div className="mt-6 lg:mt-8 pt-3 lg:pt-4 border-t border-peach/50 flex gap-4 text-xs text-text-muted justify-center">
           <a
             href="https://github.com/TheHeaviestFeather/CharcuterME/issues/new?template=content-report.md"
             target="_blank"
