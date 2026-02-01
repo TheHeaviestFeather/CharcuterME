@@ -5,6 +5,7 @@ import { isEnabled } from '@/lib/feature-flags';
 import { parseIngredients } from '@/lib/validation';
 import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
 import { getVertexAccessToken, isVertexConfigured } from '@/lib/vertex-auth';
+import { applyRateLimit } from '@/lib/rate-limit';
 
 // =============================================================================
 // Configuration
@@ -25,31 +26,31 @@ interface TemplateStyle {
 const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
   'The Minimalist': {
     layout: 'Items slightly askew on the plate. One thing rolling toward the edge. Imperfect but intentional.',
-    scene: 'Worn kitchen counter with water ring stains. Sriracha bottle photobombing in background.',
+    scene: 'Clean kitchen counter near a window. Sriracha bottle photobombing in background. Bright daylight.',
     mood: 'Too tired to care about presentation. Authentic chaos.',
   },
 
   'The Anchor': {
     layout: 'One big item dominates. Others scattered around like afterthoughts. Uneven spacing.',
-    scene: 'Paper towel as a placemat. Fork at weird angle. Ambient laptop glow.',
+    scene: 'Paper towel as a placemat. Fork at weird angle. Bright kitchen lighting.',
     mood: '"This is fine" energy. Peak millennial survival.',
   },
 
   'The Snack Line': {
     layout: 'Items in a vaguely straight line. Some overlapping. One fell over.',
-    scene: 'Coffee table with ring stains. TV remote half-visible. Blanket burrito staging.',
+    scene: 'Coffee table in a bright living room. TV remote half-visible. Cozy daytime vibes.',
     mood: 'Netflix asked if I\'m still watching. Yes. Obviously.',
   },
 
   'The Bento': {
     layout: 'Attempted organization that gave up halfway. Some zones respected, some chaos.',
-    scene: 'Desk with sticky notes visible. Coffee mug with attitude. Work-from-home realness.',
+    scene: 'Desk near window with natural light. Coffee mug with attitude. Work-from-home realness.',
     mood: 'Multitasking between emails and emotional eating.',
   },
 
   'The Wild Graze': {
     layout: 'Gloriously haphazard pile. Items touching that shouldn\'t. Zero fucks given.',
-    scene: 'Couch cushion visible. Wine glass already half empty. Phone charging cable in shot.',
+    scene: 'Couch in a sunlit room. Wine glass already half empty. Afternoon self-care.',
     mood: 'Sunday scaries but make it aesthetic. Chaotic self-care.',
   },
 };
@@ -58,18 +59,22 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
 // Prompt Building for Imagen 3 - Millennial Chaotic Style
 // =============================================================================
 
-function buildImagenPrompt(ingredients: string[], _template: string): string {
+function buildImagenPrompt(ingredients: string[], template: string): string {
   const ingredientList = ingredients.join(', ');
   const count = ingredients.length;
+  const style = TEMPLATE_STYLES[template] || TEMPLATE_STYLES['The Wild Graze'];
 
-  return `Casual phone photo of late night snack, slightly messy, authentic millennial apartment vibes.
+  return `Bright, well-lit casual phone photo of snacks, slightly messy, authentic millennial apartment vibes.
 
-A mismatched plate or paper plate with EXACTLY ${count} food items: ${ingredientList}. Arranged haphazardly like someone just threw them on.
+A mismatched plate or paper plate with EXACTLY ${count} food items: ${ingredientList}. ${style.layout}
 
-Setting: Cluttered coffee table or kitchen counter. Visible in background: half-empty wine glass, phone charger, maybe a laptop edge. Warm lamp lighting mixed with blue TV glow. Couch blanket visible.
-Style: Imperfect composition, slight motion blur okay, looks like it was taken at 11pm before eating. NOT Instagram perfect - more "sent this to my group chat" energy.
+Setting: ${style.scene}
+Mood: ${style.mood}
+Lighting: Bright natural daylight or warm overhead kitchen lighting. Well-exposed, no dark shadows. The image should feel light and airy.
+Style: Imperfect composition, casual snapshot energy. NOT Instagram perfect - more "sent this to my group chat" energy.
 
 STRICT RULES:
+- BRIGHT LIGHTING - the image must be well-lit with no dark or moody shadows
 - The plate must contain ONLY these ${count} items: ${ingredientList}
 - Do NOT add any other food, garnishes, herbs, or extras
 - NO humans, hands, people, or body parts in the image
@@ -200,6 +205,10 @@ async function generateWithVertexImagen(prompt: string): Promise<string | null> 
 // =============================================================================
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimited = await applyRateLimit(request, 'sketch');
+  if (rateLimited) return rateLimited;
+
   const startTime = Date.now();
 
   try {

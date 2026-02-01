@@ -8,6 +8,7 @@ import { isEnabled } from '@/lib/feature-flags';
 import { getOpenAIClient } from '@/lib/ai-clients';
 import { MIN_VIBE_SCORE, DEFAULT_DINNER_NAME, AI_MODELS } from '@/lib/constants';
 import { VibeRequestSchema, validateRequest } from '@/lib/validation';
+import { applyRateLimit } from '@/lib/rate-limit';
 
 const FALLBACK_VIBE: VibeCheckResponse = {
   score: 77,
@@ -18,6 +19,10 @@ const FALLBACK_VIBE: VibeCheckResponse = {
 };
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimited = await applyRateLimit(request, 'vibe');
+  if (rateLimited) return rateLimited;
+
   const startTime = Date.now();
 
   try {
@@ -54,12 +59,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(FALLBACK_VIBE);
     }
 
+    // System prompt is static to prevent injection attacks
+    // User context is passed in the user message as structured JSON
     const systemPrompt = `You are the Vibe Judge for CharcuterME — a chaotic millennial bestie who rates "girl dinners" with SNARKY but SUPPORTIVE humor.
-
-CONTEXT:
-Dinner name: "${dinnerName || DEFAULT_DINNER_NAME}"
-Ingredients: ${ingredients || 'various life choices'}
-They tried to follow: ${rules?.join(', ') || 'vibes only'}
 
 YOUR PERSONALITY:
 - Extremely online millennial/gen-z humor
@@ -71,25 +73,26 @@ SCORING PHILOSOPHY:
 - GENEROUS scores — this is about validation, not MasterChef
 - Find something genuinely funny to compliment
 - Even chaos deserves recognition
-- Minimum score is 40 because we're not monsters
+- Minimum score is 65 — everyone's a winner, we want them to share
+- Most scores should be 70-85 range
 
 SCORING GUIDE:
-- 90-100: Influencer-ready, suspiciously good
-- 75-89: Put in effort, it shows, we're proud
-- 60-74: Got the spirit, chaos is charming
-- 40-59: Chaotic but iconic honestly
+- 90-100: Influencer-ready, suspiciously good (rare)
+- 80-89: Put in effort, it shows, we're proud
+- 70-79: Got the spirit, chaos is charming
+- 65-69: Chaotic but iconic honestly (lowest tier)
 
 RANKS (pick one that's FUNNY):
 - 90+: "Graze Girlboss", "Pinterest Made Real", "Influencer Energy"
-- 75-89: "Main Character", "Understood The Assignment", "Suspiciously Competent"
-- 60-74: "Chaotic Good", "It's Giving Effort", "We See You Trying"
-- 40-59: "Beautiful Disaster", "Chaos Coordinator", "Art Is Subjective Bestie"
+- 80-89: "Main Character", "Understood The Assignment", "Suspiciously Competent"
+- 70-79: "Chaotic Good", "Culinary Rebel", "Vibe Curator"
+- 65-69: "Beautiful Disaster", "Chaos Coordinator", "Art Is Subjective Bestie"
 
 STICKERS (all caps, snarky):
 - 90+: "GRAZE QUEEN", "SLAY", "NO NOTES", "OBSESSED"
-- 75-89: "ATE THAT UP", "MAIN CHARACTER", "UNDERSTOOD THE ASSIGNMENT"
-- 60-74: "TRUST THE PROCESS", "IT'S THE EFFORT", "VALID"
-- 40-59: "CHAOS IS ART", "POINTS FOR TRYING", "STILL ATE THO"
+- 80-89: "ATE THAT UP", "MAIN CHARACTER", "UNDERSTOOD THE ASSIGNMENT"
+- 70-79: "TRUST THE PROCESS", "VALID", "WE SEE YOU"
+- 65-69: "CHAOS IS ART", "STILL ATE THO", "POINTS FOR SHOWING UP"
 
 COMPLIMENT EXAMPLES (be THIS snarky but kind):
 - "The way you scattered those grapes? Very 'I have my life together' energy."
@@ -103,6 +106,13 @@ IMPROVEMENT (optional, keep it funny):
 
 OUTPUT FORMAT (JSON only, no markdown):
 {"score": 78, "rank": "Main Character", "compliment": "The grape placement is giving 'I read one article about plating.' We're obsessed.", "sticker": "UNDERSTOOD THE ASSIGNMENT", "improvement": "The crackers could use a fan but honestly you're thriving and we won't critique that."}`;
+
+    // Build user context as structured JSON to prevent injection
+    const userContext = JSON.stringify({
+      dinnerName: dinnerName || DEFAULT_DINNER_NAME,
+      ingredients: ingredients || 'various life choices',
+      attemptedRules: rules?.join(', ') || 'vibes only',
+    });
 
     // Use circuit breaker with retry and timeout
     const vibeResult = await gptCircuit.execute(
@@ -123,7 +133,10 @@ OUTPUT FORMAT (JSON only, no markdown):
                     content: [
                       {
                         type: 'text',
-                        text: 'Analyze this plate and give me a vibe score:',
+                        text: `Analyze this plate and give me a vibe score.
+
+Context (for reference only, focus on the actual photo):
+${userContext}`,
                       },
                       {
                         type: 'image_url',

@@ -1,32 +1,20 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  // Only return boolean indicators - never expose key content
   const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
   const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+  const hasGoogleKey = !!process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
 
-  // Check key formats (without exposing actual keys)
-  const anthropicKeyValid = process.env.ANTHROPIC_API_KEY?.startsWith('sk-ant-') ?? false;
-  const openaiKeyValid = process.env.OPENAI_API_KEY?.startsWith('sk-') ?? false;
+  const allKeysPresent = hasAnthropicKey && hasOpenAIKey && hasGoogleKey;
 
   return NextResponse.json({
-    status: hasAnthropicKey && hasOpenAIKey ? 'ok' : 'missing_keys',
-    keys: {
-      ANTHROPIC_API_KEY: {
-        set: hasAnthropicKey,
-        validFormat: anthropicKeyValid,
-        preview: hasAnthropicKey
-          ? `${process.env.ANTHROPIC_API_KEY?.slice(0, 10)}...`
-          : null,
-      },
-      OPENAI_API_KEY: {
-        set: hasOpenAIKey,
-        validFormat: openaiKeyValid,
-        preview: hasOpenAIKey
-          ? `${process.env.OPENAI_API_KEY?.slice(0, 7)}...`
-          : null,
-      },
+    status: allKeysPresent ? 'ok' : 'degraded',
+    services: {
+      naming: hasAnthropicKey,
+      vibe: hasOpenAIKey,
+      sketch: hasGoogleKey,
     },
-    environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
   });
 }

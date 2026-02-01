@@ -120,7 +120,7 @@ export function LoadingScreen({ isLoading }: LoadingScreenProps) {
 
             {/* Subtle hint */}
             <motion.p
-              className="mt-8 text-sm text-[#9A8A7C]"
+              className="mt-8 text-sm text-[#736B63]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}

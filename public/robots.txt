@@ -1,0 +1,9 @@
+# CharcuterME robots.txt
+User-agent: *
+Allow: /
+
+# Disallow API routes from being indexed
+Disallow: /api/
+
+# Sitemap (add URL when deployed)
+# Sitemap: https://charcuterme.com/sitemap.xml

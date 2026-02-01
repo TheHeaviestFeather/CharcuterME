@@ -1,4 +1,13 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
+
+const isDev = process.env.NODE_ENV === 'development';
+
+// CSP script-src: unsafe-eval needed in dev for hot reloading, removed in production
+const scriptSrc = isDev
+  ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+  : "script-src 'self' 'unsafe-inline'";
 
 const securityHeaders = [
   {
@@ -29,16 +38,22 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      scriptSrc,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https://*.blob.core.windows.net",
-      "connect-src 'self' https://api.anthropic.com https://api.openai.com",
+      "connect-src 'self' https://api.anthropic.com https://api.openai.com https://*.sentry.io https://*.ingest.sentry.io",
     ].join('; ')
   }
 ];
 
 const nextConfig = {
+  // Limit request body size to prevent DoS attacks
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -59,4 +74,16 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Suppress source map upload logs in CI
+  silent: true,
+
+  // Upload source maps for better stack traces
+  widenClientFileUpload: true,
+
+  // Hides source maps from browser devtools in production
+  hideSourceMaps: true,
+
+  // Disable Sentry telemetry
+  disableLogger: true,
+});

@@ -33,7 +33,7 @@ function DefaultFallback({ error, resetErrorBoundary }: FallbackProps) {
           <h2 className="text-xl font-serif text-[#5D4E45]">
             Oops, something went wrong
           </h2>
-          <p className="text-[#9A8A7C] text-sm">
+          <p className="text-[#736B63] text-sm">
             Even the best charcuterie boards have a cheese that rolls off sometimes.
           </p>
         </div>
@@ -82,7 +82,7 @@ function DefaultFallback({ error, resetErrorBoundary }: FallbackProps) {
 function MinimalFallback({ resetErrorBoundary }: FallbackProps) {
   return (
     <div className="p-4 text-center">
-      <p className="text-[#9A8A7C] text-sm mb-3">Something went wrong</p>
+      <p className="text-[#736B63] text-sm mb-3">Something went wrong</p>
       <button
         onClick={resetErrorBoundary}
         className="

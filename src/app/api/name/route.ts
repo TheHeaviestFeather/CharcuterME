@@ -9,6 +9,8 @@ import { NameRequestSchema, validateRequest, sanitizeIngredients } from '@/lib/v
 import { getAnthropicClient } from '@/lib/ai-clients';
 import { generateCacheKey, cacheGet, cacheSet, CACHE_TTL } from '@/lib/cache';
 import { stripEmojis } from '@/lib/ai-response';
+import { applyRateLimit } from '@/lib/rate-limit';
+import { filterNamerResponse } from '@/lib/content-filter';
 
 // =============================================================================
 // Configuration
@@ -23,16 +25,16 @@ const PROMPT_VERSION = 'namer_v4.0_chaotic_millennial';
 const WILDCARD_SUGGESTIONS = [
   'Add a pickle. It\'s giving main character.',
   'Wine. Your therapist would understand.',
-  'Olives. Very "I studied abroad for a semester" energy.',
+  'Olives. Very "I studied abroad" energy.',
   'Hot sauce. Because we feel things now.',
-  'Bread. Just commit to the carb agenda.',
   'One fancy cracker. You\'re worth it.',
   'Honey drizzle. This is your glow-up era.',
   'Something crunchy. Texture is a whole mood.',
-  'One chocolate square. For serotonin.',
-  'Pickled anything. Your inner goblin craves the tang.',
+  'One chocolate square. For serotonin purposes.',
+  'Pickled anything. Embrace your inner goblin.',
   'Ranch. Because ranch is always the answer.',
-  'Everything bagel seasoning. Trust.',
+  'Everything bagel seasoning. Trust the process.',
+  'Cheese. More cheese is always valid.',
 ];
 
 function getRandomWildcard(): string {
@@ -53,8 +55,8 @@ interface NamerResponse {
 const FALLBACK_RESPONSES: Record<string, NamerResponse> = {
   default: {
     name: 'This Is Fine',
-    validation: 'You looked at your fridge and said "we can work with this." Peak millennial energy.',
-    tip: 'Horizontal eating position is therapeutic. Your couch understands.',
+    validation: 'You looked at your fridge and said "we can work with this." Peak energy.',
+    tip: 'Horizontal eating position is valid. Your couch gets it.',
     wildcard: getRandomWildcard(),
   },
   cheese: {
@@ -77,14 +79,14 @@ const FALLBACK_RESPONSES: Record<string, NamerResponse> = {
   },
   wine: {
     name: 'Millennial Retirement Fund',
-    validation: 'Wine is just grape juice that went to therapy.',
-    tip: 'Pairs nicely with your unread emails and existential dread.',
+    validation: 'Wine is just grape juice that believed in itself.',
+    tip: 'Pairs nicely with your unread emails and general vibes.',
     wildcard: 'Cheese is wine\'s emotional support animal.',
   },
   carbs: {
     name: 'Serotonin Delivery System',
     validation: 'Carbs are just a hug for your insides. You needed this.',
-    tip: 'Bread is a food group when you manifest it hard enough.',
+    tip: 'Bread is a food group when you believe hard enough.',
     wildcard: 'Butter makes everything better. That\'s just science.',
   },
   sweet: {
@@ -124,15 +126,16 @@ function getFallback(ingredients: string): NamerResponse {
 // System Prompt (with Wildcard, no emojis)
 // =============================================================================
 
-const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort meals eaten standing over the sink, horizontal on the couch, or straight from the container at 11pm. You have elder millennial energy (born 1985-1995).
+const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort meals eaten standing over the sink, horizontal on the couch, or straight from the container at 11pm.
 
 <your_vibe>
-- Peak millennial chaos goblin energy
+- Millennial chaos goblin energy — sardonic but kind underneath
 - You've been online since AIM away messages
-- Reference 2000s-2010s internet culture, memes, and shared trauma
-- Self-deprecating humor about adulting, therapy, and the economy
+- Reference 2000s-2010s internet culture, memes, and shared millennial experiences
+- Self-deprecating humor about adulting, burnout, and the economy
 - "We're all just doing our best" supportive sarcasm
-- Like if your therapist was also your funniest group chat friend
+- Like if your funniest group chat friend became a food critic
+- You roast lovingly — the humor validates, never shames
 </your_vibe>
 
 <your_job>
@@ -171,7 +174,7 @@ const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort mea
 </example>
 <example>
 <input>wine, olives</input>
-<o>{"name": "Millennial Retirement Plan", "validation": "This is literally what they eat in countries with good healthcare.", "tip": "The wine pairs nicely with your unread emails and existential dread.", "wildcard": "Feta chunk. Very 'I studied abroad' energy."}</o>
+<o>{"name": "Millennial Retirement Plan", "validation": "This is literally what they eat in countries with good healthcare.", "tip": "The wine pairs nicely with your unread emails.", "wildcard": "Feta chunk. Very 'I studied abroad' energy."}</o>
 </example>
 <example>
 <input>cereal</input>
@@ -179,7 +182,7 @@ const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort mea
 </example>
 <example>
 <input>hummus, carrots, pita</input>
-<o>{"name": "Anxious but Nutritious", "validation": "Vegetables! Your body is confused but sending a thank you email.", "tip": "Hummus-to-pita ratio should be aggressive. More hummus always.", "wildcard": "Everything bagel seasoning on top. Trust the process."}</o>
+<o>{"name": "Anxious but Nutritious", "validation": "Vegetables! Your body is confused but grateful.", "tip": "Hummus-to-pita ratio should be aggressive. More hummus always.", "wildcard": "Everything bagel seasoning on top. Trust."}</o>
 </example>
 <example>
 <input>crackers, salami, grapes</input>
@@ -187,15 +190,15 @@ const SYSTEM_PROMPT = `You name "girl dinners" — those glorious low-effort mea
 </example>
 <example>
 <input>leftover pasta</input>
-<o>{"name": "Past Me Did That", "validation": "Yesterday's effort is today's reward. Efficient queen behavior.", "tip": "Straight from the container. We're not doing dishes in this economy.", "wildcard": "Parmesan avalanche. You've earned this chaos."}</o>
+<o>{"name": "Past Me Did That", "validation": "Yesterday's effort is today's reward. Efficient behavior.", "tip": "Straight from the container. We're not doing dishes in this economy.", "wildcard": "Parmesan avalanche. You've earned this chaos."}</o>
 </example>
 <example>
 <input>pickles, cheese</input>
-<o>{"name": "Unhinged But Valid", "validation": "The salty-tangy combo is neurodivergent excellence.", "tip": "Sharp cheddar + dill pickle is the superior pairing. Hill I'll die on.", "wildcard": "Crackers to achieve the holy trinity."}</o>
+<o>{"name": "Unhinged But Valid", "validation": "The salty-tangy combo is chaos goblin excellence.", "tip": "Sharp cheddar + dill pickle is the superior pairing. Hill I'll die on.", "wildcard": "Crackers to achieve the holy trinity."}</o>
 </example>
 <example>
 <input>hot cheetos, cream cheese</input>
-<o>{"name": "My Roman Empire", "validation": "This combo lives rent-free in our collective millennial brain.", "tip": "The cream cheese-to-cheeto ratio is a personal journey.", "wildcard": "Lime. This is now fusion cuisine."}</o>
+<o>{"name": "My Roman Empire", "validation": "This combo lives rent-free in our collective brain.", "tip": "The cream cheese-to-cheeto ratio is a personal journey.", "wildcard": "Lime. This is now fusion cuisine."}</o>
 </example>
 <example>
 <input>ramen, egg</input>
@@ -216,14 +219,15 @@ NEVER generate names like these:
 <validation_rules>
 - ONE sentence only
 - Validate their choice like a supportive friend in the group chat
-- Reference shared millennial experiences when relevant
+- Sardonic but kind — roast lovingly, never meanly
+- Reference shared millennial experiences when it fits
 - NO emojis
 </validation_rules>
 
 <tip_rules>
 - Reference THEIR specific ingredients
 - Be funny OR useful, ideally both
-- Add millennial flavor (therapy speak, internet references, "in this economy")
+- Add millennial flavor ("in this economy", internet references, relatable chaos)
 - One sentence max
 - NO emojis
 </tip_rules>
@@ -305,6 +309,10 @@ function normalizeResponse(parsed: NamerResponse): NamerResponse {
 // =============================================================================
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimited = await applyRateLimit(request, 'name');
+  if (rateLimited) return rateLimited;
+
   const startTime = Date.now();
   let ingredients = ''; // Store for error handler access
 
@@ -404,16 +412,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(getFallback(ingredients));
     }
 
+    // Filter content for safety before returning
+    const fallback = getFallback(ingredients);
+    const filtered = filterNamerResponse(parsed, fallback);
+
     logger.info('Name generated successfully', {
       promptVersion: PROMPT_VERSION,
       duration: Date.now() - startTime,
-      name: parsed.name,
+      name: filtered.name,
+      wasFiltered: filtered !== parsed,
     });
 
     // Cache the result (fire and forget)
-    cacheSet(cacheKey, parsed, CACHE_TTL.dinnerName).catch(() => {});
+    cacheSet(cacheKey, filtered, CACHE_TTL.dinnerName).catch(() => {});
 
-    return NextResponse.json(parsed);
+    return NextResponse.json(filtered);
 
   } catch (error) {
     logger.error('Error generating name', {
