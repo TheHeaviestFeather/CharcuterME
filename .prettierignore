@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+.next/
+out/
+
+# Build
+build/
+dist/
+
+# Package manager
+package-lock.json
+pnpm-lock.yaml
+
+# Generated
+*.min.js
+*.min.css
+coverage/
