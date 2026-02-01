@@ -44,23 +44,25 @@ export const COPY = {
   },
 } as const;
 
-// Ingredient suggestion categories
+// Ingredient suggestion categories - chaotic millennial energy
 export const SUGGESTION_CATEGORIES = {
-  Salty: ['olives', 'prosciutto', 'salami', 'feta', 'anchovies', 'pickles', 'chips', 'pretzels'],
-  Sweet: ['grapes', 'honey', 'chocolate', 'berries', 'dates', 'jam', 'dried fruit', 'cookies'],
-  Crunch: ['crackers', 'nuts', 'breadsticks', 'crostini', 'celery', 'carrots', 'toast', 'chips'],
-  'Protein-ish': ['cheese', 'brie', 'hummus', 'eggs', 'salami', 'prosciutto', 'yogurt', 'edamame'],
-  Chaos: ['pizza', 'wine', 'regret', 'hot sauce', 'leftovers', 'ice cream', 'cereal', 'pickles'],
+  Salty: ['pickles', 'chips', 'pretzels', 'string cheese', 'deli meat', 'olives', 'goldfish', 'popcorn'],
+  Sweet: ['chocolate', 'cookies', 'grapes', 'cereal', 'gummy bears', 'nutella', 'fruit snacks', 'granola'],
+  Crunch: ['crackers', 'tortilla chips', 'toast', 'pretzels', 'carrots', 'cucumbers', 'croutons', 'pita chips'],
+  'Protein-ish': ['cheese', 'hummus', 'peanut butter', 'yogurt', 'pepperoni', 'hard-boiled egg', 'deli turkey', 'cottage cheese'],
+  Chaos: ['cold pizza', 'wine', 'hot sauce', 'leftover takeout', 'cereal at night', 'pickle juice', 'shredded cheese', 'mystery tupperware'],
 } as const;
 
-// For "Surprise me" - curated combos that work well
+// For "Surprise me" - chaotic but weirdly good combos
 export const SURPRISE_COMBOS = [
-  ['brie', 'grapes', 'crackers', 'honey'],
-  ['olives', 'salami', 'cheese', 'wine'],
-  ['hummus', 'carrots', 'pita', 'feta'],
-  ['chocolate', 'berries', 'nuts', 'wine'],
-  ['pickles', 'cheese', 'crackers', 'mustard'],
-  ['prosciutto', 'melon', 'mozzarella', 'basil'],
-  ['chips', 'salsa', 'guacamole', 'cheese'],
-  ['yogurt', 'honey', 'granola', 'berries'],
+  ['cheese', 'crackers', 'grapes', 'wine'],
+  ['chips', 'hummus', 'pickles', 'pepperoni'],
+  ['peanut butter', 'crackers', 'chocolate', 'banana'],
+  ['cold pizza', 'hot sauce', 'string cheese'],
+  ['tortilla chips', 'shredded cheese', 'salsa', 'yogurt'],
+  ['cereal', 'cookies', 'milk', 'regret'],
+  ['deli meat', 'cheese', 'mustard', 'crackers'],
+  ['popcorn', 'chocolate', 'pretzels', 'wine'],
+  ['cucumbers', 'hummus', 'olives', 'feta'],
+  ['goldfish', 'grapes', 'string cheese', 'juice box'],
 ];
