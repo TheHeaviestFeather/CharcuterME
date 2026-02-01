@@ -60,6 +60,40 @@ function SparkleIcon() {
   );
 }
 
+// Category Icons (12x12, compact)
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  Salty: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <rect x="3" y="1" width="6" height="8" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="6" cy="10.5" r="0.75" fill="currentColor" />
+      <circle cx="4.5" cy="10.5" r="0.75" fill="currentColor" />
+      <circle cx="7.5" cy="10.5" r="0.75" fill="currentColor" />
+    </svg>
+  ),
+  Sweet: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <circle cx="6" cy="7" r="4" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 1V3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+  Crunch: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M2 6L6 2L10 6L6 10L2 6Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  ),
+  'Protein-ish': (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <ellipse cx="6" cy="6.5" rx="4.5" ry="4" stroke="currentColor" strokeWidth="1.5" />
+      <ellipse cx="6" cy="6" rx="2" ry="1.5" fill="currentColor" />
+    </svg>
+  ),
+  Chaos: (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M6 1C3.5 1 2 3 2 6C2 8 3.5 9 5 9C7 9 7 7 6 7C5 7 5 8 6 9C7 10 9 10 10 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+};
+
 // =============================================================================
 // Ingredient Chip (User-added)
 // =============================================================================
@@ -352,24 +386,28 @@ export function InputScreen({ onSubmit, isLoading = false }: InputScreenProps) {
             {COPY.input.categoryLabel}
           </p>
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap gap-2 justify-center mb-3">
-            {Object.keys(SUGGESTION_CATEGORIES).map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(activeCategory === category ? null : category)}
-                className={`
-                  px-3 py-1 rounded-full text-xs font-semibold
-                  transition-all duration-150
-                  ${activeCategory === category
-                    ? 'bg-coral text-white'
-                    : 'bg-peach text-text-secondary hover:bg-coral/20'
-                  }
-                `}
-              >
-                {category}
-              </button>
-            ))}
+          {/* Category Tabs - Icon + Label, single row */}
+          <div className="flex justify-center gap-1.5 mb-3">
+            {Object.keys(SUGGESTION_CATEGORIES).map((category) => {
+              const shortLabel = category === 'Protein-ish' ? 'Protein' : category;
+              return (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(activeCategory === category ? null : category)}
+                  className={`
+                    flex items-center gap-1 px-2 py-1.5 rounded-full text-[11px] font-semibold
+                    transition-all duration-150
+                    ${activeCategory === category
+                      ? 'bg-coral text-white shadow-sm'
+                      : 'bg-peach/80 text-text-secondary hover:bg-coral/20'
+                    }
+                  `}
+                >
+                  {CATEGORY_ICONS[category]}
+                  {shortLabel}
+                </button>
+              );
+            })}
           </div>
 
           {/* Suggestions for Active Category */}
