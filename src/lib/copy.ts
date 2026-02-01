@@ -44,25 +44,27 @@ export const COPY = {
   },
 } as const;
 
-// Ingredient suggestion categories - chaotic millennial energy
+// Ingredient suggestion categories - chaotic millennial energy (no duplicates)
 export const SUGGESTION_CATEGORIES = {
   Salty: ['pickles', 'chips', 'pretzels', 'string cheese', 'deli meat', 'olives', 'goldfish', 'popcorn'],
-  Sweet: ['chocolate', 'cookies', 'grapes', 'cereal', 'gummy bears', 'nutella', 'fruit snacks', 'granola'],
-  Crunch: ['crackers', 'tortilla chips', 'toast', 'pretzels', 'carrots', 'cucumbers', 'croutons', 'pita chips'],
+  Sweet: ['chocolate', 'cookies', 'grapes', 'gummy bears', 'nutella', 'fruit snacks', 'granola', 'dried mango'],
+  Crunch: ['crackers', 'tortilla chips', 'toast', 'carrots', 'cucumbers', 'croutons', 'pita chips', 'apple slices'],
   'Protein-ish': ['cheese', 'hummus', 'peanut butter', 'yogurt', 'pepperoni', 'hard-boiled egg', 'deli turkey', 'cottage cheese'],
-  Chaos: ['cold pizza', 'wine', 'hot sauce', 'leftover takeout', 'cereal at night', 'pickle juice', 'shredded cheese', 'mystery tupperware'],
+  Chaos: ['pizza', 'wine', 'hot sauce', 'cereal', 'sushi', 'french fries', 'mystery tupperware', 'leftover takeout'],
 } as const;
 
 // For "Surprise me" - chaotic but weirdly good combos
 export const SURPRISE_COMBOS = [
   ['cheese', 'crackers', 'grapes', 'wine'],
   ['chips', 'hummus', 'pickles', 'pepperoni'],
-  ['peanut butter', 'crackers', 'chocolate', 'banana'],
-  ['cold pizza', 'hot sauce', 'string cheese'],
-  ['tortilla chips', 'shredded cheese', 'salsa', 'yogurt'],
-  ['cereal', 'cookies', 'milk', 'regret'],
+  ['peanut butter', 'crackers', 'chocolate', 'apple slices'],
+  ['pizza', 'hot sauce', 'string cheese'],
+  ['tortilla chips', 'cheese', 'salsa', 'yogurt'],
+  ['cereal', 'cookies', 'milk'],
   ['deli meat', 'cheese', 'mustard', 'crackers'],
   ['popcorn', 'chocolate', 'pretzels', 'wine'],
   ['cucumbers', 'hummus', 'olives', 'feta'],
-  ['goldfish', 'grapes', 'string cheese', 'juice box'],
+  ['goldfish', 'grapes', 'string cheese'],
+  ['sushi', 'edamame', 'wine'],
+  ['french fries', 'nuggets', 'hot sauce'],
 ];
